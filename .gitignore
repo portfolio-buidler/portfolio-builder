@@ -1,0 +1,9 @@
+# env & tooling
+.env
+.venv/
+.idea/
+.vscode/
+
+# python cache
+__pycache__/
+*.py[cod]
