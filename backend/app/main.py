@@ -1,7 +1,15 @@
 from fastapi import FastAPI
+from backend.app.api.v1.routes import router as api_v1
 
-app = FastAPI()
+def create_app() -> FastAPI:
+    application=FastAPI(title="Portfolio Builder API", version= "0.1.0")
+    application.include_router(api_v1,prefix="/api/v1")
 
-@app.get("/health")
-def health():
-    return {"status": "ok"}
+    @application.get("/")
+    def root():
+        return {"message": "Portfolio Builder!"}
+
+    return application
+
+app=create_app()
+
