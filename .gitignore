@@ -3,7 +3,12 @@
 .venv/
 .idea/
 .vscode/
+.windsurf/
 
 # python cache
 __pycache__/
 *.py[cod]
+
+# frontend
+frontend/node_modules/
+frontend/dist/
