@@ -43,7 +43,7 @@ function UploadCV() {
         Portfolio <span className="font-title-bold">Builder</span>
       </h1>
       
-      <div className="flex flex-row items-center justify-between" style={{ 
+      <div className="flex flex-row items-center justify-between gap-[8rem]" style={{ 
         maxWidth: "57.5rem",
         marginTop: "8rem",
         marginLeft: "19.4rem"
@@ -53,7 +53,8 @@ function UploadCV() {
         {/* Let's Do It Button */}
         <button 
           className={`
-            px-8 py-3 rounded-full transition-colors duration-200 flex items-center space-x-2 font-semibold
+            w-[10.5rem] h-[3.375rem] rounded-[20px] pt-[22px] pr-[18px] pb-[22px] pl-[18px]
+            transition-colors duration-200 flex items-center justify-between text-[1.25rem]
             ${selectedFile 
               ? 'bg-green-500 hover:bg-green-600 text-white cursor-pointer' 
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -61,7 +62,7 @@ function UploadCV() {
           `}
           disabled={!selectedFile}
         >
-          <span>Let's Do It!</span>
+          <span className="pl-[18px]">Let's Do It!</span>
           <span>→</span>
         </button>
       </div>

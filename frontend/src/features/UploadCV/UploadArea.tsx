@@ -72,13 +72,14 @@ function UploadArea({ onFileSelect, onDropFile }: UploadAreaProps) {
       role="button"
       aria-label="Upload CV file by clicking or dragging and dropping. Accepts PDF and DOCX files up to 2MB."
     >
-      {/* Scroll Icon */}
-      <div className="text-6xl mb-4">📜</div>
-      
-      {/* Upload Text */}
-      <p className="text-gray-700 font-medium text-lg">
-        Upload Or Drag Your CV
-      </p>
+      <div className="flex flex-col items-center justify-between h-[70%]">
+        {/* Scroll Icon */}
+        <div className="text-[6rem]">📜</div>
+        {/* Upload Text */}
+        <p className="text-gray-700 font-medium tracking-normal text-[1.325rem] mb-[1.5rem]">
+          Upload Or Drag Your CV
+        </p>
+      </div>
       
       {/* Hidden File Input */}
       <input
