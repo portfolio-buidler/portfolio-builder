@@ -4,7 +4,7 @@ from .upload_schemas import UploadResponse
 from .controller import upload_cv, upload_status
 
 # Create a router for resume-related endpoints
-router = APIRouter(prefix=API_PREFIX, tags=["resumes"])
+router = APIRouter(prefix="/resumes", tags=["resumes"])
 
 router.add_api_route(
     "/upload", upload_cv,

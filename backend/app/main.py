@@ -1,6 +1,7 @@
 import uvicorn
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.features.resumes.routes import router as resumes_router
 from app.core.config import ALLOWED_ORIGINS
 
 app = FastAPI(title="Portfolio Builder API", version="1.0.0")
@@ -13,13 +14,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-router = APIRouter(prefix="/resumes", tags=["resumes"])
-
-@router.get("/health")
-def resumes_health():
-    return {"ok": True}
-
-app.include_router(router)
+app.include_router(resumes_router)
 
 @app.get("/")
 def root():
