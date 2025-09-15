@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import type { UploadAreaProps } from './UploadCV.types'
+import { validateFile } from '../../utils/fileValidation'
+import { toast } from 'react-toastify'
 
 function UploadArea({ onFileSelect, onDropFile }: UploadAreaProps) {
   const [dragOver, setDragOver] = useState(false)
@@ -22,12 +24,12 @@ function UploadArea({ onFileSelect, onDropFile }: UploadAreaProps) {
     const files = e.dataTransfer.files
     if (files.length > 0) {
       const file = files[0]
-      // Validate file type and size
-      if (file.type === 'application/pdf' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-        if (file.size <= 2 * 1024 * 1024) { // 2MB limit
-          onDropFile(file)
-        }
+      const res = validateFile(file)
+      if (!res.ok) {
+        toast.error(res.error)
+        return
       }
+      onDropFile(file)
     }
   }
 
@@ -35,6 +37,11 @@ function UploadArea({ onFileSelect, onDropFile }: UploadAreaProps) {
     const files = e.target.files
     if (files && files.length > 0) {
       const file = files[0]
+      const res = validateFile(file)
+      if (!res.ok) {
+        toast.error(res.error)
+        return
+      }
       onFileSelect(file)
     }
   }

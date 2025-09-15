@@ -1,9 +1,13 @@
 import { useState } from 'react'
 import backgroundImage from '../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6c8.jpg'
 import UploadArea from './UploadArea'
+// TEMP_LOCAL_ONLY: Commenting real server import until backend is running
+// import { uploadCV } from '../../services/uploadService'
+import { toast } from 'react-toastify'
 
 function UploadCV() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
 
   const onFileSelect = (file: File) => {
     console.log('📁 File selected via file input:')
@@ -27,6 +31,37 @@ function UploadCV() {
     console.log('---')
     
     setSelectedFile(file)
+  }
+
+  // TEMP_LOCAL_ONLY: Mock upload handler for local testing without backend
+  const handleUpload = async () => {
+    if (!selectedFile) return
+    try {
+      setIsUploading(true)
+      console.group('🚀 Mock Upload Start')
+      console.log('Selected file:', {
+        name: selectedFile.name,
+        type: selectedFile.type,
+        sizeBytes: selectedFile.size,
+        sizeMB: (selectedFile.size / 1024 / 1024).toFixed(2),
+        lastModified: new Date(selectedFile.lastModified).toLocaleString(),
+      })
+      console.log('Simulating upload... (no network call made)')
+      // Simulate latency
+      await new Promise((res) => setTimeout(res, 800))
+      console.log('✅ Mock upload success')
+      console.groupEnd()
+      toast.success('Mock upload succeeded (no server call)')
+
+      // REAL_UPLOAD: Uncomment when backend is ready
+      // await uploadCV(selectedFile)
+      // toast.success('File uploaded successfully')
+    } catch (err) {
+      console.error('❌ Mock upload failed', err)
+      toast.error('Mock upload failed')
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   return (
@@ -60,7 +95,8 @@ function UploadCV() {
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }
           `}
-          disabled={!selectedFile}
+          onClick={handleUpload}
+          disabled={!selectedFile || isUploading}
         >
           <span className="pl-[18px]">Let's Do It!</span>
           <span>→</span>
