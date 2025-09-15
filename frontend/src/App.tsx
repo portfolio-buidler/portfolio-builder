@@ -1,9 +1,7 @@
+import UploadCV from './features/UploadCV/UploadCV'
+
 function App() {
-  return (
-    <div>
-      <h1>Portfolio Builder</h1>
-    </div>
-  )
+  return <UploadCV />
 }
 
 export default App
