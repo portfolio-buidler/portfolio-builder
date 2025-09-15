@@ -1,86 +1,37 @@
-import hashlib,os,time
-from datetime import datetime, timezone
+import secrets
 from pathlib import Path
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status, Request
-from pydantic import StrictStr, StrictInt, StringConstraints, field_validator, BaseModel, ConfigDict
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import UploadFile, File, HTTPException, status
+from app.core.config import MAX_UPLOAD_SIZE, ALLOWED_MIME, UPLOAD_DIR
+from app.utils.sanitize import safe_filename
+from .upload_schemas import UploadResponse, UploadData
 
-from app.shared.schemas import APIModel, Timestamped
+def _fake_parse_summary(path: Path) -> dict:
+    return {"summary":"stub","skills":["Python","FastAPI"],"experiences":[],"education":[]}
 
-router = APIRouter(prefix="/resumes", tags=["resumes"])
+async def _save_streamed(upload: UploadFile, dst: Path, limit: int) -> None:
+    written = 0
+    chunk = await upload.read(65536)
+    with dst.open("wb") as f:
+        while chunk:
+            written += len(chunk)
+            if written > limit:
+                dst.unlink(missing_ok=True)
+                raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="File too large")
+            f.write(chunk)
+            chunk = await upload.read(65536)
 
-# Allowed MIME types for resume uploads (PDF and Word documents) 
-ALLOWED_MIME_TYPES = {
-    "application/pdf",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-}
+async def upload_cv(file: UploadFile = File(...)) -> UploadResponse:
+    if file.content_type not in ALLOWED_MIME:
+        raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail=f"Unsupported {file.content_type}")
+    safe_name = safe_filename(file.filename or "upload.bin")
+    dst_name = f"{Path(safe_name).stem}_{secrets.token_hex(8)}{Path(safe_name).suffix.lower()}"
+    dst = (UPLOAD_DIR / dst_name).absolute()
+    await _save_streamed(file, dst, MAX_UPLOAD_SIZE)
+    data = _fake_parse_summary(dst)
+    return UploadResponse(success=True, message="File uploaded successfully", data=UploadData(fileId=dst_name, extractedData=data))
 
-# Maximum file size for uploads (5 MB)
-MAX_FILE_SIZE = 5 * 1024 * 1024  
-
-# Check real MIME type from file header
-def magic_check(header: bytes) -> str | None:
-    if header.startswith(b"%PDF"): return "application/pdf"
-    if header.startswith(b"PK\x03\x04"): return "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    return None
-
-# Acknowledge that the server received the file with metadata
-class UploadedResumeOut(Timestamped):
-    id: int | None = None
-    file_name: StrictStr
-    mime_type: StrictStr
-    size_bytes: StrictInt
-    checksum: StrictStr
-    message: StrictStr = "File Received Successfully"
-
-@router.post("/upload", response_model=UploadedResumeOut, status_code=status.HTTP_201_CREATED)
-async def upload_resume(
-    request: Request, file: UploadFile = File(...)) -> UploadedResumeOut:
-    content_length = request.headers.get('content-length')
-    if content_length is None or int(content_length) > MAX_FILE_SIZE:
-        raise HTTPException(status_code=413, detail="File too large")
-    
-    # storage path
-    temp_dir_file_storage = Path("/temp/temp_uploads")
-    temp_dir_file_storage.mkdir(parents=True, exist_ok=True)
-    temp_file_path = temp_dir_file_storage / f"upload_{int(time.time()*1000)}_{file.filename}"
-    
-    # hashing and size tracking
-    sha256 = hashlib.sha256()
-    total = 0
-    header = b""
-
-    # stream read and write to temp file 1MB at a time
-    with temp_file_path.open("wb") as out:
-        while True:
-            chunk = await file.read(1024 * 1024)
-            if not chunk:
-                break
-            total += len(chunk)
-            if total > MAX_FILE_SIZE:
-                out.close()
-                temp_file_path.unlink(missing_ok=True)
-                raise HTTPException(status_code=413, detail="file too large")
-            if len(header) < 16:
-                header += chunk[:16]
-            sha256.update(chunk)
-            out.write(chunk)
-            
-    # Validate MIME type
-    mime_type = magic_check(header)
-    if mime_type not in ALLOWED_MIME_TYPES:
-        out.close()
-        temp_file_path.unlink(missing_ok=True)
-        raise HTTPException(status_code=415, detail="Unsupported file type")
-
-    # Finalize upload
-    return UploadedResumeOut(
-        id=None,
-        file_name=file.filename,
-        mime_type=mime_type,
-        size_bytes=total,
-        checksum=sha256.hexdigest(),
-        created_at=datetime.now,
-        updated_at=datetime.now,
-        message="File uploaded successfully"
-    )
+async def upload_status(file_id: str) -> UploadResponse:
+    path = UPLOAD_DIR / file_id
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="File not found")
+    return UploadResponse(success=True, message="Parsing completed", data=UploadData(fileId=file_id, extractedData={"parse_status":"parsed"}))
