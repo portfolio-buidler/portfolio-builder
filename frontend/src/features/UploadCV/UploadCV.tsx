@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import backgroundImage from '../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6c8.jpg'
 import UploadArea from './UploadArea'
-// TEMP_LOCAL_ONLY: Commenting real server import until backend is running
-// import { uploadCV } from '../../services/uploadService'
+import { uploadCV } from '../../services/uploadService'
 import { toast } from 'react-toastify'
 
 function UploadCV() {
@@ -33,32 +32,19 @@ function UploadCV() {
     setSelectedFile(file)
   }
 
-  // TEMP_LOCAL_ONLY: Mock upload handler for local testing without backend
+  // REAL upload handler calling backend on port 8000
   const handleUpload = async () => {
     if (!selectedFile) return
     try {
       setIsUploading(true)
-      console.group('🚀 Mock Upload Start')
-      console.log('Selected file:', {
-        name: selectedFile.name,
-        type: selectedFile.type,
-        sizeBytes: selectedFile.size,
-        sizeMB: (selectedFile.size / 1024 / 1024).toFixed(2),
-        lastModified: new Date(selectedFile.lastModified).toLocaleString(),
-      })
-      console.log('Simulating upload... (no network call made)')
-      // Simulate latency
-      await new Promise((res) => setTimeout(res, 800))
-      console.log('✅ Mock upload success')
-      console.groupEnd()
-      toast.success('Mock upload succeeded (no server call)')
-
-      // REAL_UPLOAD: Uncomment when backend is ready
-      // await uploadCV(selectedFile)
-      // toast.success('File uploaded successfully')
-    } catch (err) {
-      console.error('❌ Mock upload failed', err)
-      toast.error('Mock upload failed')
+      const res = await uploadCV(selectedFile)
+      toast.success(res.message || 'File uploaded successfully')
+      // Optionally, you can use res.data?.fileId for next steps
+      console.log('Upload response:', res)
+    } catch (err: any) {
+      const msg = err?.response?.data?.detail || err?.message || 'Upload failed'
+      console.error('❌ Upload error:', err)
+      toast.error(String(msg))
     } finally {
       setIsUploading(false)
     }

@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import type { UploadAreaProps } from './UploadCV.types'
-import { validateFile } from '../../utils/fileValidation'
+import { validateFile, ALLOWED_MIME_TYPES } from '../../utils/fileValidation'
 import { toast } from 'react-toastify'
 
 function UploadArea({ onFileSelect, onDropFile }: UploadAreaProps) {
   const [dragOver, setDragOver] = useState(false)
   const [focused, setFocused] = useState(false)
+  const accept = ALLOWED_MIME_TYPES.join(',')
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
@@ -24,12 +25,12 @@ function UploadArea({ onFileSelect, onDropFile }: UploadAreaProps) {
     const files = e.dataTransfer.files
     if (files.length > 0) {
       const file = files[0]
-      const res = validateFile(file)
-      if (!res.ok) {
-        toast.error(res.error)
-        return
+      const validation = validateFile(file)
+      if (validation.ok) {
+        onDropFile(file)
+      } else {
+        toast.error(validation.error)
       }
-      onDropFile(file)
     }
   }
 
@@ -37,12 +38,12 @@ function UploadArea({ onFileSelect, onDropFile }: UploadAreaProps) {
     const files = e.target.files
     if (files && files.length > 0) {
       const file = files[0]
-      const res = validateFile(file)
-      if (!res.ok) {
-        toast.error(res.error)
-        return
+      const validation = validateFile(file)
+      if (validation.ok) {
+        onFileSelect(file)
+      } else {
+        toast.error(validation.error)
       }
-      onFileSelect(file)
     }
   }
 
@@ -59,15 +60,11 @@ function UploadArea({ onFileSelect, onDropFile }: UploadAreaProps) {
   return (
     <div
       className={`
-        relative rounded-2xl backdrop-blur-md bg-white/20 border border-white/30
+        relative w-96 h-64 rounded-2xl backdrop-blur-md bg-white/20 border border-white/30
         flex flex-col items-center justify-center cursor-pointer transition-all duration-300
         ${dragOver ? 'bg-white/30 scale-105' : 'hover:bg-white/25'}
         ${focused ? 'ring-2 ring-blue-500 ring-opacity-50' : ''}
       `}
-      style={{
-        width: '616px',
-        height: '346px'
-      }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -77,22 +74,21 @@ function UploadArea({ onFileSelect, onDropFile }: UploadAreaProps) {
       onBlur={handleBlur}
       tabIndex={0}
       role="button"
-      aria-label="Upload CV file by clicking or dragging and dropping. Accepts PDF and DOCX files up to 2MB."
+      aria-label="Upload CV file by clicking or dragging and dropping. Allowed types: PDF, DOCX, PNG, JPEG. Maximum size 5MB."
     >
-      <div className="flex flex-col items-center justify-between h-[70%]">
-        {/* Scroll Icon */}
-        <div className="text-[6rem]">📜</div>
-        {/* Upload Text */}
-        <p className="text-gray-700 font-medium tracking-normal text-[1.325rem] mb-[1.5rem]">
-          Upload Or Drag Your CV
-        </p>
-      </div>
+      {/* Box Icon */}
+      <div className="text-6xl mb-4">📦</div>
+      
+      {/* Upload Text */}
+      <p className="text-gray-700 font-medium text-lg">
+        Upload Or Drag Your CV
+      </p>
       
       {/* Hidden File Input */}
       <input
         id="file-input"
         type="file"
-        accept=".pdf,.docx"
+        accept={accept}
         onChange={handleFileInputChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
@@ -102,7 +98,7 @@ function UploadArea({ onFileSelect, onDropFile }: UploadAreaProps) {
       
       {/* Screen reader instructions */}
       <div id="upload-instructions" className="sr-only">
-        Upload your CV in PDF or DOCX format. Maximum file size is 2MB. You can click to browse files or drag and drop a file here.
+        Upload your CV in PDF, DOCX, PNG or JPEG format. Maximum file size is 5MB. You can click to browse files or drag and drop a file here.
       </div>
     </div>
   )
