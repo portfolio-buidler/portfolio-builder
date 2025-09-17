@@ -1,26 +1,35 @@
+# 1) Small Python base
+FROM python:3.12-slim AS base
 
-# בסיס קטן ומעודכן
-FROM python:3.12-slim
+# 2) Cleaner Python defaults
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PIP_NO_CACHE_DIR=1
 
-# לוגים מיידיים וללא קבצי .pyc
-ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
-
-# ספריית עבודה
+# 3) Workdir
 WORKDIR /app
 
-# תלויות מינימליות להרצה (בשלב ראשון)
-# בהמשך עדכן ל-requirements.txt / pyproject.toml
-RUN pip install --no-cache-dir --upgrade pip fastapi uvicorn[standard]
+# 4) (Optional) build tools in case deps need compiling later
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends build-essential \
+ && rm -rf /var/lib/apt/lists/*
 
-# קוד האפליקציה ( app/main.py)
-COPY app/ ./app/
+# 5) Copy pyproject so we know the deps
+COPY pyproject.toml .
 
-# אבטחה בסיסית: לא להריץ כ-root
-RUN useradd -m app && chown -R app /app
-USER app
+# 6) Install runtime deps explicitly (from pyproject)
+#    Your pyproject lists: fastapi, uvicorn[standard]
+RUN pip install --upgrade pip \
+ && python -c "import tomllib,sys;print(' '.join(tomllib.load(open('pyproject.toml','rb'))['project']['dependencies']))" \
+    | xargs -r pip install
 
-# הפורט של ה-API
+# 7) Copy source code
+COPY ./app ./app
+
+# 8) Run as non-root
+RUN useradd -m appuser && chown -R appuser /app
+USER appuser
+
+# 9) Expose FastAPI port
 EXPOSE 8000
 
-# הרצת השרת
+# 10) Launch uvicorn
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
