@@ -3,8 +3,6 @@
 export const ALLOWED_MIME_TYPES = [
   'application/pdf',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'image/png',
-  'image/jpeg',
 ]
 
 export const MAX_FILE_BYTES = 5 * 1024 * 1024 // 5MB, aligned with backend
