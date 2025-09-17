@@ -24,3 +24,20 @@ ALLOWED_MIME: set[str] = {
     "image/png",
     "image/jpeg",
 }
+
+# Database configuration
+# If DATABASE_URL provided, use it; otherwise build from individual env vars.
+_POSTGRES_USER = os.getenv("POSTGRES_USER", "app")
+_POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "app")
+_POSTGRES_DB = os.getenv("POSTGRES_DB", "app")
+_POSTGRES_HOST = os.getenv("POSTGRES_HOST", "db")  # "db" is the service name in docker-compose
+_POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
+
+_DATABASE_URL_FROM_ENV = os.getenv("DATABASE_URL")
+if _DATABASE_URL_FROM_ENV and _DATABASE_URL_FROM_ENV.strip():
+    DATABASE_URL: str = _DATABASE_URL_FROM_ENV
+else:
+    # SQLAlchemy URL using psycopg
+    DATABASE_URL: str = (
+        f"postgresql+psycopg://{_POSTGRES_USER}:{_POSTGRES_PASSWORD}@{_POSTGRES_HOST}:{_POSTGRES_PORT}/{_POSTGRES_DB}"
+    )
