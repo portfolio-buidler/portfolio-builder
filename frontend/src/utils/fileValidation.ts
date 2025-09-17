@@ -13,7 +13,7 @@ export function validateFile(file: File): ValidationResult {
   if (!ALLOWED_MIME_TYPES.includes(file.type)) {
     return {
       ok: false,
-      error: 'Invalid file type. Allowed types: PDF, DOCX, PNG, JPEG.',
+      error: 'Invalid file type. Allowed types: PDF, DOCX,',
     }
   }
 
