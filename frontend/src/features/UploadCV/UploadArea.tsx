@@ -74,7 +74,7 @@ function UploadArea({ onFileSelect, onDropFile }: UploadAreaProps) {
       onBlur={handleBlur}
       tabIndex={0}
       role="button"
-      aria-label="Upload CV file by clicking or dragging and dropping. Allowed types: PDF, DOCX, PNG, JPEG. Maximum size 5MB."
+      aria-label="Upload CV file by clicking or dragging and dropping. Allowed types: PDF, DOCX,. Maximum size 5MB."
     >
       {/* Box Icon */}
       <div className="text-6xl mb-4">📦</div>
