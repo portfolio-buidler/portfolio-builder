@@ -5,7 +5,6 @@ import { toast } from 'react-toastify'
 
 function UploadArea({ onFileSelect, onDropFile }: UploadAreaProps) {
   const [dragOver, setDragOver] = useState(false)
-  const [focused, setFocused] = useState(false)
   const accept = ALLOWED_MIME_TYPES.join(',')
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -47,34 +46,19 @@ function UploadArea({ onFileSelect, onDropFile }: UploadAreaProps) {
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      document.getElementById('file-input')?.click()
-    }
-  }
-
-  const handleFocus = () => setFocused(true)
-  const handleBlur = () => setFocused(false)
-
   return (
     <div
       className={`
         relative w-96 h-64 rounded-2xl backdrop-blur-md bg-white/20 border border-white/30
         flex flex-col items-center justify-center cursor-pointer transition-all duration-300
         ${dragOver ? 'bg-white/30 scale-105' : 'hover:bg-white/25'}
-        ${focused ? 'ring-2 ring-blue-500 ring-opacity-50' : ''}
       `}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       onClick={() => document.getElementById('file-input')?.click()}
-      onKeyDown={handleKeyDown}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
-      tabIndex={0}
-      role="button"
       aria-label="Upload CV file by clicking or dragging and dropping. Allowed types: PDF, DOCX,. Maximum size 5MB."
+      data-testid="upload-area"
     >
       {/* Box Icon */}
       <div className="text-6xl mb-4">📦</div>
@@ -90,8 +74,6 @@ function UploadArea({ onFileSelect, onDropFile }: UploadAreaProps) {
         type="file"
         accept={accept}
         onChange={handleFileInputChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
         className="hidden"
         aria-describedby="upload-instructions"
       />
