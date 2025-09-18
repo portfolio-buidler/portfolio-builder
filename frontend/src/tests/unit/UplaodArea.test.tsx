@@ -139,4 +139,44 @@ describe('UploadArea', () => {
     expect(validateFile).not.toHaveBeenCalled()
     expect(toast.error).not.toHaveBeenCalled()
   })
+
+  // Uses only the first file when multiple files are dropped
+  it('onDrop: validates and uses only the first file when multiple files provided', () => {
+    const { dropZone, onDropFile } = setup()
+    const first = createFile('first.pdf', 'application/pdf')
+    const second = createFile('second.pdf', 'application/pdf')
+
+    ;(validateFile as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce({ ok: true })
+
+    fireEvent.drop(dropZone, { dataTransfer: { files: [first, second] } })
+    expect(validateFile).toHaveBeenCalledTimes(1)
+    expect(validateFile).toHaveBeenCalledWith(first)
+    expect(onDropFile).toHaveBeenCalledTimes(1)
+    expect(onDropFile).toHaveBeenCalledWith(first)
+  })
+
+  // Uses only the first file when multiple files are selected via input
+  it('onChange: validates and uses only the first file when multiple files provided', () => {
+    const { fileInput, onFileSelect } = setup()
+    const first = createFile('first.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+    const second = createFile('second.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+
+    ;(validateFile as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce({ ok: true })
+
+    // @testing-library/react change only takes the first file anyway, but we still pass two to simulate real world
+    fireEvent.change(fileInput, { target: { files: [first, second] } })
+    expect(validateFile).toHaveBeenCalledTimes(1)
+    expect(validateFile).toHaveBeenCalledWith(first)
+    expect(onFileSelect).toHaveBeenCalledTimes(1)
+    expect(onFileSelect).toHaveBeenCalledWith(first)
+  })
+
+  // ARIA label integrity on the drop zone
+  it('has the expected aria-label on the drop zone', () => {
+    const { dropZone } = setup()
+    expect(dropZone).toHaveAttribute(
+      'aria-label',
+      'Upload CV file by clicking or dragging and dropping. Allowed types: PDF, DOCX,. Maximum size 5MB.'
+    )
+  })
 })
