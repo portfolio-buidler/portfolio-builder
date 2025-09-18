@@ -1,6 +1,5 @@
 from datetime import datetime
 from enum import StrEnum
-
 from sqlalchemy import BigInteger, Boolean, CheckConstraint, Enum, Integer, String, text, func, Index
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
@@ -16,8 +15,6 @@ class Resume(Base):
     __tablename__ = "resumes"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
-
-    # נשאיר user_id/source_file_id כשדות חופשיים לעתיד, בלי FK כרגע
     user_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True, index=True)
     source_file_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
 
@@ -29,7 +26,6 @@ class Resume(Base):
         nullable=False,
         server_default=text("'pending'")
     )
-
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("1"))
     is_primary: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
 
@@ -39,7 +35,6 @@ class Resume(Base):
     __table_args__ = (
         Index("ix_resumes_status", "parse_status"),
         Index("ix_resumes_updated_at", "updated_at"),
-        # primary אחד לכל user
         Index("uq_resumes_user_primary", "user_id", unique=True, postgresql_where=text("is_primary = true")),
         CheckConstraint("version >= 1", name="ck_resumes_version_pos"),
     )

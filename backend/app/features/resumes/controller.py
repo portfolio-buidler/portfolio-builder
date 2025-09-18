@@ -7,6 +7,7 @@ from app.utils.sanitize import safe_filename
 from app.db.models_resume import Resume, ParseStatus
 from .upload_schemas import UploadResponse, UploadData
 from app.core.db import AsyncSessionLocal
+
 def _fake_parse_summary(path: Path) -> dict:
     return {"summary": "stub", "skills": ["Python", "FastAPI"], "experiences": [], "education": []}
 
@@ -31,8 +32,7 @@ async def upload_cv(file: UploadFile = File(...)) -> UploadResponse:
     dst = (UPLOAD_DIR / dst_name).absolute()
     await _save_streamed(file, dst, MAX_UPLOAD_SIZE)
 
-    # כאן לא דוחפים שדות "mime/size" ל-resumes כי הם לא קיימים במודל
-    async with AsyncSessionLocal() as session:  # type: AsyncSession
+    async with AsyncSessionLocal() as session:  
         resume = Resume(
             user_id=None,
             source_file_id=None,

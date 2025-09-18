@@ -1,15 +1,15 @@
 from logging.config import fileConfig
+from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
-from alembic import context
 import asyncio, os
 
 config = context.config
 if config.config_file_name:
     fileConfig(config.config_file_name)
 
-from app.db.base import Base  # Base שלנו
+from app.db.base import Base
 target_metadata = Base.metadata
 
 def run_migrations_offline():
