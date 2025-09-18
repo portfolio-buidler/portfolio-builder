@@ -6,6 +6,10 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from app.db.base import Base
 import asyncio,os
 
+# Ensure models are imported so Base.metadata contains all tables for autogenerate
+# Import order matters: do not remove the following import even if unused
+from app.db import models_resume as _models_resume  # noqa: F401
+
 config = context.config
 if config.config_file_name:
     fileConfig(config.config_file_name)
