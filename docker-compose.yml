@@ -1,4 +1,4 @@
-version: "3.9"
+# version: "3.9"
 
 services:
   db:
@@ -26,6 +26,7 @@ services:
     environment:
       # Compose injects this into the container; your FastAPI reads os.getenv("DATABASE_URL")
       DATABASE_URL: ${DATABASE_URL}
+      DATABASE_PORT: ${BACKEND_PORT}
     depends_on:
       db:
         condition: service_healthy
