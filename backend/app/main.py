@@ -6,6 +6,7 @@ from app.features.resumes.routes import router as resumes_router
 from app.core.config import ALLOWED_ORIGINS
 
 app = FastAPI(title="Portfolio Builder API", version="1.0.0")
+app.include_router(resumes_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -14,8 +15,6 @@ app.add_middleware(
     allow_methods=["POST", "GET", "OPTIONS"],
     allow_headers=["*"],
 )
-
-app.include_router(resumes_router)
 
 @app.get("/")
 def root():

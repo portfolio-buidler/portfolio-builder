@@ -22,7 +22,7 @@ COPY pyproject.toml .
 RUN python -m pip install --upgrade pip \
  && python -m pip install --no-cache-dir \
       --trusted-host pypi.org --trusted-host files.pythonhosted.org \
-      fastapi uvicorn[standard] sqlalchemy psycopg[binary] python-multipart asyncpg alembic
+      fastapi uvicorn[standard] SQLAlchemy>=2.0 psycopg[binary] python-multipart asyncpg alembic>=1.7 pydantic>=2.0 python-dotenv
 
 # Install dependencies from pyproject.toml if it exists
 RUN if [ -f pyproject.toml ]; then \
@@ -35,6 +35,10 @@ RUN if [ -f pyproject.toml ]; then \
 COPY ./app ./app
 COPY alembic.ini ./
 COPY alembic ./alembic
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+
 
 # 8) Run as non-root
 RUN useradd -m appuser && chown -R appuser /app

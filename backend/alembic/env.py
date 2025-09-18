@@ -3,18 +3,18 @@ from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
-import asyncio, os
+from app.db.base import Base
+import asyncio,os
 
 config = context.config
 if config.config_file_name:
     fileConfig(config.config_file_name)
 
-from app.db.base import Base
 target_metadata = Base.metadata
 
 def run_migrations_offline():
-    url = os.getenv("ALEMBIC_DATABASE_URL") or os.getenv("DATABASE_URL")
-    context.configure(url=url, target_metadata=target_metadata, literal_binds=True, dialect_opts={"paramstyle": "named"})
+    context.configure(url=os.getenv("ALEMBIC_DATABASE_URL") or os.getenv("DATABASE_URL"),
+    target_metadata=target_metadata, literal_binds=True, dialect_opts={"paramstyle": "named"})
     with context.begin_transaction():
         context.run_migrations()
 
