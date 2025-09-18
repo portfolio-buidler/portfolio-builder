@@ -3,7 +3,7 @@ from pathlib import Path
 from fastapi import UploadFile, File, HTTPException, status
 from app.core.config import MAX_UPLOAD_SIZE, ALLOWED_MIME, UPLOAD_DIR
 from app.utils.sanitize import safe_filename
-from .models import Resume
+from app.features.resumes.models import Resume
 from .upload_schemas import UploadResponse, UploadData
 from app.core.db import AsyncSessionLocal
 from sqlalchemy.future import select

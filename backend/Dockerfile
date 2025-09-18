@@ -28,7 +28,7 @@ COPY pyproject.toml .
 RUN python -m pip install --upgrade pip \
  && python -m pip install --no-cache-dir \
       --trusted-host pypi.org --trusted-host files.pythonhosted.org \
-      fastapi uvicorn[standard] sqlalchemy psycopg[binary] python-multipart
+      fastapi uvicorn[standard] sqlalchemy psycopg[binary] python-multipart asyncpg
 
 # (Optional) If you later add more deps to pyproject.toml and want them auto-installed,
 # uncomment this block to parse and install everything declared there:
