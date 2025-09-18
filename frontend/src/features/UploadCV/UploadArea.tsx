@@ -49,7 +49,7 @@ function UploadArea({ onFileSelect, onDropFile }: UploadAreaProps) {
   return (
     <div
       className={`
-        relative w-96 h-64 rounded-2xl backdrop-blur-md bg-white/20 border border-white/30
+        relative w-[38.5rem] h-[20.75rem] rounded-2xl backdrop-blur-md bg-white/20 border border-white/30
         flex flex-col items-center justify-center cursor-pointer transition-all duration-300
         ${dragOver ? 'bg-white/30 scale-105' : 'hover:bg-white/25'}
       `}
@@ -60,8 +60,13 @@ function UploadArea({ onFileSelect, onDropFile }: UploadAreaProps) {
       aria-label="Upload CV file by clicking or dragging and dropping. Allowed types: PDF, DOCX,. Maximum size 5MB."
       data-testid="upload-area"
     >
-      {/* Box Icon */}
-      <div className="text-6xl mb-4">📦</div>
+      {/* Paper Icon (emoji), sized to 100x100px via rem units */}
+      <div
+        className="mb-4 text-gray-700 w-[6.25rem] h-[6.25rem] flex items-center justify-center"
+        aria-hidden="true"
+      >
+        <span className="text-[6.25rem] leading-none">📜</span>
+      </div>
       
       {/* Upload Text */}
       <p className="text-gray-700 font-medium text-lg">
