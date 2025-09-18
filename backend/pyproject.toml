@@ -1,5 +1,8 @@
 [project]
 name = "portfolio-backend"
 version = "0.0.1"
-dependencies = ["fastapi", "uvicorn[standard]"]
-
+dependencies = [
+  "fastapi",
+  "uvicorn[standard]",
+  "python-multipart"
+]
