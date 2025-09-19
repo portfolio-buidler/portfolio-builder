@@ -62,16 +62,20 @@ function UploadArea({ onFileSelect, onDropFile }: UploadAreaProps) {
     >
       {/* Paper Icon (emoji), sized to 100x100px via rem units */}
       <div
-        className="mb-4 text-gray-700 w-[6.25rem] h-[6.25rem] flex items-center justify-center"
+        className="text-gray-700 w-[15.4375rem] h-[13.125rem] flex flex-col justify-between items-center gap-14 rotate-0 opacity-100"
         aria-hidden="true"
       >
         <span className="text-[6.25rem] leading-none">📜</span>
+        
+      {/* Upload Text */}
+      <div className="flex flex-col gap-[0.1875rem] items-center">
+        <p className="text-gray-700 font-medium text-[1.25rem] leading-none text-center capitalize font-['Poppins'] m-0"> 
+          Upload Or Drag Your CV
+        </p>
+        <p className="text-gray-700 font-medium text-[1rem] leading-none text-center font-['Poppins'] m-0">Accept PDF or DOCX until 5MB</p>
+      </div>
       </div>
       
-      {/* Upload Text */}
-      <p className="text-gray-700 font-medium text-lg">
-        Upload Or Drag Your CV
-      </p>
       
       {/* Hidden File Input */}
       <input

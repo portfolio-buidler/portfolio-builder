@@ -20,6 +20,8 @@ function UploadCV() {
     setSelectedFile(file)
   }
 
+ 
+
   const onDropFile = (file: File) => {
     console.log('🎯 File dropped via drag & drop:')
     console.log('Name:', file.name)
@@ -50,6 +52,7 @@ function UploadCV() {
     }
   }
 
+
   return (
     <div 
       className="min-h-screen flex flex-col items-center p-8 bg-cover bg-center bg-no-repeat"
@@ -74,18 +77,22 @@ function UploadCV() {
         {/* Let's Do It Button */}
         <button 
           className={`
-            w-[10.5rem] h-[3.375rem] rounded-[20px] pt-[22px] pr-[18px] pb-[22px] pl-[18px]
-            transition-colors duration-200 flex items-center justify-between text-[1.25rem]
+            w-[10.5rem] h-[3.375rem] rounded-[1.25rem] pt-[1.375rem] pr-[1.125rem] pb-[1.375rem] pl-[1.125rem]
+            transition-colors duration-200 flex items-center justify-between text-[1.25rem] rotate-0 opacity-100
+            outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0
+            disabled:outline-none disabled:ring-0 disabled:focus:outline-none disabled:focus:ring-0
             ${selectedFile 
-              ? 'bg-green-500 hover:bg-green-600 text-white cursor-pointer' 
+              ? "[background:var(--Colors-Green,_#34C759)] hover:[background:var(--Colors-Green,_#34C759)] text-white cursor-pointer" 
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }
           `}
           onClick={handleUpload}
           disabled={!selectedFile || isUploading}
         >
-          <span className="pl-[18px]">Let's Do It!</span>
-          <span>→</span>
+          <div className="flex items-center justify-center gap-[0.1875rem] whitespace-nowrap">
+            <span className="font-['Poppins'] font-medium text-[1.25rem] leading-[2rem] text-center capitalize align-middle">Let's Do It!</span>
+            <span className="text-[2rem] leading-[2rem] w-[1.875rem] h-[2rem] text-center">→</span>
+          </div>
         </button>
       </div>
     </div>
