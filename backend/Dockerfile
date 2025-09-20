@@ -36,7 +36,8 @@ COPY alembic.ini ./
 COPY alembic ./alembic
 COPY ./app ./app
 COPY docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY docker/migrate.sh ./docker/migrate.sh
+RUN chmod +x /entrypoint.sh ./docker/migrate.sh
 
 # 8) Run as non-root
 RUN useradd -m appuser && chown -R appuser /app
