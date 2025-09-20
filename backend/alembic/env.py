@@ -1,13 +1,18 @@
+"""
+Alembic env config: wires models to migrations.
+Offline: emit SQL. Online: run via async engine.
+URL from ALEMBIC_DATABASE_URL or DATABASE_URL.
+"""
+
 from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 from app.db.base import Base
-import asyncio,os
+import asyncio, os
 
-# Ensure models are imported so Base.metadata contains all tables for autogenerate
-# Import order matters: do not remove the following import even if unused
+# Import models so Base.metadata has all tables for autogenerate.
 from app.db import models_resume as _models_resume  # noqa: F401
 
 config = context.config
@@ -16,23 +21,38 @@ if config.config_file_name:
 
 target_metadata = Base.metadata
 
-def run_migrations_offline():
-    context.configure(url=os.getenv("ALEMBIC_DATABASE_URL") or os.getenv("DATABASE_URL"),
-    target_metadata=target_metadata, literal_binds=True, dialect_opts={"paramstyle": "named"})
+
+def run_migrations_offline() -> None:
+    """Configure context with URL only and emit SQL (no DB connection)."""
+    context.configure(
+        url=os.getenv("ALEMBIC_DATABASE_URL") or os.getenv("DATABASE_URL"),
+        target_metadata=target_metadata,
+        literal_binds=True,
+        dialect_opts={"paramstyle": "named"},
+    )
     with context.begin_transaction():
         context.run_migrations()
 
-def do_run_migrations(connection: Connection):
-    context.configure(connection=connection, target_metadata=target_metadata, compare_type=True)
+
+def do_run_migrations(connection: Connection) -> None:
+    """Bind to a live connection and run migrations (compare types enabled)."""
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        compare_type=True,
+    )
     with context.begin_transaction():
         context.run_migrations()
 
-async def run_migrations_online():
+
+async def run_migrations_online() -> None:
+    """Create async engine, open one connection, run migrations, dispose."""
     url = os.getenv("ALEMBIC_DATABASE_URL") or os.getenv("DATABASE_URL")
     connectable = create_async_engine(url, poolclass=pool.NullPool)
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)
     await connectable.dispose()
+
 
 if context.is_offline_mode():
     run_migrations_offline()
