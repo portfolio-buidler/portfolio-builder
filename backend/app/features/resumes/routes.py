@@ -1,6 +1,7 @@
+from __future__ import annotations
 from fastapi import APIRouter
 from .upload_schemas import UploadResponse
-from .controller import upload_cv, upload_status, get_parsed_json
+from .controller import upload_cv, upload_status
 
 router = APIRouter(prefix="/resumes", tags=["resumes"])
 
@@ -16,7 +17,4 @@ router.add_api_route(
     upload_status,
     methods=["GET"],
     response_model=UploadResponse,
-)
-router.add_api_route(
-    "/parsed/{file_id}", get_parsed_json, methods=["GET"], response_model=dict
 )
