@@ -1,7 +1,9 @@
 from datetime import date, datetime
+from typing import Any
 from pydantic import Field, PositiveInt
 from app.shared.schemas import APIModel, IDModel, Timestamped
 from app.shared.enums import ParseStatus, EmploymentType
+from .jsonb_models import ResumeParsedJSON  # חדש
 
 # Create a resume record
 class ResumeCreate(APIModel):
@@ -12,7 +14,8 @@ class ResumeCreate(APIModel):
 # Updates an existing resume record
 class ResumeUpdate(APIModel):
     is_primary: bool | None = None
-    parsed_json: dict[str, str] | None = None
+    # היה dict[str, str] | None
+    parsed_json: ResumeParsedJSON | None = None  # או: dict[str, Any] | None
     parse_status: ParseStatus | None = None
     version: PositiveInt | None = None
 
@@ -21,7 +24,8 @@ class ResumeOut(IDModel, Timestamped):
     user_id: int
     source_file_id: int | None = None
     original_name: str | None = None
-    parsed_json: dict[str, str] | None = None
+    # היה dict[str, str] | None
+    parsed_json: ResumeParsedJSON | None = None  # או: dict[str, Any] | None
     parse_status: ParseStatus
     version: PositiveInt
     is_primary: bool

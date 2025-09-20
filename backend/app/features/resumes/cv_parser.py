@@ -121,12 +121,11 @@ class CVParser:
         
         # Convert to dictionary for JSON serialization
         return self._to_dict(cv)
-    
+
+    # Clean and normalize text 
     def _clean_text(self, text: str) -> str:
-        """Clean and normalize text."""
-        # Remove excessive whitespace
+        text = text.replace('\r\n', '\n').replace('\r', '\n')
         text = re.sub(r'\s+', ' ', text)
-        # Remove special characters that might interfere with parsing
         text = re.sub(r'[^\w\s@\.\-\+\(\)\[\]/:,;]', ' ', text)
         return text.strip()
     

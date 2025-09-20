@@ -1,6 +1,6 @@
 from typing import Annotated
 from datetime import date
-from pydantic import BaseModel, ConfigDict, StrictStr, StrictInt, StringConstraints
+from pydantic import BaseModel, ConfigDict, StrictStr, StringConstraints
 
 NonEmptyStr = Annotated[str, StringConstraints(min_length=1, max_length=50, strip_whitespace=True)]
 
@@ -31,6 +31,5 @@ class ResumeParsedJSON(BaseModel):
     summary: StrictStr | None = None
     skills: list[StrictStr] | None = None
     experiences: list[ResumeExpJSON] | None = None
-    education: list[dict] | None = None  
+    education: list[EducationJSON] | None = None   # <-- היה list[dict]
     model_config = ConfigDict(strict=True)
-    

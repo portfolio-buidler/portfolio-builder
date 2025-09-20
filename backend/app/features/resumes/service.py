@@ -2,16 +2,20 @@ import secrets
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+
 from fastapi import UploadFile, HTTPException, status
-from app.core.config import MAX_UPLOAD_SIZE, UPLOAD_DIR  
+from app.core.config import MAX_UPLOAD_SIZE, UPLOAD_DIR
 from app.utils.sanitize import safe_filename
 from .text_extractors import extract_text_from_pdf, extract_text_from_docx
 from .cv_parser import CVParser
+from .jsonb_models import ResumeParsedJSON
+from .security import verify_magic_bytes
 
 @dataclass
 class UploadResult:
     file_id: str
     extracted_data: dict[str, Any]
+    parsed_json: dict[str, Any] 
 
 ONLY_MIME = {
     "application/pdf",
@@ -21,7 +25,7 @@ ONLY_MIME = {
 class ResumeService:
     def __init__(self):
         self.cv_parser = CVParser()
-    
+
     async def handle_upload(self, file: UploadFile) -> UploadResult:
         content_type = file.content_type or ""
         if content_type not in ONLY_MIME:
@@ -36,24 +40,26 @@ class ResumeService:
         await self._save_streamed(file, dst, MAX_UPLOAD_SIZE)
 
         try:
+            verify_magic_bytes(dst, content_type)
+
             full_text = self._extract_text(dst, content_type)
-            
-            # Parse the CV and extract structured data
-            parsed_data = self.cv_parser.parse_cv_text(full_text)
-            
+
+            parsed_dict = self.cv_parser.parse_cv_text(full_text) or {}
+
+            parsed_json = ResumeParsedJSON.model_validate(parsed_dict, strict=False).model_dump()
+
             extracted = {
                 "full_text": full_text,
-                "parsed_data": parsed_data,
+                "parsed": parsed_json,
                 "file_info": {
                     "filename": file.filename,
-                    "content_type": content_type,
-                    "size": file.size if hasattr(file, 'size') else None
+                    "content_type": content_type
                 }
             }
-            return UploadResult(file_id=dst_name, extracted_data=extracted)
+            return UploadResult(file_id=dst_name, extracted_data=extracted, parsed_json=parsed_json)
         finally:
             try:
-                dst.unlink(missing_ok=True) # Clean up the uploaded file
+                dst.unlink(missing_ok=True)
             except Exception:
                 pass
 
