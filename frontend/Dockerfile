@@ -10,6 +10,10 @@ RUN npm install
 #Copy source
 COPY . .
 
+#Accept build-time environment variables
+ARG VITE_API_BASE_URL=http://localhost:9000
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+
 #Build production bundle
 RUN npm run build
 
