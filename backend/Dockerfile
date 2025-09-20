@@ -32,13 +32,11 @@ RUN if [ -f pyproject.toml ]; then \
     fi
 
 # 7) Copy source code
-COPY ./app ./app
 COPY alembic.ini ./
 COPY alembic ./alembic
+COPY ./app ./app
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
-
 
 # 8) Run as non-root
 RUN useradd -m appuser && chown -R appuser /app
@@ -46,6 +44,8 @@ USER appuser
 
 # 9) Expose FastAPI port
 EXPOSE 8000
+
+ENTRYPOINT ["/entrypoint.sh"]
 
 # 10) Launch uvicorn
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

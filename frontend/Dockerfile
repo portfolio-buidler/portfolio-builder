@@ -17,8 +17,8 @@ RUN npm run build
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 
-#Expose port
-EXPOSE 3000
+#Expose port (nginx runs on 80 by default)
+EXPOSE 80
 
 #Default command
 CMD ["nginx", "-g", "daemon off;"]
