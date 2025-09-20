@@ -1,9 +1,9 @@
-from typing import Any
 from pydantic import BaseModel, ConfigDict
+from typing import Any
 
 class UploadData(BaseModel):
     fileId: str
-    extractedData: Any | None = None
+    extractedData: Any | None = None  # מחזיק {"full_text": ..., "parsed": {...}}
 
 class UploadResponse(BaseModel):
     success: bool

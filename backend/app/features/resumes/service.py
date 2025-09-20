@@ -1,8 +1,6 @@
 import secrets
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
-
 from fastapi import UploadFile, HTTPException, status
 from app.core.config import MAX_UPLOAD_SIZE, UPLOAD_DIR
 from app.utils.sanitize import safe_filename
@@ -11,77 +9,68 @@ from .cv_parser import CVParser
 from .jsonb_models import ResumeParsedJSON
 from .security import verify_magic_bytes
 
-@dataclass
-class UploadResult:
-    file_id: str
-    extracted_data: dict[str, Any]
-    parsed_json: dict[str, Any] 
-
-ONLY_MIME = {
+SUPPORTED_MIME = {
     "application/pdf",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/msword",
 }
 
+@dataclass
+class UploadResult:
+    tmp_path: Path
+    original_name: str
+    content_type: str
+    raw_text: str
+    parsed_json: ResumeParsedJSON
+
 class ResumeService:
-    def __init__(self):
-        self.cv_parser = CVParser()
+    def __init__(self) -> None:
+        self.parser = CVParser()
+
+    async def _save_streamed(self, upload: UploadFile, dst: Path, limit: int) -> bytes:
+        """שומר לקובץ ומחזיר את ה-header bytes לבדיקה."""
+        header = b""
+        written = 0
+        chunk = await upload.read(8192)
+        with dst.open("wb") as f:
+            while chunk:
+                if not header:
+                    header = chunk[:8]
+                written += len(chunk)
+                if written > limit:
+                    dst.unlink(missing_ok=True)
+                    raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="File too large")
+                f.write(chunk)
+                chunk = await upload.read(8192)
+        return header
 
     async def handle_upload(self, file: UploadFile) -> UploadResult:
-        content_type = file.content_type or ""
-        if content_type not in ONLY_MIME:
-            raise HTTPException(
-                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                detail=f"Unsupported content type: {content_type}"
-            )
+        if file.content_type not in SUPPORTED_MIME:
+            raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail=f"Unsupported {file.content_type}")
 
         safe_name = safe_filename(file.filename or "upload.bin")
         dst_name = f"{Path(safe_name).stem}_{secrets.token_hex(8)}{Path(safe_name).suffix.lower()}"
         dst = (UPLOAD_DIR / dst_name).absolute()
-        await self._save_streamed(file, dst, MAX_UPLOAD_SIZE)
+        header = await self._save_streamed(file, dst, MAX_UPLOAD_SIZE)
 
-        try:
-            verify_magic_bytes(dst, content_type)
+        # בדיקת חתימה
+        verify_magic_bytes(header, file.content_type)
 
-            full_text = self._extract_text(dst, content_type)
+        # חילוץ טקסט
+        if file.content_type == "application/pdf":
+            raw_text = extract_text_from_pdf(dst)
+        else:
+            raw_text = extract_text_from_docx(dst)
 
-            parsed_dict = self.cv_parser.parse_cv_text(full_text) or {}
+        if not raw_text.strip():
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Empty or unreadable document")
 
-            parsed_json = ResumeParsedJSON.model_validate(parsed_dict, strict=False).model_dump()
+        parsed = self.parser.parse(raw_text)
 
-            extracted = {
-                "full_text": full_text,
-                "parsed": parsed_json,
-                "file_info": {
-                    "filename": file.filename,
-                    "content_type": content_type
-                }
-            }
-            return UploadResult(file_id=dst_name, extracted_data=extracted, parsed_json=parsed_json)
-        finally:
-            try:
-                dst.unlink(missing_ok=True)
-            except Exception:
-                pass
-
-    async def _save_streamed(self, upload: UploadFile, dst: Path, limit: int) -> None:
-        written = 0
-        chunk = await upload.read(65536)
-        with dst.open("wb") as f:
-            while chunk:
-                written += len(chunk)
-                if written > limit:
-                    dst.unlink(missing_ok=True)
-                    raise HTTPException(
-                        status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                        detail="File too large"
-                    )
-                f.write(chunk)
-                chunk = await upload.read(65536)
-
-    def _extract_text(self, path: Path, mime: str) -> str:
-        suffix = path.suffix.lower()
-        if mime == "application/pdf" or suffix == ".pdf":
-            return extract_text_from_pdf(path)
-        if mime == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" or suffix == ".docx":
-            return extract_text_from_docx(path)
-        return ""
+        return UploadResult(
+            tmp_path=dst,
+            original_name=file.filename or "upload.bin",
+            content_type=file.content_type,
+            raw_text=raw_text,
+            parsed_json=parsed,
+        )
