@@ -2,7 +2,6 @@ import secrets
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-
 from fastapi import UploadFile, HTTPException, status
 from app.core.config import MAX_UPLOAD_SIZE, UPLOAD_DIR  
 from app.utils.sanitize import safe_filename
@@ -54,7 +53,7 @@ class ResumeService:
             return UploadResult(file_id=dst_name, extracted_data=extracted)
         finally:
             try:
-                dst.unlink(missing_ok=True)
+                dst.unlink(missing_ok=True) # Clean up the uploaded file
             except Exception:
                 pass
 
