@@ -24,6 +24,7 @@ async def upload_cv(file: UploadFile = File(...)) -> UploadResponse:
         session.add(resume)
         await session.flush()  # allocates ID
         resume_id = resume.id
+        await session.commit()  # FIXED: commit the initial record
 
     # 2) parse the upload; on failure -> mark failed
     try:
