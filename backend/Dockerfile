@@ -43,9 +43,9 @@ RUN useradd -m appuser && chown -R appuser /app
 USER appuser
 
 # 9) Expose FastAPI port
-EXPOSE 8000
+EXPOSE 9000
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-# 10) Launch uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# 10) Launch uvicorn (actual command is in entrypoint.sh)
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "9000", "--reload"]

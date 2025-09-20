@@ -9,4 +9,6 @@ dependencies = [
   "alembic>=1.7",
   "asyncpg",
   "pydantic>=2.0",
+  "pypdf",
+  "python-docx",
 ]
