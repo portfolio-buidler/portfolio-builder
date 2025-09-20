@@ -345,3 +345,25 @@ docker system prune -a
 - Everything else is automatic! 🎯
 
 Happy building! 🎯
+
+## 🧪 Testing
+
+Run backend tests (inside running containers):
+
+```powershell
+docker compose exec backend python -m pytest -q
+```
+
+Included tests:
+- `test_smoke.py` root endpoint sanity.
+- `features/test_resumes.py` resume upload scenarios:
+	- valid synthetic PDF (may return 201 or 422 depending on minimal PDF parsing).
+	- unsupported MIME -> 415 fast-fail (no DB write).
+	- empty/unreadable PDF -> mocked 422 path without DB interaction.
+
+Design decisions improving testability:
+- MIME validation and file parsing now occur BEFORE any database row creation.
+- Database row is only created once parsing succeeds, simplifying error handling and avoiding noisy failed rows.
+- Tests monkeypatch the service for deterministic error cases.
+
+Add new tests under `backend/app/tests/` and run the same command.

@@ -7,51 +7,38 @@ from app.db.models_resume import Resume
 from app.shared.enums import ParseStatus
 from .upload_schemas import UploadResponse, UploadData
 from .service import ResumeService
+from .security import SUPPORTED_MIME
 
 async def upload_cv(file: UploadFile = File(...)) -> UploadResponse:
     svc = ResumeService()
 
-    # 1) create DB row as 'parsing'
+    # Fast-fail unsupported MIME before touching the database (improves perf & testability)
+    ct = file.content_type or ""
+    if ct not in SUPPORTED_MIME:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=f"Unsupported content type: {ct}"
+        )
+
+    # Parse first; if this fails we don't touch the DB
+    result = await svc.handle_upload(file)
+
+    # Create DB row only on success
     async with AsyncSessionLocal() as session:
         resume = Resume(
             user_id=None,
             source_file_id=None,
             original_name=file.filename or "upload.bin",
-            parse_status=ParseStatus.parsing,
+            parse_status=ParseStatus.success,
             is_primary=False,
-            parsed_json=None,
+            parsed_json=result.parsed_json.model_dump(mode="json"),
         )
         session.add(resume)
-        await session.flush()  # allocates ID
+        await session.flush()
         resume_id = resume.id
-        await session.commit()  # FIXED: commit the initial record
-
-    # 2) parse the upload; on failure -> mark failed
-    try:
-        result = await svc.handle_upload(file)
-    except HTTPException as e:
-        async with AsyncSessionLocal() as session:
-            await session.execute(
-                update(Resume)
-                .where(Resume.id == resume_id)
-                .set({"parse_status": ParseStatus.failed})
-            )
-            await session.commit()
-        raise e
-
-    # 3) persist parsed_json and success status
-    async with AsyncSessionLocal() as session:
-        await session.execute(
-            update(Resume)
-            .where(Resume.id == resume_id)
-            .set({
-                "parsed_json": result.parsed_json.model_dump(mode="json"),
-                "parse_status": ParseStatus.success,
-            })
-        )
         await session.commit()
 
-    # 4) response includes both full_text and parsed JSON
+    # Response includes both full_text and parsed JSON
     extracted = {
         "full_text": result.raw_text,
         "parsed": result.parsed_json.model_dump(mode="json"),
