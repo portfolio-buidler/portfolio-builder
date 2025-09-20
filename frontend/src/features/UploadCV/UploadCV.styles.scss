@@ -1,0 +1,117 @@
+/* UploadCV.styles.scss
+   BEM styles for the UploadCV page. No Tailwind utilities. Uses global tokens/mixins.
+*/
+
+.upload-cv {
+  /* Background image via CSS variable */
+  min-height: 100vh;
+  background-image: var(--uploadcv-bg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  &__container {
+    width: 100%;
+    max-width: 92rem; /* generous max width to center content */
+    margin-inline: auto;
+    padding: 2rem;
+  }
+
+  &__title {
+    /* Title styling mirrors theme tokens */
+    font-family: var(--font-family-base);
+    color: var(--title-color);
+    text-transform: capitalize;
+    text-align: center;
+    letter-spacing: var(--tracking-title-xl);
+    line-height: var(--line-height-tight);
+    font-weight: var(--font-weight-normal);
+
+    /* Size aligns to prior config: 7xl */
+    font-size: var(--font-size-7xl);
+
+    /* Spacing derived from tokens; adjustable as needed */
+    margin-top: var(--title-top);
+    margin-left: var(--title-left);
+
+    .upload-cv__title-highlight {
+      font-weight: var(--font-weight-black);
+    }
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8rem;
+
+    /* Mirror previous layout constraints */
+    max-width: 57.5rem;
+    margin-top: 8rem;
+    margin-left: 19.4rem;
+  }
+
+  &__cta {
+    /* Dimensions from the previous Tailwind inline utilities */
+    width: 10.5rem;
+    height: 3.375rem;
+    border-radius: 1.25rem;
+    padding: 1.375rem 1.125rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    font-size: var(--font-size-lg);
+    transition: background-color 200ms ease, color 200ms ease, opacity 200ms ease;
+
+    /* Enabled state visuals */
+    background: var(--brand-500);
+    color: #fff;
+    cursor: pointer;
+
+    /* Disabled visuals driven by aria-disabled attribute */
+    &[aria-disabled='true'] {
+      background: var(--gray-300);
+      color: var(--gray-500);
+      cursor: not-allowed;
+    }
+
+    /* Hover only when not disabled */
+    &:not([aria-disabled='true']):hover {
+      background: var(--brand-600);
+    }
+
+    &:not([aria-disabled='true']):active {
+      background: var(--brand-700);
+    }
+
+    /* Focus visible for a11y */
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.4);
+    }
+  }
+
+  &__cta-label {
+    font-family: var(--font-family-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 2rem;
+    text-transform: capitalize;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  &__cta-icon {
+    font-size: 2rem;
+    line-height: 2rem;
+    width: 1.875rem;
+    height: 2rem;
+    text-align: center;
+  }
+}

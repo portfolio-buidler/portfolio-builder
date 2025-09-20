@@ -71,16 +71,17 @@ describe('UploadArea', () => {
     expect(clickSpy).toHaveBeenCalled()
   })
 
-  // Visual feedback: drag over adds a class, leaving removes it
-  it('drag over/leave toggles visual state (class changes)', () => {
+  // Visual feedback: drag over toggles data attribute used for styling
+  it('drag over/leave toggles visual state via data-dragover attribute', () => {
     const { dropZone } = setup()
-    expect(dropZone.className).not.toContain('scale-105')
+    // initial false
+    expect(dropZone).toHaveAttribute('data-dragover', 'false')
 
     fireEvent.dragOver(dropZone)
-    expect(dropZone.className).toContain('scale-105')
+    expect(dropZone).toHaveAttribute('data-dragover', 'true')
 
     fireEvent.dragLeave(dropZone)
-    expect(dropZone.className).not.toContain('scale-105')
+    expect(dropZone).toHaveAttribute('data-dragover', 'false')
   })
 
   // Drop flow: valid file calls onDropFile; invalid shows a toast error

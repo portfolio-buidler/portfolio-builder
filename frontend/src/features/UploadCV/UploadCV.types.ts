@@ -19,3 +19,12 @@ export interface UploadAreaProps {
   onFileSelect: (file: File) => void
   onDropFile: (file: File) => void
 }
+
+export interface UploadCVViewProps {
+  backgroundUrl: string
+  ready: boolean
+  isUploading: boolean
+  onUpload: () => void
+  onFileSelect: (file: File) => void
+  onDropFile: (file: File) => void
+}
