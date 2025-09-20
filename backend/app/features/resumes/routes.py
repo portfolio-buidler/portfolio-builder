@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from app.core.config import API_PREFIX
 from .upload_schemas import UploadResponse
-from .controller import upload_cv, upload_status
+from .controller import upload_cv, upload_status, get_parsed_json
 
 # Create a router for resume-related endpoints
 router = APIRouter(prefix="/resumes", tags=["resumes"])
@@ -18,4 +18,11 @@ router.add_api_route(
     upload_status,
     methods=["GET"],
     response_model=UploadResponse
+)
+
+router.add_api_route(
+    "/parsed/{file_id}",
+    get_parsed_json,
+    methods=["GET"],
+    response_model=dict
 )

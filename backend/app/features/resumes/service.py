@@ -7,6 +7,7 @@ from fastapi import UploadFile, HTTPException, status
 from app.core.config import MAX_UPLOAD_SIZE, UPLOAD_DIR  
 from app.utils.sanitize import safe_filename
 from .text_extractors import extract_text_from_pdf, extract_text_from_docx
+from .cv_parser import CVParser
 
 @dataclass
 class UploadResult:
@@ -19,6 +20,9 @@ ONLY_MIME = {
 }
 
 class ResumeService:
+    def __init__(self):
+        self.cv_parser = CVParser()
+    
     async def handle_upload(self, file: UploadFile) -> UploadResult:
         content_type = file.content_type or ""
         if content_type not in ONLY_MIME:
@@ -34,13 +38,17 @@ class ResumeService:
 
         try:
             full_text = self._extract_text(dst, content_type)
+            
+            # Parse the CV and extract structured data
+            parsed_data = self.cv_parser.parse_cv_text(full_text)
+            
             extracted = {
                 "full_text": full_text,
-                "parsed": {
-                    "summary": None,
-                    "skills": [],
-                    "experiences": [],
-                    "education": []
+                "parsed_data": parsed_data,
+                "file_info": {
+                    "filename": file.filename,
+                    "content_type": content_type,
+                    "size": file.size if hasattr(file, 'size') else None
                 }
             }
             return UploadResult(file_id=dst_name, extracted_data=extracted)
