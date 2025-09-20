@@ -33,3 +33,4 @@ class ResumeParsedJSON(BaseModel):
     experiences: list[ResumeExpJSON] | None = None
     education: list[dict] | None = None  
     model_config = ConfigDict(strict=True)
+    
