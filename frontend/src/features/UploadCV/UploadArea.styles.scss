@@ -1,0 +1,89 @@
+/* UploadArea.styles.scss
+   BEM styles for the upload area. No Tailwind utilities. Uses global tokens/mixins.
+*/
+
+.upload-area {
+  position: relative;
+  width: 38.5rem;      /* matches original */
+  height: 20.75rem;    /* matches original */
+  border-radius: var(--radius-2xl);
+  backdrop-filter: blur(var(--blur-md, 12px));
+  background-color: var(--overlay-20);
+  border: 1px solid var(--border-overlay-30);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  transition: transform 300ms ease, background-color 300ms ease;
+
+  /* Hover visual */
+  &:hover {
+    background-color: var(--overlay-25);
+  }
+
+  /* Dragover state via data attribute */
+  &[data-dragover="true"] {
+    transform: scale(1.05);
+    background-color: var(--overlay-30);
+  }
+
+  /* If the block becomes focusable (e.g., via tabindex), show accessible outline */
+  &:focus-visible {
+    /* Uses mixin if desired; inline to avoid import coupling */
+    outline: none;
+    box-shadow: 0 0 0 2px var(--brand-500);
+    outline-offset: 2px;
+  }
+
+  &__icon {
+    color: var(--color-fg-muted);
+    width: 15.4375rem;
+    height: 13.125rem;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-14);
+  }
+
+  &__emoji {
+    font-size: var(--font-size-6xl);
+    line-height: var(--line-height-tight);
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px; /* original was 0.1875rem */
+  }
+
+  &__headline {
+    color: var(--color-fg-muted);
+    font-family: var(--font-family-base);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-lg);
+    line-height: var(--line-height-tight);
+    text-align: center;
+    text-transform: capitalize;
+    margin: 0;
+  }
+
+  &__subline {
+    color: var(--color-fg-muted);
+    font-family: var(--font-family-base);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-tight);
+    text-align: center;
+    margin: 0;
+  }
+
+  &__input {
+    /* Hidden visually using global .sr-only utility; no extra styling needed here. */
+  }
+}

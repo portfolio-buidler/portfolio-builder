@@ -1,0 +1,6 @@
+/* mixins/_fluid-size.scss
+   Fluid size helper for typography/spacing between viewport ranges. */
+
+@mixin fluid-size($min, $max, $vwMin: 360, $vwMax: 1280) {
+  font-size: clamp(#{$min}, calc(#{$min} + (#{$max} - #{$min}) * ((100vw - #{$vwMin}px) / (#{$vwMax} - #{$vwMin}))), #{$max});
+}

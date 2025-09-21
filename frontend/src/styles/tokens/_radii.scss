@@ -1,0 +1,10 @@
+/* tokens/_radii.scss
+   Radius tokens. */
+
+:root {
+  --radius-sm: 2px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px; /* approximates Tailwind 2xl */
+}

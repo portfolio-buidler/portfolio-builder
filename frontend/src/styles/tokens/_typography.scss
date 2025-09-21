@@ -1,0 +1,37 @@
+/* tokens/_typography.scss
+   Typography tokens: font families, sizes, weights, line-heights, tracking. */
+
+:root {
+  --font-family-base: 'Poppins', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
+
+  /* Sizes */
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 2rem;
+  --font-size-3xl: 2.5rem;
+  --font-size-4xl: 4rem;
+  --font-size-6xl: 6.25rem; /* emoji size used */
+  --font-size-7xl: 7.5rem;  /* title-xl from Tailwind config */
+
+  /* Line heights */
+  --line-height-tight: 1;
+  --line-height-normal: 1.5;
+
+  /* Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --font-weight-black: 900; /* title-bold from Tailwind config */
+
+  /* Tracking (letter-spacing) from Tailwind config */
+  --tracking-title-xl: -2.5px;
+  --tracking-title-lg: -1.5px;
+  --tracking-title-md: -1px;
+  --tracking-title-sm: -0.5px;
+
+  /* Title margins from Tailwind config (optional) */
+  --title-top: 8.25rem;
+  --title-left: -3.075rem;
+}
