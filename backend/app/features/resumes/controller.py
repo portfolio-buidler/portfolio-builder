@@ -1,63 +1,69 @@
-import secrets
-from pathlib import Path
+from __future__ import annotations
 from fastapi import UploadFile, File, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.config import MAX_UPLOAD_SIZE, ALLOWED_MIME, UPLOAD_DIR
-from app.utils.sanitize import safe_filename
-from app.db.models_resume import Resume, ParseStatus
-from .upload_schemas import UploadResponse, UploadData
+from sqlalchemy import select, update
+from sqlalchemy.exc import NoResultFound
 from app.core.db import AsyncSessionLocal
-
-def _fake_parse_summary(path: Path) -> dict:
-    return {"summary": "stub", "skills": ["Python", "FastAPI"], "experiences": [], "education": []}
-
-async def _save_streamed(upload: UploadFile, dst: Path, limit: int) -> None:
-    written = 0
-    chunk = await upload.read(65536)
-    with dst.open("wb") as f:
-        while chunk:
-            written += len(chunk)
-            if written > limit:
-                dst.unlink(missing_ok=True)
-                raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="File too large")
-            f.write(chunk)
-            chunk = await upload.read(65536)
+from app.db.models_resume import Resume
+from app.shared.enums import ParseStatus
+from .upload_schemas import UploadResponse, UploadData
+from .service import ResumeService
+from .security import SUPPORTED_MIME
 
 async def upload_cv(file: UploadFile = File(...)) -> UploadResponse:
-    if file.content_type not in ALLOWED_MIME:
-        raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail=f"Unsupported {file.content_type}")
+    svc = ResumeService()
 
-    safe_name = safe_filename(file.filename or "upload.bin")
-    dst_name = f"{Path(safe_name).stem}_{secrets.token_hex(8)}{Path(safe_name).suffix.lower()}"
-    dst = (UPLOAD_DIR / dst_name).absolute()
-    await _save_streamed(file, dst, MAX_UPLOAD_SIZE)
+    # Fast-fail unsupported MIME before touching the database (improves perf & testability)
+    ct = file.content_type or ""
+    if ct not in SUPPORTED_MIME:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=f"Unsupported content type: {ct}"
+        )
 
-    async with AsyncSessionLocal() as session:  
+    # Parse first; if this fails we don't touch the DB
+    result = await svc.handle_upload(file)
+
+    # Create DB row only on success
+    async with AsyncSessionLocal() as session:
         resume = Resume(
             user_id=None,
             source_file_id=None,
             original_name=file.filename or "upload.bin",
-            parse_status=ParseStatus.pending,
+            parse_status=ParseStatus.success,
             is_primary=False,
-            parsed_json=None
+            parsed_json=result.parsed_json.model_dump(mode="json"),
         )
         session.add(resume)
+        await session.flush()
+        resume_id = resume.id
         await session.commit()
 
-    data = _fake_parse_summary(dst)
+    # Response includes both full_text and parsed JSON
+    extracted = {
+        "full_text": result.raw_text,
+        "parsed": result.parsed_json.model_dump(mode="json"),
+        "file_info": {"filename": result.original_name, "content_type": result.content_type},
+    }
     return UploadResponse(
         success=True,
-        message="File uploaded successfully",
-        data=UploadData(fileId=dst_name, extractedData=data)
+        message="File uploaded and parsed successfully",
+        data=UploadData(fileId=str(resume_id), extractedData=extracted),
     )
 
 async def upload_status(file_id: str) -> UploadResponse:
-    path = UPLOAD_DIR / file_id
-    if not path.exists():
-        raise HTTPException(status_code=404, detail="File not found")
-    return UploadResponse(
-        success=True,
-        message="Parsing completed",
-        data=UploadData(fileId=file_id, extractedData={"parse_status": "parsed"})
-    )
+    # reads status from DB (not the filesystem)
+    async with AsyncSessionLocal() as session:
+        stmt = select(Resume.id, Resume.parse_status, Resume.parsed_json).where(Resume.id == int(file_id))
+        row = (await session.execute(stmt)).first()
+        if not row:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Resume not found")
 
+        extracted = {
+            "parse_status": row.parse_status.value,
+            "has_parsed_json": row.parsed_json is not None,
+        }
+        return UploadResponse(
+            success=True,
+            message="OK",
+            data=UploadData(fileId=str(row.id), extractedData=extracted),
+        )

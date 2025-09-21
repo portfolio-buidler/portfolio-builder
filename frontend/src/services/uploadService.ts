@@ -2,7 +2,7 @@ import axios from 'axios'
 import type { UploadResponse } from '../features/UploadCV/UploadCV.types'
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:9000',
 })
 
 export async function uploadCV(file: File): Promise<UploadResponse> {
