@@ -4,7 +4,11 @@
 
 .upload-area {
   position: relative;
-  width: 38.5rem;      /* matches original */
+  /* Use responsive width with a max of 616px */
+  width: 100%;
+  max-width: 38.5rem;  /* 616px */
+  margin-left: 0;
+  margin-right: 0;
   height: 20.75rem;    /* matches original */
   border-radius: var(--radius-2xl);
   backdrop-filter: blur(var(--blur-md, 12px));
@@ -83,7 +87,5 @@
     margin: 0;
   }
 
-  &__input {
-    /* Hidden visually using global .sr-only utility; no extra styling needed here. */
-  }
+  /* Removed empty &__input ruleset to satisfy linter; input uses global .sr-only */
 }

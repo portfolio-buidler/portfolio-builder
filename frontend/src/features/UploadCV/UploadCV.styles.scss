@@ -4,7 +4,9 @@
 
 .upload-cv {
   /* Background image via CSS variable */
+  /* Fallback to 100vh, then prefer 100svh for mobile browser UI correctness */
   min-height: 100vh;
+  min-height: 100svh;
   background-image: var(--uploadcv-bg);
   background-size: cover;
   background-position: center;
@@ -39,7 +41,9 @@
     margin-left: var(--title-left);
 
     .upload-cv__title-highlight {
-      font-weight: var(--font-weight-black);
+      font-weight: 900;
+      /* If a variable font is available (e.g., Poppins VF), push weight beyond 900 */
+      font-variation-settings: 'wght' 1000;
     }
   }
 
@@ -51,9 +55,9 @@
     gap: 8rem;
 
     /* Mirror previous layout constraints */
-    max-width: 57.5rem;
+    max-width: 57.5rem; /* reverted to previous */
     margin-top: 8rem;
-    margin-left: 19.4rem;
+    margin-left: 26.6rem; /* per request */
   }
 
   &__cta {
