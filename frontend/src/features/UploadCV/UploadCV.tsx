@@ -35,7 +35,7 @@ function UploadCV() {
     setSelectedFile(file)
   }
 
-  // REAL upload handler calling backend on port 8000
+  // Upload handler calling backend API
   const handleUpload = async () => {
     if (!selectedFile) return
     try {

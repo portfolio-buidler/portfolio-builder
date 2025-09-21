@@ -1,16 +1,9 @@
 from datetime import datetime
-from enum import StrEnum
 from sqlalchemy import BigInteger, Boolean, CheckConstraint, Enum, Integer, String, text, func, Index
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
-
-class ParseStatus(StrEnum):
-    pending = "pending"
-    parsing = "parsing"
-    success = "success"
-    failed = "failed"
-
+from app.shared.enums import ParseStatus  
 class Resume(Base):
     __tablename__ = "resumes"
 
