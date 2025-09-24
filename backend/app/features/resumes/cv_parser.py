@@ -3,7 +3,23 @@ from .jsonb_models import ResumeParsedJSON
 
 
 EMAIL_REGEX = r"[a-zA-Z0-9.\-+_]+@[a-zA-Z0-9.\-+_]+\.[a-zA-Z]+"
-PHONE_REGEX = r"[\+\(]?[1-9][0-9 .\-\(\)]{8,}[0-9]"
+# General phone numbers:
+# - Optional +country code (1-3 digits)
+# - Optional trunk '0' after country code
+# - National number as 2-3 + 3 + 4, or 2-3 + 7, or straight 8-10 digits
+# - Allow spaces/hyphens as separators between groups
+PHONE_REGEX = (
+    r"(?x)"                      # verbose mode
+    r"(?<!\d)"                  # don't start mid-number
+    r"(?:\+?\d{1,3}[\s\-]?)?" # optional country code
+    r"(?:0[\s\-]?)?"            # optional trunk 0
+    r"(?:"                       # main number
+    r"  \d{2,3}[\s\-]?\d{3}[\s\-]?\d{4}"  # 2-3 + 3 + 4
+    r"| \d{2,3}[\s\-]?\d{7}"                # 2-3 + 7
+    r"| \d{8,10}"                              # or straight digits
+    r")"
+    r"(?!\d)"                   # don't end mid-number
+)
 
 SECTION_HEADERS = re.compile(
     r"(?im)^\s*(SUMMARY|OBJECTIVE|ABOUT|EXPERIENCE|WORK EXPERIENCE|PROJECTS|EDUCATION|SKILLS)\b[:\-]?\s*$"

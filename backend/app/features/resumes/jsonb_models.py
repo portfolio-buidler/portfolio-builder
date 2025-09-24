@@ -7,7 +7,7 @@ NonEmptyShortStr = Annotated[str, StringConstraints(min_length=1, max_length=200
 class ResumeParsedJSON(BaseModel):
     """Simplified parsed resume schema.
 
-    - name: Full name if detected (best effort)
+    - name: Full name 
     - email: First-matched email address
     - phone: First-matched phone number
     - about: Summary/About text block
