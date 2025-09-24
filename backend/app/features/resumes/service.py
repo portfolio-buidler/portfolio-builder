@@ -8,7 +8,7 @@ from app.core.config import MAX_UPLOAD_SIZE, UPLOAD_DIR
 from app.utils.sanitize import safe_filename
 from app.features.adapters.pdf.reader import read_pdf_text
 from app.features.adapters.docx.reader import read_docx_text
-from .cv_parser import CVParser
+from app.features.parsing.parser_core import ParserCore
 from .jsonb_models import ResumeParsedJSON
 from .security import verify_magic_bytes, SUPPORTED_MIME
 
@@ -21,7 +21,7 @@ class UploadResult:
 
 class ResumeService:
     def __init__(self) -> None:
-        self.parser = CVParser()
+        self.parser = ParserCore()
 
     async def handle_upload(self, file: UploadFile) -> UploadResult:
         if (ct := (file.content_type or "")) not in SUPPORTED_MIME:
