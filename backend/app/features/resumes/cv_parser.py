@@ -162,11 +162,15 @@ class CVParser:
 
     # -------- Education parsing ---------
     _YEAR_PAT = re.compile(r"\b(19\d{2}|20\d{2})(?:\s*[–\-]\s*(19\d{2}|20\d{2}))?\b")
-    _DEGREE_PAT = re.compile(
-        r"\b((?:B\.?(?:Sc|A)|B(?:Sc|A)|Bachelor(?:'s)?|M(?:\.?(?:Sc|A)|aster(?:'s)?)|PhD|Doctorate|Diploma|Associate)(?:[^\n\|,.;]{0,80})?)",
+    # Degree phrase: e.g., B.Sc. in Software Engineering, Bachelor of Science in CS, MSc Computer Science
+    _DEGREE_PHRASE_PAT = re.compile(
+        r"\b((?:B\.?\s?(?:Sc|A)|Bachelor(?:'s)?|M\.?\s?(?:Sc|A)|Master(?:'s)?|PhD|Doctorate|Diploma|Associate)\.?"  # core degree (optional trailing dot)
+        r"(?:\s+(?:in|of)\s+[^\n\|,;]{1,80})?)",  # subject
         re.IGNORECASE,
     )
+    _DEGREE_PAT = re.compile(r"\b(B\.?\s?(?:Sc|A)|Bachelor(?:'s)?|M\.?\s?(?:Sc|A)|Master(?:'s)?|PhD|Doctorate|Diploma|Associate)\b", re.IGNORECASE)
     _INSTITUTION_HINT_PAT = re.compile(r"\b(University|College|Institute|Polytechnic|Academy|School)\b", re.IGNORECASE)
+    _COURSEWORK_SKIP = re.compile(r"\b(coursework|courses|relevant\s+coursework)\b", re.IGNORECASE)
 
     def _split_lines(self, text: str) -> list[str]:
         return [ln.strip() for ln in text.split("\n") if ln.strip()]
@@ -179,35 +183,53 @@ class CVParser:
         lines = self._split_lines(edu)
         entries: list[EducationEntry] = []
         for ln in lines:
+            # Skip lines that are clearly coursework/descriptions, not degrees
+            if self._COURSEWORK_SKIP.search(ln) or ln.strip().lower().startswith("completed"):
+                continue
             year_match = self._YEAR_PAT.search(ln)
             year = None
             if year_match:
                 year = year_match.group(0)
 
             degree = None
-            deg_m = self._DEGREE_PAT.search(ln)
+            deg_m = self._DEGREE_PHRASE_PAT.search(ln) or self._DEGREE_PAT.search(ln)
             if deg_m:
-                degree = deg_m.group(1).strip()
+                degree = re.sub(r"\s+", " ", deg_m.group(1)).strip(" .")
 
             institution = None
-            # Heuristic: institution contains hint words or capitalized proper nouns
+            # Prefer text after a pipe as institution block if present
+            if "|" in ln:
+                institution_block = ln.split("|", 1)[1].strip()
+                # strip years and trailing punctuation
+                if self._YEAR_PAT.search(institution_block):
+                    institution_block = self._YEAR_PAT.sub("", institution_block).strip(" ,;.-")
+                if institution_block:
+                    institution = institution_block
+
+            # Otherwise, detect by hints or proper nouns
             cand_parts = re.split(r"[,\-\u2013;]|\s\|\s", ln)
             cand_parts = [p.strip() for p in cand_parts if p.strip()]
-            for part in cand_parts:
-                if self._INSTITUTION_HINT_PAT.search(part):
-                    institution = part
-                    break
+            if not institution:
+                for part in cand_parts:
+                    if self._INSTITUTION_HINT_PAT.search(part):
+                        institution = part
+                        break
 
             # Fallback: capitalized chunk that isn't (part of) the degree
             if not institution:
-                caps = re.findall(r"\b([A-Z][A-Za-z&.'’\-]*(?:\s+[A-Z][A-Za-z&.'’\-]*)*)\b", ln)
-                for c in caps:
-                    if not degree or c.lower() not in degree.lower():
-                        if len(c.split()) >= 1 and len(c) <= 120:
-                            institution = c
-                            break
+                if degree:  # only try fallback when a degree was detected
+                    caps = re.findall(r"\b([A-Z][A-Za-z&.'’\-]*(?:\s+[A-Z][A-Za-z&.'’\-]*)*)\b", ln)
+                    for c in caps:
+                        # Avoid generic words
+                        if c.lower().startswith("completed"):
+                            continue
+                        if not degree or c.lower() not in degree.lower():
+                            if 2 <= len(c) <= 120:
+                                institution = c
+                                break
 
-            if degree or institution or year:
+            # Keep only entries that look like real education rows
+            if degree or institution:
                 entries.append(EducationEntry(degree=degree, institution=institution, year=year))
 
         return entries or None
