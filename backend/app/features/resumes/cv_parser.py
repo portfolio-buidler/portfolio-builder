@@ -22,8 +22,65 @@ PHONE_REGEX = (
 )
 
 SECTION_HEADERS = re.compile(
-    r"(?im)^\s*(SUMMARY|OBJECTIVE|ABOUT|EXPERIENCE|WORK EXPERIENCE|PROJECTS|EDUCATION|SKILLS)\b[:\-]?\s*$"
+    r"(?im)^\s*(SUMMARY|OBJECTIVE|ABOUT|EXPERIENCE|WORK EXPERIENCE|PROJECTS|EDUCATION|SKILLS|TECHNICAL SKILLS|TOOLS|TECHNOLOGIES|TECH STACK|STACK)\b[:\-]?\s*$"
 )
+
+# Headers that typically contain skills/tooling content
+SKILLS_HEADERS = {
+    "SKILLS",
+    "TECHNICAL SKILLS",
+    "TOOLS",
+    "TECHNOLOGIES",
+    "TECH STACK",
+    "STACK",
+}
+
+# Curated canonical skills with regex patterns for common variants/synonyms.
+# Order here does not affect the final output order; we preserve order by first appearance in text.
+CURATED_SKILL_PATTERNS: dict[str, str] = {
+    # Frontend
+    "React": r"\breact(?:\.?(?:js|jsx))?\b",
+    "TypeScript": r"\btypescript\b",
+    "JavaScript": r"\bjavascript\b|\bjs\b(?!on)",
+    "Tailwind": r"\btailwind(?:\s*css)?\b",
+    "CSS": r"\bcss\b",
+    "HTML": r"\bhtml(?:5)?\b",
+
+    # Backend / Platforms
+    "Node.js": r"\bnode(?:\.?(?:js))?\b",
+    "Python": r"\bpython\b",
+    "FastAPI": r"\bfast\s*api\b|\bfastapi\b",
+    "Django": r"\bdjango\b",
+    "Flask": r"\bflask\b",
+
+    # Mobile
+    "Flutter": r"\bflutter\b",
+    "Dart": r"\bdart\b",
+
+    # Databases
+    "MySQL": r"\bmy\s*sql\b|\bmysql\b",
+    "PostgreSQL": r"\bpostgre(?:sql)?\b|\bpostgres\b",
+    "MongoDB": r"\bmongo(?:db)?\b",
+    "SQLite": r"\bsqlite\b",
+
+    # Cloud / BaaS
+    "Firebase": r"\bfirebase\b",
+    "Supabase": r"\bsupabase\b",
+
+    # DevOps / Tools
+    "Git": r"\bgit\b",
+    "Docker": r"\bdocker\b",
+    "Kubernetes": r"\bkubernetes\b|\bk8s\b",
+
+    # Practices / Methods
+    "Agile": r"\bagile\b",
+    "Scrum": r"\bscrum\b",
+}
+
+# Pre-compile regex patterns (case-insensitive, unicode) for performance
+COMPILED_SKILL_PATTERNS: list[tuple[str, re.Pattern]] = [
+    (name, re.compile(pattern, flags=re.IGNORECASE)) for name, pattern in CURATED_SKILL_PATTERNS.items()
+]
 
 
 class CVParser:
@@ -82,6 +139,34 @@ class CVParser:
             return skills or None
         return None
 
+    def _extract_skills_curated(self, sections: dict[str, str], full_text: str) -> list[str] | None:
+        """Extract skills by matching curated patterns.
+
+        Preferred scope is any detected skills-related section; if none, fall back to the full text.
+        Returns canonical skill names ordered by first appearance.
+        """
+        # Build the text to scan: join all skills-like sections if present
+        blocks: list[str] = []
+        for hdr in SKILLS_HEADERS:
+            if hdr in sections and sections[hdr]:
+                blocks.append(sections[hdr])
+        scan_text = "\n".join(blocks) if blocks else full_text
+
+        matches: list[tuple[int, str]] = []  # (position, canonical)
+        seen: set[str] = set()
+
+        for canonical, pat in COMPILED_SKILL_PATTERNS:
+            m = pat.search(scan_text)
+            if m and canonical not in seen:
+                seen.add(canonical)
+                matches.append((m.start(), canonical))
+
+        if not matches:
+            return None
+
+        matches.sort(key=lambda t: t[0])
+        return [name for _, name in matches]
+
     # Main parsing logic
     def parse(self, raw_text: str) -> ResumeParsedJSON:
         t = self._clean_text(raw_text)
@@ -114,12 +199,8 @@ class CVParser:
         # Education
         education = sections.get("EDUCATION") or None
 
-        # Skills from section or inline fallback
-        skills = None
-        if "SKILLS" in sections and sections["SKILLS"]:
-            # split on separators or newlines
-            parts = re.split(r"[\n,\|\u00B7\u2022]", sections["SKILLS"])  # bullets/separators
-            skills = [p.strip() for p in parts if p.strip()]
+        # Skills: curated keyword match with section preference, fallback to inline parsing
+        skills = self._extract_skills_curated(sections, t)
         if not skills:
             skills = self._parse_skills_inline(t)
 
