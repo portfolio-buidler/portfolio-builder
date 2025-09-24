@@ -10,7 +10,7 @@ from app.features.adapters.pdf.reader import read_pdf_text
 from app.features.adapters.docx.reader import read_docx_text
 from app.features.parsing.parser_core import ParserCore
 from .jsonb_models import ResumeParsedJSON
-from .security import verify_magic_bytes, SUPPORTED_MIME
+from .security import verify_magic_bytes, SUPPORTED_MIME, verify_extension
 
 @dataclass
 class UploadResult:
@@ -24,6 +24,9 @@ class ResumeService:
         self.parser = ParserCore()
 
     async def handle_upload(self, file: UploadFile) -> UploadResult:
+        # Extension check (explicitly allow only .pdf/.docx)
+        verify_extension(file.filename or "")
+
         if (ct := (file.content_type or "")) not in SUPPORTED_MIME:
             raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
                                 detail=f"Unsupported content type: {file.content_type}")

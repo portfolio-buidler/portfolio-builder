@@ -13,6 +13,7 @@ dependencies = [
   "python-docx",
   "docx2txt",
   "docx2python",
+  "defusedxml>=0.7.1",
   # test deps
   "pytest",
   "httpx",

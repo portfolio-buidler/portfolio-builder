@@ -1,6 +1,34 @@
 from pathlib import Path
 from zipfile import ZipFile
-from xml.etree import ElementTree as ET
+from typing import Iterable
+
+# Prefer defusedxml for safety, but fall back to stdlib if not installed
+try:  # pragma: no cover - simple import guard
+    from defusedxml.ElementTree import fromstring as safe_fromstring  # type: ignore
+except Exception:  # defusedxml not installed
+    from xml.etree.ElementTree import fromstring as safe_fromstring  # type: ignore
+
+DOCX_WORD_NS = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
+
+def _iter_docx_xml_text(zf: ZipFile, names: Iterable[str], max_nodes: int = 200_000) -> list[str]:
+    lines: list[str] = []
+    nodes_seen = 0
+    for name in names:
+        try:
+            data = zf.read(name)
+            root = safe_fromstring(data)  # safe parser when available
+            for p in root.findall(".//w:p", DOCX_WORD_NS):
+                if nodes_seen > max_nodes:
+                    break
+                texts = [t.text for t in p.findall(".//w:t", DOCX_WORD_NS) if t.text]
+                if texts:
+                    ln = "".join(texts).strip()
+                    if ln:
+                        lines.append(ln)
+                nodes_seen += 1
+        except Exception:
+            continue
+    return lines
 
 def read_docx_text(path: Path) -> str:
     candidates: list[str] = []
@@ -57,26 +85,16 @@ def read_docx_text(path: Path) -> str:
                 candidates.append(t)
     except Exception:
         pass
-    # raw XML sweep
+    # raw XML sweep (safe)
     try:
-        ns = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
-        lines: list[str] = []
         with ZipFile(str(path), "r") as zf:
-            names = [n for n in zf.namelist() if n.startswith("word/") and n.endswith(".xml") and "/_rels/" not in n]
-            for name in names:
-                try:
-                    data = zf.read(name)
-                    root = ET.fromstring(data)
-                    for p in root.findall(".//w:p", ns):
-                        texts = [t.text for t in p.findall(".//w:t", ns) if t.text]
-                        if texts:
-                            ln = "".join(texts).strip()
-                            if ln:
-                                lines.append(ln)
-                except Exception:
-                    continue
-        if lines:
-            candidates.append("\n".join(lines).strip())
+            names = [
+                n for n in zf.namelist()
+                if n.startswith("word/") and n.endswith(".xml") and "/_rels/" not in n
+            ]
+            lines = _iter_docx_xml_text(zf, names)
+            if lines:
+                candidates.append("\n".join(lines).strip())
     except Exception:
         pass
     if not candidates:

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from pathlib import Path
 from fastapi import HTTPException, status
 from typing import Final
 
@@ -10,6 +11,17 @@ SUPPORTED_MIME: Final[set[str]] = {
     "application/pdf",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 }
+
+ALLOWED_EXTENSIONS: Final[set[str]] = {".pdf", ".docx"}
+
+def verify_extension(filename: str) -> None:
+    """Allow only .pdf and .docx filenames (case-insensitive)."""
+    suffix = Path(filename or "").suffix.lower()
+    if suffix not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=f"Unsupported file extension: {suffix or '(none)'}",
+        )
 
 def verify_magic_bytes(header: bytes, content_type: str) -> None:
     """
