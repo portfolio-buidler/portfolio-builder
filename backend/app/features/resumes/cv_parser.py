@@ -140,18 +140,62 @@ class CVParser:
         return None
 
     def _extract_skills_curated(self, sections: dict[str, str], full_text: str) -> list[str] | None:
-        """Extract skills by matching curated patterns.
+        """Extract skills by matching curated patterns with separator-aware tokenization.
 
-        Preferred scope is any detected skills-related section; if none, fall back to the full text.
-        Returns canonical skill names ordered by first appearance.
+        - Prefer scanning skills-related sections; else fall back to the entire text.
+        - If scanning sections: split by inferred separators (commas, pipes, bullets, slashes, semicolons, newlines).
+          Treat a token without inner separators as a single item: if it contains multiple curated matches
+          (e.g., 'Agile Scrum'), return the token itself as one combined label.
+        - If falling back to full text (no skills sections), do simple first-appearance matching of curated terms.
         """
         # Build the text to scan: join all skills-like sections if present
         blocks: list[str] = []
         for hdr in SKILLS_HEADERS:
             if hdr in sections and sections[hdr]:
                 blocks.append(sections[hdr])
-        scan_text = "\n".join(blocks) if blocks else full_text
 
+        if blocks:
+            scan_text = "\n".join(blocks)
+
+            # Split sections by common separators, but DO NOT split on plain spaces.
+            # This lets multi-word tokens like 'Agile Scrum' stay intact.
+            sep_regex = re.compile(r"\s*(?:[,\|\u00B7\u2022/;]|\n)+\s*")
+            raw_tokens = [tok.strip() for tok in sep_regex.split(scan_text) if tok.strip()]
+
+            results: list[str] = []
+            seen: set[str] = set()
+
+            for tok in raw_tokens:
+                # Within this token, find curated matches in order of appearance
+                inner_matches: list[tuple[int, str]] = []
+                for canonical, pat in COMPILED_SKILL_PATTERNS:
+                    m = pat.search(tok)
+                    if m:
+                        inner_matches.append((m.start(), canonical))
+
+                if not inner_matches:
+                    # Unrecognized token; skip silently (we only output curated skills/composites)
+                    continue
+
+                inner_matches.sort(key=lambda t: t[0])
+
+                if len(inner_matches) == 1:
+                    # Single match -> output canonical name
+                    label = inner_matches[0][1]
+                else:
+                    # Multiple curated matches but no separators inside token -> composite label.
+                    # Return the token text itself to preserve how the resume author grouped them
+                    # (e.g., 'Agile Scrum'). Normalize extra spaces.
+                    label = re.sub(r"\s+", " ", tok).strip()
+
+                if label not in seen:
+                    seen.add(label)
+                    results.append(label)
+
+            return results or None
+
+        # Fallback: no skills sections found -> simple first-appearance across full text
+        scan_text = full_text
         matches: list[tuple[int, str]] = []  # (position, canonical)
         seen: set[str] = set()
 
