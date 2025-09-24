@@ -11,6 +11,8 @@ dependencies = [
   "pydantic>=2.0",
   "pypdf",
   "python-docx",
+  "docx2txt",
+  "docx2python",
   # test deps
   "pytest",
   "httpx",

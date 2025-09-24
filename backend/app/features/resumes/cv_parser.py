@@ -1,8 +1,9 @@
 import re
-from .jsonb_models import ResumeParsedJSON
+from .jsonb_models import ResumeParsedJSON, EducationEntry
 
 
-EMAIL_REGEX = r"[a-zA-Z0-9.\-+_]+@[a-zA-Z0-9.\-+_]+\.[a-zA-Z]+"
+# Email: allow multi-part TLDs and prevent trailing letters (e.g., '...@gmail.comLinkedIn')
+EMAIL_REGEX = r"[a-zA-Z0-9.\-+_]+@[a-zA-Z0-9.\-+_]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})*(?![A-Za-z])"
 # General phone numbers:
 # - Optional +country code (1-3 digits)
 # - Optional trunk '0' after country code
@@ -87,7 +88,22 @@ class CVParser:
     # Text cleaning and normalization
     @staticmethod
     def _clean_text(text: str) -> str:
+        # Normalize newlines and common Unicode punctuation:
+        # - Convert NBSP to regular space
+        # - Convert various Unicode dashes to ASCII hyphen so phone regex works
         text = text.replace("\r\n", "\n").replace("\r", "\n")
+        text = text.translate(str.maketrans({
+            "\u00A0": " ",  # NBSP
+            "\u2010": "-",  # hyphen
+            "\u2011": "-",  # non-breaking hyphen
+            "\u2012": "-",  # figure dash
+            "\u2013": "-",  # en dash
+            "\u2014": "-",  # em dash
+            "\u2015": "-",  # horizontal bar
+            "\u2212": "-",  # minus sign
+        }))
+        # Remove zero-width characters and soft hyphens
+        text = text.replace("\u200B", "").replace("\u200C", "").replace("\u200D", "").replace("\u00AD", "")
         text = re.sub(r"[ \t]+", " ", text)
         text = re.sub(r"\n{3,}", "\n\n", text)
         return text.strip()
@@ -96,6 +112,20 @@ class CVParser:
     def _first_match(pattern: str, text: str) -> str | None:
         m = re.search(pattern, text)
         return m.group(0) if m else None
+
+    @staticmethod
+    def _name_from_email(email: str | None) -> str | None:
+        if not email:
+            return None
+        local = email.split("@", 1)[0]
+        # Split by common separators and remove digits
+        parts = re.split(r"[._\-+]+", local)
+        parts = [re.sub(r"\d+", "", p).strip() for p in parts]
+        parts = [p for p in parts if p]
+        if len(parts) >= 1:
+            # Capitalize each token
+            return " ".join(w.capitalize() for w in parts[:4])  # cap to a few tokens
+        return None
 
     @staticmethod
     def _split_sections(text: str) -> dict[str, str]:
@@ -119,8 +149,8 @@ class CVParser:
 
     def _guess_name(self, text: str) -> str | None:
         """Heuristic: first non-empty line in preamble that doesn't look like a title/link/contact."""
-        pre = text.split("\n", 1)[0:50]  # first chunk
-        for ln in pre:
+        lines = text.split("\n")
+        for ln in lines[:50]:  # scan first ~50 lines
             s = ln.strip()
             if not s:
                 continue
@@ -129,6 +159,58 @@ class CVParser:
             if len(s.split()) >= 2 and 2 <= len(s) <= 60:
                 return s
         return None
+
+    # -------- Education parsing ---------
+    _YEAR_PAT = re.compile(r"\b(19\d{2}|20\d{2})(?:\s*[–\-]\s*(19\d{2}|20\d{2}))?\b")
+    _DEGREE_PAT = re.compile(
+        r"\b((?:B\.?(?:Sc|A)|B(?:Sc|A)|Bachelor(?:'s)?|M(?:\.?(?:Sc|A)|aster(?:'s)?)|PhD|Doctorate|Diploma|Associate)(?:[^\n\|,.;]{0,80})?)",
+        re.IGNORECASE,
+    )
+    _INSTITUTION_HINT_PAT = re.compile(r"\b(University|College|Institute|Polytechnic|Academy|School)\b", re.IGNORECASE)
+
+    def _split_lines(self, text: str) -> list[str]:
+        return [ln.strip() for ln in text.split("\n") if ln.strip()]
+
+    def _extract_education_entries(self, sections: dict[str, str]) -> list[EducationEntry] | None:
+        edu = sections.get("EDUCATION")
+        if not edu:
+            return None
+
+        lines = self._split_lines(edu)
+        entries: list[EducationEntry] = []
+        for ln in lines:
+            year_match = self._YEAR_PAT.search(ln)
+            year = None
+            if year_match:
+                year = year_match.group(0)
+
+            degree = None
+            deg_m = self._DEGREE_PAT.search(ln)
+            if deg_m:
+                degree = deg_m.group(1).strip()
+
+            institution = None
+            # Heuristic: institution contains hint words or capitalized proper nouns
+            cand_parts = re.split(r"[,\-\u2013;]|\s\|\s", ln)
+            cand_parts = [p.strip() for p in cand_parts if p.strip()]
+            for part in cand_parts:
+                if self._INSTITUTION_HINT_PAT.search(part):
+                    institution = part
+                    break
+
+            # Fallback: capitalized chunk that isn't (part of) the degree
+            if not institution:
+                caps = re.findall(r"\b([A-Z][A-Za-z&.'’\-]*(?:\s+[A-Z][A-Za-z&.'’\-]*)*)\b", ln)
+                for c in caps:
+                    if not degree or c.lower() not in degree.lower():
+                        if len(c.split()) >= 1 and len(c) <= 120:
+                            institution = c
+                            break
+
+            if degree or institution or year:
+                entries.append(EducationEntry(degree=degree, institution=institution, year=year))
+
+        return entries or None
 
     def _parse_skills_inline(self, text: str) -> list[str] | None:
         # Look for 'Skills: a, b, c' anywhere
@@ -223,8 +305,10 @@ class CVParser:
         sections = self._split_sections(t)
         preamble = sections.get("__preamble__", "")
 
-        # Name guess from preamble
+        # Name guess from preamble; fallback to name derived from email if preamble is empty
         name = self._guess_name(preamble) if preamble else None
+        if not name:
+            name = self._name_from_email(email)
 
         # About/Summary
         about = None
@@ -240,8 +324,9 @@ class CVParser:
                 exp_blocks.append(sections[key])
         experience = "\n\n".join(exp_blocks) or None
 
-        # Education
+        # Education - free text and structured entries
         education = sections.get("EDUCATION") or None
+        education_entries = self._extract_education_entries(sections)
 
         # Skills: curated keyword match with section preference, fallback to inline parsing
         skills = self._extract_skills_curated(sections, t)
@@ -255,5 +340,6 @@ class CVParser:
             about=about,
             experience=experience,
             education=education,
+            education_entries=education_entries,
             skills=skills,
         )
