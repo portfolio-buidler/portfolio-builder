@@ -1,7 +1,7 @@
 import React from 'react'
 import type { UploadCVViewProps } from './UploadCV.types'
 import './UploadCV.styles.scss'
-import UploadArea from './UploadArea'
+import UploadArea from './UplaodArea/UploadArea'
 
 export const UploadCVView: React.FC<UploadCVViewProps> = ({
   backgroundUrl,

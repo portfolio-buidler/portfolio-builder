@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { UploadAreaProps } from './UploadArea.types'
-import { validateFile, ALLOWED_MIME_TYPES } from '../../utils/fileValidation'
+import { validateFile, ALLOWED_MIME_TYPES } from '../../../utils/fileValidation'
 import { toast } from 'react-toastify'
 import { UploadAreaView } from './UploadArea.view'
 

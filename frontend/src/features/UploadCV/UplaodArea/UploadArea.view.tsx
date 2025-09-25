@@ -1,5 +1,5 @@
 import React from 'react'
-import type { UploadAreaViewProps } from './UploadArea.types'
+import type { UploadAreaViewProps } from './UplaodArea/UploadArea.types'
 import './UploadArea.styles.scss'
 
 export const UploadAreaView: React.FC<UploadAreaViewProps> = ({

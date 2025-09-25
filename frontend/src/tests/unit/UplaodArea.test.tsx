@@ -1,7 +1,7 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import UploadArea from '../../features/UploadCV/UploadArea'
+import UploadArea from '../../features/UploadCV/UplaodArea/UploadArea'
 
 // Mock react-toastify toast
 vi.mock('react-toastify', () => ({
