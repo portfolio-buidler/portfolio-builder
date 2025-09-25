@@ -6,10 +6,11 @@ from pathlib import Path
 from fastapi import UploadFile, HTTPException, status
 from app.core.config import MAX_UPLOAD_SIZE, UPLOAD_DIR
 from app.utils.sanitize import safe_filename
-from .text_extractors import extract_text_from_pdf, extract_text_from_docx
-from .cv_parser import CVParser
+from app.features.adapters.pdf.reader import read_pdf_text
+from app.features.adapters.docx.reader import read_docx_text
+from app.features.parsing.parser_core import ParserCore
 from .jsonb_models import ResumeParsedJSON
-from .security import verify_magic_bytes, SUPPORTED_MIME
+from .security import verify_magic_bytes, SUPPORTED_MIME, verify_extension
 
 @dataclass
 class UploadResult:
@@ -20,9 +21,12 @@ class UploadResult:
 
 class ResumeService:
     def __init__(self) -> None:
-        self.parser = CVParser()
+        self.parser = ParserCore()
 
     async def handle_upload(self, file: UploadFile) -> UploadResult:
+        # Extension check (explicitly allow only .pdf/.docx)
+        verify_extension(file.filename or "")
+
         if (ct := (file.content_type or "")) not in SUPPORTED_MIME:
             raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
                                 detail=f"Unsupported content type: {file.content_type}")
@@ -79,6 +83,6 @@ class ResumeService:
 
     def _extract_text(self, path: Path, content_type: str) -> str:
         if content_type == "application/pdf":
-            return extract_text_from_pdf(path)
+            return read_pdf_text(path)
         # else DOCX
-        return extract_text_from_docx(path)
+        return read_docx_text(path)
