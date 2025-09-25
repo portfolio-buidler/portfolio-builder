@@ -12,3 +12,12 @@ __pycache__/
 # frontend
 frontend/node_modules/
 frontend/dist/
+
+# local-only compose/docker overrides and frontend env
+# (these are developer-specific and should not be committed)
+docker-compose.local.yml
+backend/Dockerfile.nomigrate.local
+backend/docker-compose.frontend.local.yml
+database/Dockerfile.db.local
+frontend/Dockerfile.bookworm.local
+frontend/.env.development

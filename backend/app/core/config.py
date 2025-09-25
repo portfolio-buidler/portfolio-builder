@@ -8,9 +8,10 @@ API_PREFIX: str = os.getenv("API_PREFIX", "/api")
 ALLOWED_ORIGINS: list[str] = [
     o.strip() for o in os.getenv(
         "ALLOWED_ORIGINS",
-        "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000"
-        ).split(",") if o.strip()
+        "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000,http://localhost:9000"
+    ).split(",") if o.strip()
 ]
+
 
 MAX_UPLOAD_SIZE: int = int(os.getenv("MAX_UPLOAD_SIZE", 5 * 1024 * 1024))  # 5 MB
 
