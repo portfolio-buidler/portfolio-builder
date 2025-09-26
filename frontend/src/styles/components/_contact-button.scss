@@ -1,0 +1,75 @@
+/* components/_contact-button.scss
+   Fixed Contact Us button with responsive safe-area spacing and inner shadows.
+*/
+
+@use '../mixins/mq' as mq;
+
+// Local SCSS sizing variables (rem-based to avoid px hardcoding)
+$contact-width: 7.125rem; // ~114px
+$contact-height: 2.75rem; // ~44px
+$contact-min-width: 4.625rem; // ~74px
+$contact-padding-y: 1.4rem;
+$contact-padding-x: 1.1rem;
+$contact-radius: 0.9375rem; // ~15px
+
+// Color: #9B4D4E at ~20% opacity
+$contact-bg: rgba(155, 77, 78, 0.2);
+
+.contact-us-button {
+  position: fixed;
+  left: max(1.25rem, env(safe-area-inset-left));
+  bottom: calc(max(1.25rem, env(safe-area-inset-bottom)));
+  z-index: 1000; // above most content; tokens/zindex also available if needed
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  min-width: $contact-min-width;
+  width: $contact-width;
+  height: $contact-height;
+  padding: $contact-padding-y $contact-padding-x;
+  border-radius: $contact-radius;
+  border: none;
+  background: var(--glass-bg-accent);
+  color: var(--color-fg);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-md);
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+
+  /* Inner shadows */
+  box-shadow: var(--shadow-glass-inset);
+
+  /* Focus styles for accessibility */
+  &:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 3px rgba(155, 77, 78, 0.25),
+      var(--shadow-glass-inset);
+  }
+
+  /* Hover/active subtle feedback while keeping the transparent look */
+  &:hover {
+    background: rgba(155, 77, 78, 0.28);
+  }
+  &:active {
+    background: rgba(155, 77, 78, 0.34);
+  }
+
+  /* Responsiveness: scale slightly on tablet and up */
+  @include mq.mq('md') {
+    width: calc(#{$contact-width} + 0.5rem);
+    height: calc(#{$contact-height} + 0.125rem);
+    font-size: var(--font-size-lg);
+  }
+
+  /* Ensure it doesn't overlap bottom navigation on small screens */
+  @media (max-width: 480px) {
+    left: max(1rem, env(safe-area-inset-left));
+    bottom: calc(max(1.5rem, env(safe-area-inset-bottom)));
+  }
+}

@@ -2,6 +2,8 @@
    BEM styles for the UploadCV page. No Tailwind utilities. Uses global tokens/mixins.
 */
 
+@use '../../styles/components/contact-button';
+
 .upload-cv {
   /* Background image via CSS variable */
   /* Fallback to 100vh, then prefer 100svh for mobile browser UI correctness */

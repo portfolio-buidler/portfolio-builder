@@ -56,6 +56,14 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
           </div>
         </div>
       </div>
+      {/* Fixed Contact Us button at bottom-left, remains visible on scroll */}
+      <button
+        type="button"
+        className="contact-us-button"
+        aria-label="Contact Us"
+      >
+        Contact Us
+      </button>
     </div>
   )
 }

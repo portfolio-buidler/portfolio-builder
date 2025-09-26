@@ -12,8 +12,9 @@
   height: 20.75rem;    /* matches original */
   border-radius: var(--radius-2xl);
   backdrop-filter: blur(var(--blur-md, 12px));
-  background-color: var(--overlay-20);
+  background-color: var(--glass-bg-accent);
   border: 1px solid var(--border-overlay-30);
+  box-shadow: var(--shadow-glass-inset);
 
   display: flex;
   flex-direction: column;
@@ -25,13 +26,13 @@
 
   /* Hover visual */
   &:hover {
-    background-color: var(--overlay-25);
+    background-color: var(--glass-bg-accent-hover);
   }
 
   /* Dragover state via data attribute */
   &[data-dragover="true"] {
     transform: scale(1.05);
-    background-color: var(--overlay-30);
+    background-color: var(--glass-bg-accent-active);
   }
 
   /* If the block becomes focusable (e.g., via tabindex), show accessible outline */
