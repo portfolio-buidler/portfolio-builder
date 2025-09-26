@@ -35,9 +35,11 @@ $contact-bg: rgba(155, 77, 78, 0.2);
   background: var(--glass-bg-accent);
   color: var(--color-fg);
   font-family: var(--font-family-base);
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-sm); /* 14px */
+  font-weight: var(--font-weight-medium);
   line-height: 1;
   text-align: center;
+  text-transform: capitalize;
   white-space: nowrap;
   cursor: pointer;
 
@@ -64,7 +66,7 @@ $contact-bg: rgba(155, 77, 78, 0.2);
   @include mq.mq('md') {
     width: calc(#{$contact-width} + 0.5rem);
     height: calc(#{$contact-height} + 0.125rem);
-    font-size: var(--font-size-lg);
+    /* Keep font-size at 14px per spec */
   }
 
   /* Ensure it doesn't overlap bottom navigation on small screens */

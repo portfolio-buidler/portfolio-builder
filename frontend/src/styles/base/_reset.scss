@@ -1,3 +1,22 @@
 /* base/_reset.scss
    Intentionally empty placeholder in PR1 to avoid visual changes.
    A modern reset/normalize can be added in a later PR if needed. */
+
+/* Minimal reset to remove default body margin and enable edge-to-edge backgrounds */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: var(--color-bg);
+  color: var(--color-fg);
+}
+
+/* Improve image defaults */
+img,
+svg,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}

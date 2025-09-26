@@ -3,6 +3,7 @@
 */
 
 @use '../../styles/components/contact-button';
+@use '../../styles/mixins/mq';
 
 .upload-cv {
   /* Background image via CSS variable */
@@ -11,8 +12,15 @@
   min-height: 100svh;
   background-image: var(--uploadcv-bg);
   background-size: cover;
-  background-position: center;
+  background-position: center center;
   background-repeat: no-repeat;
+  /* Default scroll on mobile to avoid iOS rendering issues */
+  background-attachment: scroll;
+
+  /* Keep the image fixed on desktop while preserving cover and position */
+  @include mq.mq('md') {
+    background-attachment: fixed;
+  }
 
   display: flex;
   flex-direction: column;
