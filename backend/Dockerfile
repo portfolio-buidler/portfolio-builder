@@ -7,11 +7,11 @@ ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PIP_NO_CACHE_DIR=1
 # 3) Workdir
 WORKDIR /app
 
-# 4) OS packages:
+# 4) os packages:
 #    - ca-certificates: up-to-date trust store for HTTPS (pip)
-#    Keep this minimal to avoid flaky mirror issues and long installs in CI
-RUN apt-get -o Acquire::Retries=5 update \
- && apt-get install -o Acquire::Retries=5 -y --no-install-recommends ca-certificates \
+#    - build-essential: only if wheels are missing and a package needs compilation
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ca-certificates build-essential \
  && update-ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
@@ -36,7 +36,8 @@ COPY alembic.ini ./
 COPY alembic ./alembic
 COPY ./app ./app
 COPY docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY docker/migrate.sh ./docker/migrate.sh
+RUN chmod +x /entrypoint.sh ./docker/migrate.sh
 
 # 8) Run as non-root
 RUN useradd -m appuser && chown -R appuser /app
