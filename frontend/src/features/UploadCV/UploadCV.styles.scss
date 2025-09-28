@@ -153,6 +153,48 @@
     text-align: center;
   }
 
+  /* Mobile layout adjustments */
+  @media (max-width: 480px) {
+    &__container {
+      padding: 1rem;
+    }
+
+    &__title {
+      text-align: left;
+      margin-top: 1rem;
+      margin-left: 0; /* override any token offset */
+    }
+
+    &__body {
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 1.25rem; /* tighter spacing on mobile */
+      max-width: 100%;
+      margin-top: 1.25rem;
+      margin-left: 0; /* remove desktop offset */
+    }
+
+    &__manual-info {
+      display: block; /* show on mobile */
+      margin-top: 0.5rem;
+      max-width: 22.5rem; /* visually similar to card width */
+    }
+
+    &__manual-info-item {
+      justify-content: center;
+      margin-left: 0; /* avoid negative offset on small screens */
+    }
+
+    &__cta {
+      width: 100%;
+      max-width: 22.5rem; /* match card width visually */
+      height: 2.75rem; /* ensure >=44px */
+      margin-top: 0.75rem;
+      margin-bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+  }
+
   /* Manual info section shown when user wants to proceed without a CV */
   &__manual-info {
     /* Place directly under the upload body with a very tiny gap */
