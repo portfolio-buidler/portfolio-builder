@@ -65,7 +65,7 @@
     gap: 8rem;
 
     /* Mirror previous layout constraints */
-    max-width: 57.5rem; /* reverted to previous */
+    max-width: 58.3rem; /* reverted to previous */
     margin-top: 8rem;
     margin-left: 26.6rem; /* per request */
   }
@@ -73,7 +73,7 @@
   &__cta {
     /* Dimensions from the previous Tailwind inline utilities */
     width: 10.5rem;
-    height: 3.375rem;
+    height:2.775rem;
     border-radius: 1.25rem;
     padding: 1.375rem 1.125rem;
 
@@ -82,6 +82,7 @@
     justify-content: space-between;
 
     font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-normal);
     transition: background-color 200ms ease, color 200ms ease, opacity 200ms ease;
 
     /* Enabled state visuals */
@@ -91,8 +92,7 @@
 
     /* Disabled visuals driven by aria-disabled attribute */
     &[aria-disabled='true'] {
-      background: var(--gray-300);
-      color: var(--gray-500);
+      background: var(--gray-500);
       cursor: not-allowed;
     }
 
@@ -151,5 +151,50 @@
     width: 1.875rem;
     height: 2rem;
     text-align: center;
+  }
+
+  /* Manual info section shown when user wants to proceed without a CV */
+  &__manual-info {
+    /* Place directly under the upload body with a very tiny gap */
+    margin-top: 0.25rem; /* ~4px */
+
+    /* Constrain to design width but allow responsiveness */
+    max-width: 26.875rem; /* 430px */
+    width: 100%;
+
+    /* Center within container */
+    margin-left: auto;
+    margin-right: auto;
+    margin-inline: auto;
+    text-align: center;
+
+    /* Temporarily hidden per request */
+    display: none;
+  }
+  &__manual-info-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem; /* very small gap between icon and text */
+    margin-top: 0.625rem;
+   
+
+    /* Typography per spec */
+    font-family: var(--font-family-base); /* Poppins */
+    font-weight: var(--font-weight-medium); /* 500 */
+    font-size: 1.25rem; /* 20px */
+    line-height: 1; /* 100% */
+    letter-spacing: 0.2px;
+    text-transform: capitalize;
+
+    /* Font color provided by design */
+    color: rgba(53, 64, 82, 0.8); /* #354052CC */
+    white-space: nowrap;
+  }
+
+  &__manual-info-icon {
+    font-size: 0.875rem; /* icon size adjusted with text */
+    line-height: 1;
+    display: inline-block;
   }
 }

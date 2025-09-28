@@ -55,6 +55,13 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
             {isUploading ? 'Upload in progress' : 'Idle'}
           </div>
         </div>
+
+        {/* Manual flow hint paragraphs (separate from Upload Area block) */}
+        <div className="upload-cv__manual-info" role="group" aria-label="Manual portfolio creation info">
+          <p className="upload-cv__manual-info-item">
+            I don't have CV, I want to do it manually 🔮.
+          </p>
+        </div>
       </div>
       {/* Fixed Contact Us button at bottom-left, remains visible on scroll */}
       <button
