@@ -6,20 +6,21 @@
 @use '../../styles/mixins/mq';
 
 .upload-cv {
-  /* Background image via CSS variable */
   /* Fallback to 100vh, then prefer 100svh for mobile browser UI correctness */
   min-height: 100vh;
   min-height: 100svh;
-  background-image: var(--uploadcv-bg);
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  /* Default scroll on mobile to avoid iOS rendering issues */
-  background-attachment: scroll;
+  position: relative;
 
-  /* Keep the image fixed on desktop while preserving cover and position */
-  @include mq.mq('md') {
-    background-attachment: fixed;
+  /* Dedicated fixed background layer to avoid white gaps and attachment issues */
+  &::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: var(--uploadcv-bg);
+    background-size: cover; /* ensures no white gaps, allows some cropping */
+    background-position: center center;
+    background-repeat: no-repeat;
+    z-index: 0;
   }
 
   display: flex;
@@ -31,6 +32,8 @@
     max-width: 92rem; /* generous max width to center content */
     margin-inline: auto;
     padding: 2rem;
+    position: relative;
+    z-index: 1; /* keep content above background */
   }
 
   &__title {
@@ -38,36 +41,38 @@
     font-family: var(--font-family-base);
     color: var(--title-color);
     text-transform: capitalize;
-    text-align: center;
     letter-spacing: var(--tracking-title-xl);
     line-height: var(--line-height-tight);
-    font-weight: var(--font-weight-normal);
+    font-weight: var(--font-weight-bold);
 
     /* Size aligns to prior config: 7xl */
-    font-size: var(--font-size-7xl);
+    font-size: var(--font-size-3xl);
 
-    /* Spacing derived from tokens; adjustable as needed */
-    margin-top: var(--title-top);
-    margin-left: var(--title-left);
-
-    .upload-cv__title-highlight {
-      font-weight: 900;
-      /* If a variable font is available (e.g., Poppins VF), push weight beyond 900 */
-      font-variation-settings: 'wght' 1000;
-    }
+    /* Pin title to the top-left corner of the screen */
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    margin: 0;
+    z-index: 2;
   }
 
   &__body {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    gap: 8rem;
+    /* Center the upload area in the viewport */
+    position: fixed;
+    top: 45.7%;
+    left: 49.2%;
+    transform: translate(-50%, -50%);
 
     /* Mirror previous layout constraints */
-    max-width: 58.3rem; /* reverted to previous */
-    margin-top: 8rem;
-    margin-left: 26.6rem; /* per request */
+    width: calc(100vw - 20px); /* keep ~10px gutters on each side */
+    max-width: 58.3rem; /* desktop cap */
+    box-sizing: border-box;
+    margin: 0 auto;
+    z-index: 1; /* above background */
+    
   }
 
   &__cta {
@@ -161,18 +166,21 @@
 
     &__title {
       text-align: left;
-      margin-top: 1rem;
-      margin-left: 0; /* override any token offset */
+      /* Already fixed to top-left; keep size responsive on small screens */
+      margin: 0;
+      font-size: clamp(2rem, 11.1vw, 3rem);
+      line-height: 1.05;
+      letter-spacing: 0.01em;
+      white-space: nowrap; /* force single line */
     }
 
     &__body {
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
+      justify-content: center;
       gap: 1.25rem; /* tighter spacing on mobile */
-      max-width: 100%;
-      margin-top: 1.25rem;
-      margin-left: 0; /* remove desktop offset */
+      max-width: 58.3rem; /* keep same cap; width rule above handles gutters */
+      /* Stays centered via fixed + transform */
     }
 
     &__manual-info {

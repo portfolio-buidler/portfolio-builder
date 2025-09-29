@@ -27,7 +27,7 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
     >
       <div className="upload-cv__container">
         <h1 className="upload-cv__title">
-          Portfolio <span className="upload-cv__title-highlight">Builder</span>
+          Portify.
         </h1>
 
         <div className="upload-cv__body">
@@ -47,7 +47,7 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
               <span className="upload-cv__cta-icon" aria-hidden>
                 →
               </span>
-            )}
+            )};
           </button>
 
           {/* Screen reader status announcement */}
