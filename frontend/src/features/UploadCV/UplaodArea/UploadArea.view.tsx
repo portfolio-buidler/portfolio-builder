@@ -27,7 +27,9 @@ export const UploadAreaView: React.FC<UploadAreaViewProps> = ({
           📜
         </span>
         <div className="upload-area__text">
-          <p className="upload-area__headline">Upload Or Drag Your CV</p>
+          <p className="upload-area__headline">
+            Drop & Drag or <span className="upload-area__link">Choose File</span> To Upload
+          </p>
           <p className="upload-area__subline">Accept PDF or DOCX up to 5MB</p>
         </div>
       </div>

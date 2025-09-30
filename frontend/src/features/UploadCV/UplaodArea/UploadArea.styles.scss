@@ -76,6 +76,7 @@
     text-align: center;
     text-transform: capitalize;
     margin: 0;
+    white-space: nowrap; /* keep in one line */
   }
 
   &__subline {
@@ -89,4 +90,30 @@
   }
 
   /* Removed empty &__input ruleset to satisfy linter; input uses global .sr-only */
+}
+
+/* Inline link-style button for "Choose File" */
+.upload-area__link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font: inherit;
+  /* Use blue like a regular link */
+  color: #2563eb; /* blue-600 */
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.upload-area__link:hover {
+  color: #1d4ed8; /* blue-700 */
+}
+
+.upload-area__link:active {
+  color: #1e40af; /* blue-800 */
+}
+
+.upload-area__link:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.35);
+  border-radius: 4px;
 }

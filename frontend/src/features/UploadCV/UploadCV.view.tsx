@@ -31,6 +31,7 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
         </h1>
 
         <div className="upload-cv__body">
+          <h2 className="upload-cv__upload-title">Upload your CV</h2>
           <UploadArea onFileSelect={onFileSelect} onDropFile={onDropFile} />
 
           <button
@@ -42,13 +43,14 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
             aria-busy={isUploading || undefined}
           >
             {isUploading && <span className="upload-cv__cta-spinner" aria-hidden="true" />}
-            <span className="upload-cv__cta-label">{isUploading ? 'Uploading…' : "Let's Do It!"}</span>
+            <span className="upload-cv__cta-label">{isUploading ? 'Uploading…' : "Next"}</span>
             {!isUploading && (
-              <span className="upload-cv__cta-icon" aria-hidden>
-                →
+              <span className="upload-cv__cta-icon" aria-hidden="true">
+                ›
               </span>
-            )};
+            )}
           </button>
+        </div>
 
           {/* Screen reader status announcement */}
           <div className="sr-only" aria-live="polite" aria-atomic="true">
@@ -56,21 +58,7 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
           </div>
         </div>
 
-        {/* Manual flow hint paragraphs (separate from Upload Area block) */}
-        <div className="upload-cv__manual-info" role="group" aria-label="Manual portfolio creation info">
-          <p className="upload-cv__manual-info-item">
-            I don't have CV, I want to do it manually 🔮.
-          </p>
-        </div>
-      </div>
-      {/* Fixed Contact Us button at bottom-left, remains visible on scroll */}
-      <button
-        type="button"
-        className="contact-us-button"
-        aria-label="Contact Us"
-      >
-        Contact Us
-      </button>
+
     </div>
   )
 }
