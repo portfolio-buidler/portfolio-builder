@@ -22,11 +22,18 @@
   justify-content: center;
 
   cursor: pointer;
-  transition: transform 300ms ease, background-color 300ms ease;
+  transition: transform 300ms ease, background-color 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
 
   /* Hover visual */
   &:hover {
-    background-color: var(--glass-bg-accent-hover);
+    /* Blue-tinted glass while keeping blur look */
+    background-color: rgba(37, 99, 235, 0.18); /* blue-600 @ ~18% */
+    border-color: rgba(37, 99, 235, 0.35);
+    /* Emphasize the frame with a blue glow and subtle inset edge */
+    box-shadow:
+      0 8px 24px rgba(37, 99, 235, 0.22),   /* outer blue glow */
+      0 0 0 1px rgba(37, 99, 235, 0.45) inset, /* crisp inner edge */
+      var(--shadow-glass-inset); /* keep original glass inset */
   }
 
   /* Dragover state via data attribute */
@@ -53,6 +60,11 @@
     justify-content: space-between;
     align-items: center;
     gap: var(--space-14);
+
+    /* When the progress component is shown, pull it closer to the emoji */
+    > .upload-progress {
+      margin-top: -0.7rem;
+    }
   }
 
   &__emoji {
@@ -65,6 +77,15 @@
     flex-direction: column;
     align-items: center;
     gap: 3px; /* original was 0.1875rem */
+  }
+
+  /* Stack for uploading state: emoji on top, progress below */
+  &__stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-14);
   }
 
   &__headline {

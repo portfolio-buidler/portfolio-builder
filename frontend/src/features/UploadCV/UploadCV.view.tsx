@@ -32,7 +32,7 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
 
         <div className="upload-cv__body">
           <h2 className="upload-cv__upload-title">Upload your CV</h2>
-          <UploadArea onFileSelect={onFileSelect} onDropFile={onDropFile} />
+          <UploadArea onFileSelect={onFileSelect} onDropFile={onDropFile} isUploading={isUploading} />
 
           <button
             type="button"

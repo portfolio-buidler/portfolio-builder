@@ -1,5 +1,6 @@
 import React from 'react'
 import type { UploadAreaViewProps } from './UploadArea.types'
+import { UploadProgress } from './Progress/UploadProgress'
 import './UploadArea.styles.scss'
 
 export const UploadAreaView: React.FC<UploadAreaViewProps> = ({
@@ -10,6 +11,9 @@ export const UploadAreaView: React.FC<UploadAreaViewProps> = ({
   onDrop,
   onClick,
   onFileInputChange,
+  isUploading,
+  progress,
+  onCancelUpload,
 }) => {
   return (
     <div
@@ -26,12 +30,25 @@ export const UploadAreaView: React.FC<UploadAreaViewProps> = ({
         <span className="upload-area__emoji" aria-hidden>
           📜
         </span>
-        <div className="upload-area__text">
-          <p className="upload-area__headline">
-            Drop & Drag or <span className="upload-area__link">Choose File</span> To Upload
-          </p>
-          <p className="upload-area__subline">Accept PDF or DOCX up to 5MB</p>
-        </div>
+        {/* Swap only this inner block for design/testing */}
+        {!isUploading || !progress ? (
+          <div className="upload-area__text">
+            <p className="upload-area__headline">
+              Drop & Drag or <span className="upload-area__link">Choose File</span> To Upload
+            </p>
+            <p className="upload-area__subline">Accept PDF or DOCX up to 5MB</p>
+          </div>
+        ) : (
+          <UploadProgress
+            fileName={progress.fileName}
+            fileSizeBytes={progress.fileSizeBytes}
+            percent={progress.percent}
+            uploadedBytes={progress.uploadedBytes}
+            totalBytes={progress.totalBytes}
+            etaSeconds={progress.etaSeconds}
+            onCancel={onCancelUpload || (() => {})}
+          />
+        )}
       </div>
 
       <input

@@ -1,0 +1,142 @@
+/* UploadProgress.styles.scss */
+
+.upload-progress {
+  /* Fixed wrapper size */
+  width: 404px;
+  height: auto; /* allow progress bar to be visible below rows */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--color-fg-muted);
+  font-family: var(--font-family-base);
+}
+
+.upload-progress__header {
+  /* Filename + cancel (X) row */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 404px;
+  height: 28px;
+}
+
+.upload-progress__emoji {
+  font-size: var(--font-size-6xl);
+  line-height: var(--line-height-tight);
+}
+
+.upload-progress__meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.upload-progress__name {
+  /* Filename typography */
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-style: normal; /* "Medium" weight corresponds to 500 */
+  font-size: 20px;
+  line-height: 100%;
+  letter-spacing: 0;
+  text-transform: capitalize;
+  color: var(--title-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.upload-progress__sub {
+  /* File size + percentage row */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 403px;
+  height: 22px;
+  gap: 0.5rem;
+  /* Typography for file size and time left */
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 22px;
+  letter-spacing: 0;
+}
+
+/* Left group: size • time-left, with a touch more spacing */
+.upload-progress__sub-left {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem; /* ~10px for a bit more space */
+}
+
+.upload-progress__dot { opacity: 0.5; }
+
+.upload-progress__right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.upload-progress__cancel {
+  /* Cancel (X) button visuals */
+  background: transparent;
+  color: var(--text-black, #354052);
+  border: none;           /* remove default button border */
+  outline: none;          /* remove focus ring (visual); keep accessibility via aria-label */
+  padding: 0;             /* no padding so only the icon shows */
+  margin: 0;
+  box-shadow: none;       /* no shadows */
+  border-radius: 0;       /* no rounded frame */
+  appearance: none;       /* reset native styles */
+  -webkit-appearance: none;
+  box-sizing: content-box;
+  width: 20px;            /* match icon bounds */
+  height: 20px;
+  line-height: 0;         /* prevent extra inline height */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Ensure only the X glyph is visible without any box around it */
+.upload-progress__cancel svg {
+  width: 20px;
+  height: 20px;
+  display: block;         /* remove inline baseline gap */
+}
+
+.upload-progress__percent {
+  /* Percentage typography */
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 22px;
+  letter-spacing: 0;
+  color: rgba(37, 99, 235, 0.95);
+}
+
+.upload-progress__bar {
+  width: 404px;
+  height: 8px; /* non-zero height for visibility */
+  background: rgba(53, 64, 82, 0.15); /* soft gray */
+  border-radius: 999px;
+  margin-top: calc(0.25rem + 8px); /* push the bar ~3px lower without moving other content */
+  overflow: hidden;
+}
+
+.upload-progress__bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, rgba(59,130,246,1) 0%, rgba(37,99,235,1) 100%);
+  border-radius: 999px;
+  transition: width 200ms ease;
+}
+
+.upload-progress__done {
+  margin-top: 0.5rem;
+  font-size: var(--font-size-md);
+  color: rgba(37, 99, 235, 0.95);
+  font-weight: var(--font-weight-medium);
+}
+
