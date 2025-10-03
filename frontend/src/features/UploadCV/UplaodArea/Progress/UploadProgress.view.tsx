@@ -50,10 +50,6 @@ export const UploadProgressView: React.FC<UploadProgressViewProps> = ({
       <div className="upload-progress__bar" aria-label="Upload progress">
         <div className="upload-progress__bar-fill" style={{ width: `${percent}%` }} />
       </div>
-
-      {percent >= 100 && (
-        <div className="upload-progress__done" aria-label="Upload completed">Completed</div>
-      )}
     </div>
   )
 }

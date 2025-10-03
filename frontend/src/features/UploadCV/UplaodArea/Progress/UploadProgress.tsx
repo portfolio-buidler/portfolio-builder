@@ -28,24 +28,13 @@ export const UploadProgress: React.FC<UploadProgressProps & { onCancel: () => vo
   etaSeconds,
   onCancel,
 }) => {
-  // TEST: hardcode display strings per request
-  const TESTING_OVERRIDE = true
-
-  const viewProps: UploadProgressViewProps = TESTING_OVERRIDE
-    ? {
-        fileName: 'Name File',
-        sizeText: '500KB',
-        timeLeftText: '2 Secondeds Left',
-        percent: 79,
-        onCancel,
-      }
-    : {
-        fileName,
-        sizeText: `${formatBytes(fileSizeBytes)}`,
-        timeLeftText: `${formatEta(etaSeconds)} left`,
-        percent,
-        onCancel,
-      }
+  const viewProps: UploadProgressViewProps = {
+    fileName,
+    sizeText: `${formatBytes(fileSizeBytes)}`,
+    timeLeftText: `${formatEta(etaSeconds)} left`,
+    percent,
+    onCancel,
+  }
 
   return <UploadProgressView {...viewProps} />
 }

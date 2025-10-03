@@ -4,14 +4,9 @@ import { validateFile, ALLOWED_MIME_TYPES } from '../../../utils/fileValidation'
 import { toast } from 'react-toastify'
 import { UploadAreaView } from './UploadArea.view'
 import axios from 'axios'
-import type { AxiosProgressEvent } from 'axios'
 
-function UploadArea({ onFileSelect, onDropFile, isUploading, onCancelUpload }: UploadAreaProps) {
-  // Design preview: force show progress component without uploading
-  // TEMP: Set to true for pixel-perfect comparison. Do NOT remove this constant.
-  // To disable later, change `true` to `false` or rely on the env flag below.
-  const DESIGN_PREVIEW =
-    true || ((import.meta as any)?.env?.VITE_SHOW_UPLOAD_PROGRESS === 'true')
+
+function UploadArea({ onFileSelect, onDropFile, isUploading, onCancelUpload, progress: externalProgress }: UploadAreaProps) {
   const [dragOver, setDragOver] = useState(false)
   const [file, setFile] = useState<File | null>(null)
   const [uploadedBytes, setUploadedBytes] = useState(0)
@@ -24,7 +19,7 @@ function UploadArea({ onFileSelect, onDropFile, isUploading, onCancelUpload }: U
 
   const accept = useMemo(() => ALLOWED_MIME_TYPES.join(','), [])
 
-  const progress: UploadProgressData | undefined = useMemo(() => {
+  const internalProgress: UploadProgressData | undefined = useMemo(() => {
     if (!file) return undefined
     return {
       fileName: file.name,
@@ -36,24 +31,8 @@ function UploadArea({ onFileSelect, onDropFile, isUploading, onCancelUpload }: U
     }
   }, [file, uploadedBytes, totalBytes, percent, etaSeconds])
 
-  // Mock progress for pixel-perfect design review
-  const previewProgress: UploadProgressData | undefined = useMemo(() => {
-    if (!DESIGN_PREVIEW) return undefined
-    const total = 2 * 1024 * 1024 // 2 MB
-    const uploaded = Math.round(total * 0.68) // 68%
-    return {
-      fileName: 'My CV – Product Designer.pdf',
-      fileSizeBytes: total,
-      uploadedBytes: uploaded,
-      totalBytes: total,
-      percent: Math.round((uploaded / total) * 100),
-      etaSeconds: 12,
-    }
-  }, [DESIGN_PREVIEW])
-
   const beginUpload = useCallback(
     (selected: File) => {
-      // Prevent duplicate uploads
       if (abortControllerRef.current) return
 
       const controller = new AbortController()
@@ -72,7 +51,7 @@ function UploadArea({ onFileSelect, onDropFile, isUploading, onCancelUpload }: U
         .post('/api/upload', form, {
           headers: { 'Content-Type': 'multipart/form-data' },
           signal: controller.signal,
-          onUploadProgress: (evt: AxiosProgressEvent) => {
+          onUploadProgress: (evt: ProgressEvent) => {
             if (!evt.total) return
             const loaded = evt.loaded
             const total = evt.total
@@ -98,7 +77,6 @@ function UploadArea({ onFileSelect, onDropFile, isUploading, onCancelUpload }: U
           setEtaSeconds(0)
         })
         .catch((err: any) => {
-          // Ignore user-initiated cancel/abort
           if (err?.code === 'ERR_CANCELED' || err?.name === 'CanceledError' || err?.name === 'AbortError') {
             return
           }
@@ -162,6 +140,7 @@ function UploadArea({ onFileSelect, onDropFile, isUploading, onCancelUpload }: U
     document.getElementById('file-input')?.click()
   }, [])
 
+  /*
   useEffect(() => {
     if (!isUploading || !file) return
     beginUpload(file)
@@ -174,6 +153,23 @@ function UploadArea({ onFileSelect, onDropFile, isUploading, onCancelUpload }: U
       }
     }
   }, [isUploading, file, beginUpload])
+  */
+  /*
+  // Disabled: Parent component now owns the upload via uploadService.
+  // Keeping this code commented for reference during testing to avoid duplicate requests to /api/upload.
+  useEffect(() => {
+    if (!isUploading || !file) return
+    beginUpload(file)
+
+    return () => {
+      // Cleanup if component unmounts mid-upload
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+        abortControllerRef.current = null
+      }
+    }
+  }, [isUploading, file, beginUpload])
+  */
 
   const handleCancel = useCallback(() => {
     if (abortControllerRef.current) {
@@ -192,9 +188,8 @@ function UploadArea({ onFileSelect, onDropFile, isUploading, onCancelUpload }: U
       onDrop={handleDrop}
       onClick={handleClick}
       onFileInputChange={handleFileInputChange}
-      // In design preview, render the uploading stack (emoji + progress)
-      isUploading={DESIGN_PREVIEW ? true : isUploading}
-      progress={DESIGN_PREVIEW ? previewProgress : progress}
+      isUploading={isUploading}
+      progress={externalProgress ?? internalProgress}
       onCancelUpload={handleCancel}
     />
   )

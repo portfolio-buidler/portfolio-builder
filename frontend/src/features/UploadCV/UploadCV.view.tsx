@@ -10,6 +10,7 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
   onUpload,
   onFileSelect,
   onDropFile,
+  progress,
 }) => {
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (ready && !isUploading) {
@@ -32,7 +33,12 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
 
         <div className="upload-cv__body">
           <h2 className="upload-cv__upload-title">Upload your CV</h2>
-          <UploadArea onFileSelect={onFileSelect} onDropFile={onDropFile} isUploading={isUploading} />
+          <UploadArea
+            onFileSelect={onFileSelect}
+            onDropFile={onDropFile}
+            isUploading={isUploading}
+            progress={progress}
+          />
 
           <button
             type="button"
@@ -42,8 +48,8 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
             disabled={!ready || isUploading}
             aria-busy={isUploading || undefined}
           >
-            {isUploading && <span className="upload-cv__cta-spinner" aria-hidden="true" />}
-            <span className="upload-cv__cta-label">{isUploading ? 'Uploading…' : "Next"}</span>
+
+            <span className="upload-cv__cta-label">Next</span>
             {!isUploading && (
               <span className="upload-cv__cta-icon" aria-hidden="true">
                 ›
@@ -52,7 +58,7 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
           </button>
         </div>
 
-          {/* Screen reader status announcement */}
+
           <div className="sr-only" aria-live="polite" aria-atomic="true">
             {isUploading ? 'Upload in progress' : 'Idle'}
           </div>

@@ -30,7 +30,7 @@ export const UploadAreaView: React.FC<UploadAreaViewProps> = ({
         <span className="upload-area__emoji" aria-hidden>
           📜
         </span>
-        {/* Swap only this inner block for design/testing */}
+     
         {!isUploading || !progress ? (
           <div className="upload-area__text">
             <p className="upload-area__headline">

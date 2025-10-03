@@ -1,10 +1,8 @@
-/* components/_contact-button.scss
-   Fixed Contact Us button with responsive safe-area spacing and inner shadows.
-*/
+
 
 @use '../mixins/mq' as mq;
 
-// Local SCSS sizing variables (rem-based to avoid px hardcoding)
+
 $contact-width: 7.125rem; // ~114px
 $contact-height: 2.75rem; // ~44px
 $contact-min-width: 4.625rem; // ~74px
