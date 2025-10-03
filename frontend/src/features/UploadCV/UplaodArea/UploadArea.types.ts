@@ -1,3 +1,5 @@
+export type UploadStatus = 'idle' | 'uploading' | 'success' | 'error'
+
 export interface UploadProgressData {
   fileName: string
   fileSizeBytes: number
@@ -16,6 +18,12 @@ export interface UploadAreaProps {
   progress?: UploadProgressData
   /** Allow cancel from the progress UI */
   onCancelUpload?: () => void
+  /** Visual state of the upload area */
+  status: UploadStatus
+  /** Canonical error message to render when status is 'error' */
+  errorMessage?: string
+  /** Report status changes upstream (e.g., from validation) */
+  onStatusChange?: (status: UploadStatus, errorMessage?: string) => void
 }
 
 export interface UploadAreaViewProps {
@@ -29,4 +37,8 @@ export interface UploadAreaViewProps {
   isUploading?: boolean
   progress?: UploadProgressData
   onCancelUpload?: () => void
+  /** Visual state of the upload area */
+  status: UploadStatus
+  /** Optional error message text to render when status is 'error' */
+  errorMessage?: string
 }

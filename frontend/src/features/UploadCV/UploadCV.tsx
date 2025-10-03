@@ -6,7 +6,7 @@ import { toast } from 'react-toastify'
 import type { UploadCVViewProps } from './UploadCV.types'
 import { useResumeStore } from '../../store/resumeStore'
 import { useEffect } from 'react'
-import type { UploadProgressData } from './UplaodArea/UploadArea.types'
+import type { UploadProgressData, UploadStatus } from './UplaodArea/UploadArea.types'
 
 function UploadCV() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -14,6 +14,8 @@ function UploadCV() {
   const [progress, setProgress] = useState<UploadProgressData | undefined>(undefined)
   const startTimeRef = useRef<number | null>(null)
   const { resumeData, setResumeData } = useResumeStore()
+  const [status, setStatus] = useState<UploadStatus>('idle')
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     console.log('[UploadCV] resumeData in global store:', resumeData)
@@ -47,6 +49,8 @@ function UploadCV() {
   const handleUpload = async () => {
     if (!selectedFile) return
     try {
+      setStatus('uploading')
+      setErrorMessage(undefined)
       setIsUploading(true)
       startTimeRef.current = Date.now()
       const res = await uploadCV(selectedFile, {
@@ -76,12 +80,16 @@ function UploadCV() {
       toast.success(res.message || 'File uploaded successfully')
       console.log('Upload response:', res)
       setResumeData(res)
+      setStatus('success')
+      setErrorMessage(undefined)
 
       console.log('[UploadCV] Simulated read back from store:', useResumeStore.getState().resumeData)
     } catch (err: any) {
       const msg = err?.response?.data?.detail || err?.message || 'Upload failed'
       console.error('❌ Upload error:', err)
       toast.error(String(msg))
+      setStatus('error')
+      setErrorMessage('🦖 Oops! We couldn’t process that / Give it another shot')
     } finally {
       setIsUploading(false)
       if (selectedFile) {
@@ -101,6 +109,12 @@ function UploadCV() {
     }
   }
 
+  const handleRetry = () => {
+    setStatus('idle')
+    setErrorMessage(undefined)
+    document.getElementById('file-input')?.click()
+  }
+
 
   const viewProps: UploadCVViewProps = {
     backgroundUrl: backgroundImage,
@@ -110,6 +124,13 @@ function UploadCV() {
     onFileSelect,
     onDropFile,
     progress,
+    status,
+    errorMessage,
+    onStatusChange: (s, msg) => {
+      setStatus(s)
+      setErrorMessage(msg)
+    },
+    onRetry: handleRetry,
   }
 
   return <UploadCVView {...viewProps} />

@@ -33,6 +33,15 @@
       var(--shadow-glass-inset); 
   }
 
+  &[data-status="error"] {
+    background-color: rgba(220, 38, 38, 0.18);
+    border-color: rgba(220, 38, 38, 0.35);
+    box-shadow:
+      0 8px 24px rgba(220, 38, 38, 0.22),
+      0 0 0 1px rgba(220, 38, 38, 0.45) inset,
+      var(--shadow-glass-inset);
+  }
+
 
   &[data-dragover="true"] {
     transform: scale(1.05);

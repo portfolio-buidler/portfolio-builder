@@ -141,6 +141,37 @@
     cursor: progress;
   }
 
+  &__cta--error {
+    background: var(--Colors-Red, #FF3B30);
+    color: #fff;
+    border-color: transparent;
+
+    .upload-cv__cta-icon {
+      color: inherit;
+      fill: currentColor;
+      stroke: currentColor;
+      margin-inline-end: 0.5rem;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .upload-cv__cta-label {
+      color: inherit;
+    }
+
+    &:hover,
+    &:focus-visible {
+      filter: brightness(0.95);
+      outline: none;
+    }
+
+    &:disabled,
+    &[aria-disabled='true'] {
+      opacity: 0.9;
+      pointer-events: auto;
+    }
+  }
+
   &__cta-spinner {
     width: 1rem;
     height: 1rem;

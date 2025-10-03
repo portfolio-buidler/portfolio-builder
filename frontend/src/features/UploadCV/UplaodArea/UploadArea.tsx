@@ -6,7 +6,7 @@ import { UploadAreaView } from './UploadArea.view'
 import axios from 'axios'
 
 
-function UploadArea({ onFileSelect, onDropFile, isUploading, onCancelUpload, progress: externalProgress }: UploadAreaProps) {
+function UploadArea({ onFileSelect, onDropFile, isUploading, onCancelUpload, progress: externalProgress, status, errorMessage, onStatusChange }: UploadAreaProps) {
   const [dragOver, setDragOver] = useState(false)
   const [file, setFile] = useState<File | null>(null)
   const [uploadedBytes, setUploadedBytes] = useState(0)
@@ -95,13 +95,19 @@ function UploadArea({ onFileSelect, onDropFile, isUploading, onCancelUpload, pro
       const validation = validateFile(f)
       if (validation.ok) {
         setFile(f)
+        if (typeof onStatusChange === 'function') {
+          onStatusChange('idle', undefined)
+        }
         if (triggerCallbacks.select) onFileSelect(f)
         if (triggerCallbacks.drop) onDropFile(f)
       } else {
-        toast.error(validation.error)
+        if (typeof onStatusChange === 'function') {
+          onStatusChange('error', validation.error)
+        }
+        return
       }
     },
-    [onDropFile, onFileSelect]
+    [onDropFile, onFileSelect, onStatusChange]
   )
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -191,6 +197,8 @@ function UploadArea({ onFileSelect, onDropFile, isUploading, onCancelUpload, pro
       isUploading={isUploading}
       progress={externalProgress ?? internalProgress}
       onCancelUpload={handleCancel}
+      status={status}
+      errorMessage={errorMessage}
     />
   )
 }
