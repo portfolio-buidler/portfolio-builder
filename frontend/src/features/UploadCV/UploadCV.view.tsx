@@ -2,6 +2,7 @@ import React from 'react'
 import type { UploadCVViewProps } from './UploadCV.types'
 import './UploadCV.styles.scss'
 import UploadArea from './UplaodArea/UploadArea'
+import RefreshIcon from '../../assets/icons/refresh.png'
 
 export const UploadCVView: React.FC<UploadCVViewProps> = ({
   backgroundUrl,
@@ -69,18 +70,8 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
           >
             {status === 'error' ? (
               <>
-                <svg
-                  className="upload-cv__cta-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"
-                  fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                >
-                  <path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-7.94-5" />
-                  <path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 7.94 5" />
-                  <polyline points="3 12 5 14 7 12" />
-                  <polyline points="21 12 19 10 17 12" />
-                </svg>
                 <span className="upload-cv__cta-label">Try again</span>
+                <img src={RefreshIcon} alt="" aria-hidden className="upload-cv__cta-icon-img" />
               </>
             ) : (
               <>

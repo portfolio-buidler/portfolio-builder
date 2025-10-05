@@ -10,14 +10,14 @@ $contact-padding-y: 1.4rem;
 $contact-padding-x: 1.1rem;
 $contact-radius: 0.9375rem; // ~15px
 
-// Color: #9B4D4E at ~20% opacity
+
 $contact-bg: rgba(155, 77, 78, 0.2);
 
 .contact-us-button {
   position: fixed;
   left: max(6.85rem, env(safe-area-inset-left));
   bottom: max(4.35rem, env(safe-area-inset-bottom));
-  z-index: 1000; // above most content; tokens/zindex also available if needed
+  z-index: 1000; 
 
   display: inline-flex;
   align-items: center;

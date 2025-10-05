@@ -2,6 +2,11 @@ import React from 'react'
 import type { UploadAreaViewProps } from './UploadArea.types'
 import { UploadProgress } from './Progress/UploadProgress'
 import './UploadArea.styles.scss'
+import PaperIcon from '../../../assets/icons/📜.svg'
+import PartyIcon from '../../../assets/icons/🎉.svg'
+import SadIcon from '../../../assets/icons/😔.svg'
+import DinoIcon from '../../../assets/icons/🦖.svg'
+import PeekIcon from '../../../assets/icons/🫣.svg'
 
 export const UploadAreaView: React.FC<UploadAreaViewProps> = ({
   accept,
@@ -69,9 +74,22 @@ export const UploadAreaView: React.FC<UploadAreaViewProps> = ({
                 msgText = picked.text
               }
               return (
-                <span className="upload-area__emoji" aria-hidden>
-                  {icon}
-                </span>
+                <>
+                  {status === 'idle' && (
+                    <img src={PaperIcon} className="upload-area__emoji-img" alt="" aria-hidden />
+                  )}
+                  {status === 'success' && (
+                    <img src={PartyIcon} className="upload-area__emoji-img" alt="" aria-hidden />
+                  )}
+                  {status === 'error' && (
+                    (() => {
+                      const picked = pickErrorIconAndText(errorMessage)
+                      const leading = picked.icon
+                      const src = leading === '🫣' ? PeekIcon : leading === '😔' ? SadIcon : DinoIcon
+                      return <img src={src} className="upload-area__emoji-img" alt="" aria-hidden />
+                    })()
+                  )}
+                </>
               )
             })()}
 
@@ -127,3 +145,4 @@ export const UploadAreaView: React.FC<UploadAreaViewProps> = ({
     </div>
   )
 }
+

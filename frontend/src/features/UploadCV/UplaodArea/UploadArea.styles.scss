@@ -78,6 +78,14 @@
     line-height: var(--line-height-tight);
   }
 
+  /* SVG icon used during idle state */
+  &__emoji-img {
+    width: 6rem;
+    height: 6rem;
+    display: block;
+    object-fit: contain;
+  }
+
   &__text {
     display: flex;
     flex-direction: column;
@@ -114,6 +122,17 @@
     line-height: var(--line-height-tight);
     text-align: center;
     margin: 0;
+  }
+
+  /* In error state, make the second line (subline) same size as headline */
+  &[data-status="error"] {
+    .upload-area__subline {
+      font-size: var(--font-size-lg);
+      line-height: var(--line-height-tight);
+      font-weight: var(--font-weight-medium);
+      text-transform: capitalize;
+      white-space: nowrap;
+    }
   }
 
 }
