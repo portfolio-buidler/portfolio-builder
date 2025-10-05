@@ -13,7 +13,7 @@ export function validateFile(file: File): ValidationResult {
   if (!ALLOWED_MIME_TYPES.includes(file.type)) {
     return {
       ok: false,
-      error: 'Invalid file type. Allowed types: PDF, DOCX,',
+      error: '😔 Unsupported file type / Please upload a PDF or DOCX',
     }
   }
 
@@ -21,7 +21,7 @@ export function validateFile(file: File): ValidationResult {
     const sizeMB = (MAX_FILE_BYTES / 1024 / 1024).toFixed(0)
     return {
       ok: false,
-      error: `File is too large. Maximum allowed size is ${sizeMB}MB.`,
+      error: `🫣 The file is too large / Please upload a file under ${sizeMB}MB`,
     }
   }
 

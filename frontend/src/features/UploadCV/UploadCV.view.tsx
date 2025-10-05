@@ -2,6 +2,7 @@ import React from 'react'
 import type { UploadCVViewProps } from './UploadCV.types'
 import './UploadCV.styles.scss'
 import UploadArea from './UplaodArea/UploadArea'
+import RefreshIcon from '../../assets/icons/refresh.png'
 
 export const UploadCVView: React.FC<UploadCVViewProps> = ({
   backgroundUrl,
@@ -10,9 +11,22 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
   onUpload,
   onFileSelect,
   onDropFile,
+  progress,
+  status,
+  errorMessage,
+  onStatusChange,
+  onRetry,
 }) => {
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (ready && !isUploading) {
+    if (isUploading) {
+      e.preventDefault()
+      return
+    }
+    if (status === 'error') {
+      onRetry()
+      return
+    }
+    if (ready) {
       onUpload()
     } else {
       e.preventDefault()
@@ -27,50 +41,56 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
     >
       <div className="upload-cv__container">
         <h1 className="upload-cv__title">
-          Portfolio <span className="upload-cv__title-highlight">Builder</span>
+          Portify.
         </h1>
 
         <div className="upload-cv__body">
-          <UploadArea onFileSelect={onFileSelect} onDropFile={onDropFile} />
+          <h2 className="upload-cv__upload-title">Upload your CV</h2>
+          <UploadArea
+            onFileSelect={onFileSelect}
+            onDropFile={onDropFile}
+            isUploading={isUploading}
+            progress={progress}
+            status={status}
+            errorMessage={errorMessage}
+            onStatusChange={onStatusChange}
+          />
 
           <button
             type="button"
-            className={`upload-cv__cta${isUploading ? ' upload-cv__cta--loading' : ''}`}
+            className={
+              `upload-cv__cta` +
+              (isUploading ? ' upload-cv__cta--loading' : '') +
+              (status === 'error' ? ' upload-cv__cta--error' : '')
+            }
             onClick={handleClick}
-            aria-disabled={!ready || isUploading}
-            disabled={!ready || isUploading}
+            aria-disabled={isUploading || undefined}
+            disabled={isUploading || undefined}
             aria-busy={isUploading || undefined}
           >
-            {isUploading && <span className="upload-cv__cta-spinner" aria-hidden="true" />}
-            <span className="upload-cv__cta-label">{isUploading ? 'Uploading…' : "Let's Do It!"}</span>
-            {!isUploading && (
-              <span className="upload-cv__cta-icon" aria-hidden>
-                →
-              </span>
+            {status === 'error' ? (
+              <>
+                <span className="upload-cv__cta-label">Try again</span>
+                <img src={RefreshIcon} alt="" aria-hidden className="upload-cv__cta-icon-img" />
+              </>
+            ) : (
+              <>
+                <span className="upload-cv__cta-label">Next</span>
+                {!isUploading && (
+                  <span className="upload-cv__cta-icon" aria-hidden="true">›</span>
+                )}
+              </>
             )}
           </button>
+        </div>
 
-          {/* Screen reader status announcement */}
+
           <div className="sr-only" aria-live="polite" aria-atomic="true">
             {isUploading ? 'Upload in progress' : 'Idle'}
           </div>
         </div>
 
-        {/* Manual flow hint paragraphs (separate from Upload Area block) */}
-        <div className="upload-cv__manual-info" role="group" aria-label="Manual portfolio creation info">
-          <p className="upload-cv__manual-info-item">
-            I don't have CV, I want to do it manually 🔮.
-          </p>
-        </div>
-      </div>
-      {/* Fixed Contact Us button at bottom-left, remains visible on scroll */}
-      <button
-        type="button"
-        className="contact-us-button"
-        aria-label="Contact Us"
-      >
-        Contact Us
-      </button>
+
     </div>
   )
 }

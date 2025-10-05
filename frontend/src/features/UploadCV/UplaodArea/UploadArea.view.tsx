@@ -1,6 +1,12 @@
 import React from 'react'
 import type { UploadAreaViewProps } from './UploadArea.types'
+import { UploadProgress } from './Progress/UploadProgress'
 import './UploadArea.styles.scss'
+import PaperIcon from '../../../assets/icons/📜.svg'
+import PartyIcon from '../../../assets/icons/🎉.svg'
+import SadIcon from '../../../assets/icons/😔.svg'
+import DinoIcon from '../../../assets/icons/🦖.svg'
+import PeekIcon from '../../../assets/icons/🫣.svg'
 
 export const UploadAreaView: React.FC<UploadAreaViewProps> = ({
   accept,
@@ -10,11 +16,32 @@ export const UploadAreaView: React.FC<UploadAreaViewProps> = ({
   onDrop,
   onClick,
   onFileInputChange,
+  isUploading,
+  progress,
+  onCancelUpload,
+  status,
+  errorMessage,
 }) => {
+  const pickErrorIconAndText = (rawMsg?: string) => {
+    const raw = (rawMsg || '').trim()
+    if (!raw) return { icon: '🦖', text: '' }
+    const leading = raw.startsWith('🫣')
+      ? '🫣'
+      : raw.startsWith('😔')
+      ? '😔'
+      : raw.startsWith('🦖')
+      ? '🦖'
+      : null
+    const text = leading ? raw.slice(leading.length).trim() : raw
+    const icon = leading ?? '🦖'
+    return { icon, text }
+  }
+
   return (
     <div
       className="upload-area"
       data-dragover={dragOver}
+      data-status={status}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
@@ -23,13 +50,84 @@ export const UploadAreaView: React.FC<UploadAreaViewProps> = ({
       data-testid="upload-area"
     >
       <div className="upload-area__icon" aria-hidden="true">
-        <span className="upload-area__emoji" aria-hidden>
-          📜
-        </span>
-        <div className="upload-area__text">
-          <p className="upload-area__headline">Upload Or Drag Your CV</p>
-          <p className="upload-area__subline">Accept PDF or DOCX up to 5MB</p>
-        </div>
+        {isUploading && progress ? (
+          <UploadProgress
+            fileName={progress.fileName}
+            fileSizeBytes={progress.fileSizeBytes}
+            percent={progress.percent}
+            uploadedBytes={progress.uploadedBytes}
+            totalBytes={progress.totalBytes}
+            etaSeconds={progress.etaSeconds}
+            onCancel={onCancelUpload || (() => {})}
+          />
+        ) : (
+          <>
+            {/* Icon */}
+            {(() => {
+              let icon = '📜'
+              let msgText = ''
+              if (status === 'success') {
+                icon = '🎉'
+              } else if (status === 'error') {
+                const picked = pickErrorIconAndText(errorMessage)
+                icon = picked.icon
+                msgText = picked.text
+              }
+              return (
+                <>
+                  {status === 'idle' && (
+                    <img src={PaperIcon} className="upload-area__emoji-img" alt="" aria-hidden />
+                  )}
+                  {status === 'success' && (
+                    <img src={PartyIcon} className="upload-area__emoji-img" alt="" aria-hidden />
+                  )}
+                  {status === 'error' && (
+                    (() => {
+                      const picked = pickErrorIconAndText(errorMessage)
+                      const leading = picked.icon
+                      const src = leading === '🫣' ? PeekIcon : leading === '😔' ? SadIcon : DinoIcon
+                      return <img src={src} className="upload-area__emoji-img" alt="" aria-hidden />
+                    })()
+                  )}
+                </>
+              )
+            })()}
+
+            {/* Text */}
+            {status === 'idle' && (
+              <div className="upload-area__text">
+                <p className="upload-area__headline">
+                  Drop & Drag or <span className="upload-area__link">Choose File</span> To Upload
+                </p>
+                <p className="upload-area__subline">Accept PDF or DOCX up to 5MB</p>
+              </div>
+            )}
+
+            {status === 'success' && (
+              <div className="upload-area__text">
+                <p className="upload-area__headline">Upload complete!</p>
+              </div>
+            )}
+
+            {status === 'error' && (
+              <div className="upload-area__text">
+                {(() => {
+                  const { text: msgText } = pickErrorIconAndText(errorMessage)
+                  if (msgText.includes('/')) {
+                    const [line1, line2] = msgText.split('/')
+                    return (
+                      <>
+                        <p className="upload-area__headline">{line1.trim()}</p>
+                        <p className="upload-area__subline">{line2.trim()}</p>
+                      </>
+                    )
+                  }
+                  return <p className="upload-area__headline">{msgText}</p>
+                })()}
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       <input
@@ -47,3 +145,4 @@ export const UploadAreaView: React.FC<UploadAreaViewProps> = ({
     </div>
   )
 }
+

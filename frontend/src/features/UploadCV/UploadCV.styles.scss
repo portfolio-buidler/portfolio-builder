@@ -1,25 +1,43 @@
-/* UploadCV.styles.scss
-   BEM styles for the UploadCV page. No Tailwind utilities. Uses global tokens/mixins.
-*/
+
 
 @use '../../styles/components/contact-button';
 @use '../../styles/mixins/mq';
 
 .upload-cv {
-  /* Background image via CSS variable */
-  /* Fallback to 100vh, then prefer 100svh for mobile browser UI correctness */
+
   min-height: 100vh;
   min-height: 100svh;
-  background-image: var(--uploadcv-bg);
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  /* Default scroll on mobile to avoid iOS rendering issues */
-  background-attachment: scroll;
+  position: relative;
 
-  /* Keep the image fixed on desktop while preserving cover and position */
-  @include mq.mq('md') {
-    background-attachment: fixed;
+
+  &::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: var(--uploadcv-bg);
+    background-size: cover; 
+    background-position: center center;
+    background-repeat: no-repeat;
+    z-index: 0;
+  }
+
+
+  &__upload-title {
+    font-family: var(--font-family-base); 
+    font-weight: var(--font-weight-bold);
+    font-style: normal;
+    font-size: 2.5rem; 
+    line-height: 1;
+    letter-spacing: 1;
+    text-transform: capitalize;
+    color: var(--title-color);
+
+   
+    width: 100%;
+    max-width: 38.5rem; 
+    margin: 0 auto 0.8rem auto; 
+    text-align: left;
+    white-space: nowrap; 
   }
 
   display: flex;
@@ -28,75 +46,77 @@
 
   &__container {
     width: 100%;
-    max-width: 92rem; /* generous max width to center content */
+    max-width: 92rem;
     margin-inline: auto;
     padding: 2rem;
+    position: relative;
+    z-index: 1; 
   }
 
   &__title {
-    /* Title styling mirrors theme tokens */
+
     font-family: var(--font-family-base);
     color: var(--title-color);
     text-transform: capitalize;
-    text-align: center;
-    letter-spacing: var(--tracking-title-xl);
+    letter-spacing: 2px;
     line-height: var(--line-height-tight);
-    font-weight: var(--font-weight-normal);
+    font-weight: var(--font-weight-bold);
 
-    /* Size aligns to prior config: 7xl */
-    font-size: var(--font-size-7xl);
 
-    /* Spacing derived from tokens; adjustable as needed */
-    margin-top: var(--title-top);
-    margin-left: var(--title-left);
+    font-size: var(--font-size-3xl);
 
-    .upload-cv__title-highlight {
-      font-weight: 900;
-      /* If a variable font is available (e.g., Poppins VF), push weight beyond 900 */
-      font-variation-settings: 'wght' 1000;
-    }
+  
+    position: fixed;
+    top: 2rem;
+    left: 1.5rem;
+    margin: 0;
+    z-index: 2;
   }
 
   &__body {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    gap: 8rem;
+  
+    position: fixed;
+    top:  49.5%;
+    left: 49.2%;
+    transform: translate(-50%, calc(-50% )); 
 
-    /* Mirror previous layout constraints */
-    max-width: 58.3rem; /* reverted to previous */
-    margin-top: 8rem;
-    margin-left: 26.6rem; /* per request */
+    width: min(58.3rem, calc(100vw - 20px));
+    box-sizing: border-box;
+    margin: 0 auto;
+    z-index: 1; 
+    
   }
 
   &__cta {
-    /* Dimensions from the previous Tailwind inline utilities */
-    width: 10.5rem;
-    height:2.775rem;
-    border-radius: 1.25rem;
+
+    width: clamp(8rem, 20.6%, 12rem);
+    height: 2.775rem;
+    border-radius: 1.05rem;
     padding: 1.375rem 1.125rem;
 
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    transform: translateY(36.4px);
+    will-change: transform;
 
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-normal);
     transition: background-color 200ms ease, color 200ms ease, opacity 200ms ease;
 
-    /* Enabled state visuals */
+    
     background: var(--brand-500);
     color: #fff;
     cursor: pointer;
 
-    /* Disabled visuals driven by aria-disabled attribute */
     &[aria-disabled='true'] {
       background: var(--gray-500);
       cursor: not-allowed;
     }
 
-    /* Hover only when not disabled */
     &:not([aria-disabled='true']):hover {
       background: var(--brand-600);
     }
@@ -105,19 +125,61 @@
       background: var(--brand-700);
     }
 
-    /* Focus visible for a11y */
     &:focus-visible {
       outline: none;
       box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.4);
     }
   }
 
-  /* Loading modifier for CTA */
   &__cta--loading {
+    cursor: progress;
+    background: var(--brand-500);
+  }
+
+  &__cta--loading[aria-disabled='true'] {
+    background: var(--brand-500);
     cursor: progress;
   }
 
-  /* Spinner for CTA */
+  &__cta--error {
+    background: var(--Colors-Red, #FF3B30);
+    color: #fff;
+    border-color: transparent;
+
+    .upload-cv__cta-icon {
+      color: inherit;
+      fill: currentColor;
+      stroke: currentColor;
+      margin-inline-end: 0.5rem;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .upload-cv__cta-icon-img {
+      width: 20px;
+      height: 20px;
+      display: inline-block;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+
+    .upload-cv__cta-label {
+      color: inherit;
+    }
+
+    &:hover,
+    &:focus-visible {
+      filter: brightness(0.95);
+      outline: none;
+    }
+
+    &:disabled,
+    &[aria-disabled='true'] {
+      opacity: 0.9;
+      pointer-events: auto;
+    }
+  }
+
   &__cta-spinner {
     width: 1rem;
     height: 1rem;
@@ -147,13 +209,22 @@
 
   &__cta-icon {
     font-size: 2rem;
-    line-height: 2rem;
-    width: 1.875rem;
-    height: 2rem;
+    line-height: 1;
+    width: auto;
+    height: auto;
     text-align: center;
+    margin-left: 1rem;
   }
 
-  /* Mobile layout adjustments */
+  /* generic image icon sizing if used outside error variant */
+  &__cta-icon-img {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
+
   @media (max-width: 480px) {
     &__container {
       padding: 1rem;
@@ -161,81 +232,74 @@
 
     &__title {
       text-align: left;
-      margin-top: 1rem;
-      margin-left: 0; /* override any token offset */
+      margin: 0;
+      font-size: clamp(2rem, 11.1vw, 3rem);
+      line-height: 1.05;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
     }
 
     &__body {
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      gap: 1.25rem; /* tighter spacing on mobile */
-      max-width: 100%;
-      margin-top: 1.25rem;
-      margin-left: 0; /* remove desktop offset */
+      justify-content: center;
+      gap: 1.25rem;
+      max-width: 58.3rem;
     }
 
     &__manual-info {
-      display: block; /* show on mobile */
+      display: block;
       margin-top: 0.5rem;
-      max-width: 22.5rem; /* visually similar to card width */
+      max-width: 22.5rem;
     }
 
     &__manual-info-item {
       justify-content: center;
-      margin-left: 0; /* avoid negative offset on small screens */
+      margin-left: 0;
     }
 
     &__cta {
       width: 100%;
-      max-width: 22.5rem; /* match card width visually */
-      height: 2.75rem; /* ensure >=44px */
+      max-width: 22.5rem;
+      height: 2.75rem;
       margin-top: 0.75rem;
       margin-bottom: max(1rem, env(safe-area-inset-bottom));
     }
   }
 
-  /* Manual info section shown when user wants to proceed without a CV */
   &__manual-info {
-    /* Place directly under the upload body with a very tiny gap */
-    margin-top: 0.25rem; /* ~4px */
-
-    /* Constrain to design width but allow responsiveness */
-    max-width: 26.875rem; /* 430px */
+    margin-top: 0.25rem;
+    
+    max-width: none;
     width: 100%;
 
-    /* Center within container */
     margin-left: auto;
     margin-right: auto;
     margin-inline: auto;
     text-align: center;
-
-    /* Temporarily hidden per request */
-    display: none;
+    
   }
   &__manual-info-item {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.25rem; /* very small gap between icon and text */
+    gap: 0.25rem;
     margin-top: 0.625rem;
-   
+    
 
-    /* Typography per spec */
-    font-family: var(--font-family-base); /* Poppins */
-    font-weight: var(--font-weight-medium); /* 500 */
-    font-size: 1.25rem; /* 20px */
-    line-height: 1; /* 100% */
+    font-family: var(--font-family-base);
+    font-weight: var(--font-weight-medium);
+    font-size: 1.25rem;
+    line-height: 1;
     letter-spacing: 0.2px;
     text-transform: capitalize;
-
-    /* Font color provided by design */
-    color: rgba(53, 64, 82, 0.8); /* #354052CC */
+    
+    color: rgba(53, 64, 82, 0.8);
     white-space: nowrap;
   }
 
   &__manual-info-icon {
-    font-size: 0.875rem; /* icon size adjusted with text */
+    font-size: 0.875rem;
     line-height: 1;
     display: inline-block;
   }
