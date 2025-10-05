@@ -21,6 +21,15 @@
     z-index: 0;
   }
 
+  /* Success variant: enabled and green */
+  &__cta--success {
+    background: var(--Colors-Green, #22C55E);
+    color: #fff;
+
+    &:not([aria-disabled='true']):hover { background: #16A34A; }
+    &:not([aria-disabled='true']):active { background: #15803D; }
+  }
+
 
   &__upload-title {
     font-family: var(--font-family-base); 
@@ -91,7 +100,6 @@
   }
 
   &__cta {
-
     width: clamp(8rem, 20.6%, 12rem);
     height: 2.775rem;
     border-radius: 1.05rem;
@@ -107,8 +115,8 @@
     font-weight: var(--font-weight-normal);
     transition: background-color 200ms ease, color 200ms ease, opacity 200ms ease;
 
-    
-    background: var(--brand-500);
+    /* Default (disabled/idle) = gray */
+    background: var(--gray-500);
     color: #fff;
     cursor: pointer;
 
@@ -117,13 +125,9 @@
       cursor: not-allowed;
     }
 
-    &:not([aria-disabled='true']):hover {
-      background: var(--brand-600);
-    }
-
-    &:not([aria-disabled='true']):active {
-      background: var(--brand-700);
-    }
+    /* Base hover/active (only applies if enabled and not success/error) */
+    &:not([aria-disabled='true']):hover { background: var(--gray-600, #6B7280); }
+    &:not([aria-disabled='true']):active { background: var(--gray-700, #4B5563); }
 
     &:focus-visible {
       outline: none;
@@ -133,11 +137,11 @@
 
   &__cta--loading {
     cursor: progress;
-    background: var(--brand-500);
+    background: var(--gray-500);
   }
 
   &__cta--loading[aria-disabled='true'] {
-    background: var(--brand-500);
+    background: var(--gray-500);
     cursor: progress;
   }
 

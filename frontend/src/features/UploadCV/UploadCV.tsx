@@ -44,6 +44,7 @@ function UploadCV() {
     console.log('---')
     
     setSelectedFile(file)
+    setProgress(undefined)
   }
 
   const handleUpload = async () => {
@@ -109,6 +110,23 @@ function UploadCV() {
     }
   }
 
+  // Auto-upload after a valid file is provided by UploadArea
+  useEffect(() => {
+    if (!selectedFile) return
+    // Avoid duplicate uploads: don't start if already uploading or already succeeded for this file
+    if (isUploading || status === 'success') return
+    void handleUpload()
+    // We intentionally depend on selectedFile and status/isUploading
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedFile])
+
+  // CTA now only moves to the next step when upload succeeded
+  const handleNext = () => {
+    if (status !== 'success' || isUploading) return
+    // TODO: integrate navigation to the next step (Template selection)
+    toast.info('Proceeding to the next step...')
+  }
+
   const handleRetry = () => {
     setStatus('idle')
     setErrorMessage(undefined)
@@ -118,9 +136,11 @@ function UploadCV() {
 
   const viewProps: UploadCVViewProps = {
     backgroundUrl: backgroundImage,
-    ready: Boolean(selectedFile),
+    // Ready only when upload finished successfully
+    ready: status === 'success',
     isUploading,
-    onUpload: handleUpload,
+    // onUpload now represents proceeding to the next page
+    onUpload: handleNext,
     onFileSelect,
     onDropFile,
     progress,
