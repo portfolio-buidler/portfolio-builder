@@ -10,8 +10,10 @@ WORKDIR /app
 # 4) os packages:
 #    - ca-certificates: up-to-date trust store for HTTPS (pip)
 #    - build-essential: only if wheels are missing and a package needs compilation
+#    - libpq-dev: PostgreSQL development headers (required for asyncpg)
+#    - gcc: C compiler (required for asyncpg compilation)
 RUN apt-get update \
- && apt-get install -y --no-install-recommends ca-certificates build-essential \
+ && apt-get install -y --no-install-recommends ca-certificates build-essential libpq-dev gcc \
  && update-ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
@@ -19,17 +21,12 @@ RUN apt-get update \
 COPY pyproject.toml .
 
 # 6) Install Python deps
-RUN python -m pip install --upgrade pip \
- && python -m pip install --no-cache-dir \
-      --trusted-host pypi.org --trusted-host files.pythonhosted.org \
-      fastapi uvicorn[standard] SQLAlchemy>=2.0 psycopg[binary] python-multipart asyncpg alembic>=1.7 pydantic>=2.0 python-dotenv
+RUN python -m pip install --upgrade pip
 
-# Install dependencies from pyproject.toml if it exists
-RUN if [ -f pyproject.toml ]; then \
-      python -m pip install --no-cache-dir \
-        --trusted-host pypi.org --trusted-host files.pythonhosted.org \
-        -e .; \
-    fi
+# Install dependencies from pyproject.toml
+RUN python -m pip install --no-cache-dir \
+      --trusted-host pypi.org --trusted-host files.pythonhosted.org \
+      -e .
 
 # 7) Copy source code
 COPY alembic.ini ./
