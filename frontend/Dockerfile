@@ -1,28 +1,21 @@
-FROM node:20-alpine AS build
+FROM node:20-alpine
 
 #Set working directory
 WORKDIR /app
 
-#Install dependencies
+# Copy only dependency manifests for cached layer
 COPY package*.json ./
-RUN npm install
+RUN npm install --no-audit --no-fund
 
-#Copy source
-COPY . .
+# In dev we mount the source via docker-compose, so no COPY . . needed.
+# Fallback: if someone builds without compose, uncomment below line.
+# COPY . .
 
-#Accept build-time environment variables
-ARG VITE_API_BASE_URL=http://localhost:9000
-ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+# Backend service name resolution inside compose network
+ENV VITE_API_BASE_URL=http://backend:9000 \
+	CHOKIDAR_USEPOLLING=true \
+	WATCHPACK_POLLING=true
 
-#Build production bundle
-RUN npm run build
+EXPOSE 3000
 
-#Use lightweight nginx to serve built files
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-
-#Expose port (nginx runs on 80 by default)
-EXPOSE 80
-
-#Default command
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["npm","run","dev","--","--host","0.0.0.0","--port","3000"]
