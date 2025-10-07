@@ -9,10 +9,14 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui",
+    "e2e:headed": "playwright test --headed --project=chromium",
+    "e2e:install": "playwright install --with-deps"
   },
   "dependencies": {
-    "axios": "^1.12.1",
+    "axios": "^1.12.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.62.0",
@@ -22,13 +26,14 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
-    "@playwright/test": "^1.55.0",
+    "@playwright/test": "^1.56.0",
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
-    "@types/react": "^19.1.10",
-    "@types/react-dom": "^19.1.7",
-    "@vitejs/plugin-react": "^5.0.0",
+    "@types/node": "^20.19.19",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@vitejs/plugin-react": "^5.0.4",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.33.0",
     "eslint-plugin-react-hooks": "^5.2.0",
@@ -36,10 +41,10 @@
     "globals": "^16.3.0",
     "jsdom": "^27.0.0",
     "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.13",
+    "sass-embedded": "^1.93.0",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.39.1",
-    "vite": "^7.1.2",
+    "vite": "^7.1.9",
     "vitest": "^3.2.4"
   }
 }

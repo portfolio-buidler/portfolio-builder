@@ -1,0 +1,29 @@
+// Reusable file validation helper for uploads
+
+export const ALLOWED_MIME_TYPES = [
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+]
+
+export const MAX_FILE_BYTES = 5 * 1024 * 1024 // 5MB, aligned with backend
+
+export type ValidationResult = { ok: true } | { ok: false; error: string }
+
+export function validateFile(file: File): ValidationResult {
+  if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+    return {
+      ok: false,
+      error: '😔 Unsupported file type / Please upload a PDF or DOCX',
+    }
+  }
+
+  if (file.size > MAX_FILE_BYTES) {
+    const sizeMB = (MAX_FILE_BYTES / 1024 / 1024).toFixed(0)
+    return {
+      ok: false,
+      error: `🫣 The file is too large / Please upload a file under ${sizeMB}MB`,
+    }
+  }
+
+  return { ok: true }
+}

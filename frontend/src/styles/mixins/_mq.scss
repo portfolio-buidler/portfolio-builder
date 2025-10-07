@@ -1,0 +1,11 @@
+/* mixins/_mq.scss
+   Media query mixin using $breakpoints map. */
+
+@use 'sass:map';
+@use '../tokens/breakpoints' as breakpoints;
+
+@mixin mq($bp) {
+  @media (min-width: map.get(breakpoints.$breakpoints, $bp)) {
+    @content;
+  }
+}

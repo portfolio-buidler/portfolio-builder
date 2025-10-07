@@ -1,0 +1,8 @@
+/* tokens/_zindex.scss
+   Z-index tokens. */
+
+:root {
+  --z-base: 1;
+  --z-overlay: 10;
+  --z-modal: 100;
+}

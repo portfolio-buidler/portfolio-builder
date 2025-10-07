@@ -1,0 +1,35 @@
+/* styles/main.scss
+   Root stylesheet that wires all tokens, mixins, base, layout, components, and utilities.
+   Order follows requested sequence. */
+
+/* Tokens */
+@use 'tokens/colors';
+@use 'tokens/spacing';
+@use 'tokens/typography';
+@use 'tokens/radii';
+@use 'tokens/shadows';
+@use 'tokens/zindex';
+@use 'tokens/breakpoints';
+
+/* Mixins (included for any emitted CSS within them) */
+@use 'mixins/mq';
+@use 'mixins/focus-ring';
+@use 'mixins/fluid-size';
+@use 'mixins/truncate';
+
+/* Base */
+@use 'base/reset';
+@use 'base/typography' as base_typography;
+@use 'base/base';
+
+/* Layout */
+@use 'layout/container';
+@use 'layout/grid';
+@use 'layout/flex';
+
+/* Components (shared, only if needed) */
+/* @use 'components/buttons'; */
+/* @use 'components/cards'; */
+
+/* Utilities */
+@use 'utilities/a11y';

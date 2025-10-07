@@ -1,26 +1,49 @@
+# 1) Small Python base
+FROM python:3.12-slim AS base
 
-# בסיס קטן ומעודכן
-FROM python:3.12-slim
+# 2) Cleaner Python defaults
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PIP_NO_CACHE_DIR=1
 
-# לוגים מיידיים וללא קבצי .pyc
-ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
-
-# ספריית עבודה
+# 3) Workdir
 WORKDIR /app
 
-# תלויות מינימליות להרצה (בשלב ראשון)
-# בהמשך עדכן ל-requirements.txt / pyproject.toml
-RUN pip install --no-cache-dir --upgrade pip fastapi uvicorn[standard]
+# 4) os packages:
+#    - ca-certificates: up-to-date trust store for HTTPS (pip)
+#    - build-essential: only if wheels are missing and a package needs compilation
+#    - libpq-dev: PostgreSQL development headers (required for asyncpg)
+#    - gcc: C compiler (required for asyncpg compilation)
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ca-certificates build-essential libpq-dev gcc \
+ && update-ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
 
-# קוד האפליקציה ( app/main.py)
-COPY app/ ./app/
+# 5) Copy pyproject so we know the deps
+COPY pyproject.toml .
 
-# אבטחה בסיסית: לא להריץ כ-root
-RUN useradd -m app && chown -R app /app
-USER app
+# 6) Install Python deps
+RUN python -m pip install --upgrade pip
 
-# הפורט של ה-API
-EXPOSE 8000
+# Install dependencies from pyproject.toml
+RUN python -m pip install --no-cache-dir \
+      --trusted-host pypi.org --trusted-host files.pythonhosted.org \
+      -e .
 
-# הרצת השרת
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# 7) Copy source code
+COPY alembic.ini ./
+COPY alembic ./alembic
+COPY ./app ./app
+COPY docker/entrypoint.sh /entrypoint.sh
+COPY docker/migrate.sh ./docker/migrate.sh
+RUN chmod +x /entrypoint.sh ./docker/migrate.sh
+
+# 8) Run as non-root
+RUN useradd -m appuser && chown -R appuser /app
+USER appuser
+
+# 9) Expose FastAPI port
+EXPOSE 9000
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+# 10) Launch uvicorn (actual command is in entrypoint.sh)
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "9000", "--reload"]

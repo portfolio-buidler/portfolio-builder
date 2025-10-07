@@ -1,1 +1,0 @@
-# FastAPI dependencies (auth guard, pagination)

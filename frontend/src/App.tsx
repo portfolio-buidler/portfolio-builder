@@ -1,8 +1,13 @@
+import UploadCV from './features/UploadCV/UploadCV'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+
 function App() {
   return (
-    <div>
-      <h1>Portfolio Builder</h1>
-    </div>
+    <>
+      <UploadCV />
+      <ToastContainer position="top-right" autoClose={3000} />
+    </>
   )
 }
 

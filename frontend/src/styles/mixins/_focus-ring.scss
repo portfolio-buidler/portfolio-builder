@@ -1,0 +1,8 @@
+/* mixins/_focus-ring.scss
+   Accessible focus ring mixin using tokens. */
+
+@mixin focus-ring($color: var(--brand-500), $offset: 2px, $width: 2px) {
+  outline: none;
+  box-shadow: 0 0 0 $width $color;
+  outline-offset: $offset;
+}
