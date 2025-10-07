@@ -8,6 +8,7 @@ SKILLS_HEADERS = {
     "TECHNOLOGIES",
     "TECH STACK",
     "STACK",
+    "TOOLS & TECHNOLOGIES"
 }
 
 CURATED_SKILL_PATTERNS: dict[str, str] = {
@@ -49,49 +50,38 @@ COMPILED_SKILL_PATTERNS: list[tuple[str, re.Pattern]] = [
 ]
 
 def parse_skills(sections: dict[str, str], full_text: str) -> list[str] | None:
-    # Build the text to scan: join all skills-like sections if present
-    blocks: list[str] = []
-    for hdr in SKILLS_HEADERS:
-        if hdr in sections and sections[hdr]:
-            blocks.append(sections[hdr])
+    # Try to get skills from known headers in sections
+    blocks: list[str] = [sections[hdr] for hdr in SKILLS_HEADERS if hdr in sections and sections[hdr]]
 
-    if blocks:
-        scan_text = "\n".join(blocks)
-        sep_regex = re.compile(r"\s*(?:[,\|\u00B7\u2022/;]|\n)+\s*")
-        raw_tokens = [tok.strip() for tok in sep_regex.split(scan_text) if tok.strip()]
+    # Fallback: search full text for skills section headers if no section found
+    if not blocks:
+        m = re.search(
+            r"(?im)^(skills|technical skills|tools & technologies|technologies|tech stack|stack)[:\-]?\s*(.+)$",
+            full_text
+        )
+        if m:
+            blocks.append(m.group(2))
 
-        results: list[str] = []
-        seen: set[str] = set()
-        for tok in raw_tokens:
-            inner_matches: list[tuple[int, str]] = []
-            for canonical, pat in COMPILED_SKILL_PATTERNS:
-                m = pat.search(tok)
-                if m:
-                    inner_matches.append((m.start(), canonical))
-            if not inner_matches:
-                continue
-            inner_matches.sort(key=lambda t: t[0])
-            if len(inner_matches) == 1:
-                label = inner_matches[0][1]
-            else:
-                label = re.sub(r"\s+", " ", tok).strip()
-            if label not in seen:
-                seen.add(label)
-                results.append(label)
-        return results or None
-
-    # Fallback: simple first-appearance across full text
-    matches: list[tuple[int, str]] = []
-    seen: set[str] = set()
-    for canonical, pat in COMPILED_SKILL_PATTERNS:
-        m = pat.search(full_text)
-        if m and canonical not in seen:
-            seen.add(canonical)
-            matches.append((m.start(), canonical))
-    if not matches:
+    if not blocks:
         return None
-    matches.sort(key=lambda t: t[0])
-    return [name for _, name in matches]
+
+    scan_text = "\n".join(blocks)
+
+    # Split by commas, semicolons, pipes, bullets, parentheses, newlines
+    sep_regex = re.compile(r"\s*(?:[,\|\u00B7\u2022/;\(\)\n])+\s*")
+    raw_tokens = [tok.strip() for tok in sep_regex.split(scan_text) if tok.strip()]
+
+    # Remove duplicates
+    seen = set()
+    results = []
+    for tok in raw_tokens:
+        if tok not in seen:
+            seen.add(tok)
+            results.append(tok)
+
+    return results or None
+
+
 
 def parse_skills_inline(text: str) -> list[str] | None:
     m = re.search(r"(?im)^\s*(skills|technical skills|technologies)\s*[:\-]\s*(.+)$", text)
