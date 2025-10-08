@@ -9,16 +9,16 @@ from app.core.config import MAX_UPLOAD_SIZE, UPLOAD_DIR
 from app.utils.sanitize import safe_filename
 
 # New adapters (text only, no side-effects)
-from app.features.adapters.pdf.reader import pdf_to_text as read_pdf_text
-from app.features.adapters.docx.reader import docx_to_text as read_docx_text
+from app.features.adapters.pdf.reader import read_pdf_text
+from app.features.adapters.docx.reader import read_docx_text
 
 # Normalization utilities
 from app.features.parsing.normalizers import normalize_text, heal_urls
 
 # New parsing core (handles Projects-as-Experience and header synonyms)
-from app.features.parsing.parser_core import parse_all_from_text
+from app.features.parsing.parser_core import parse_cv_text
 
-from .jsonb_models import ResumeParsedJSON
+from .jsonb_models import ResumeParsed
 from .security import verify_magic_bytes, SUPPORTED_MIME, verify_extension
 
 @dataclass
@@ -26,7 +26,7 @@ class UploadResult:
     original_name: str
     content_type: str
     raw_text: str
-    parsed_json: ResumeParsedJSON
+    parsed_json: ResumeParsed
 
 class ResumeService:
     async def handle_upload(self, file: UploadFile) -> UploadResult:
@@ -50,8 +50,10 @@ class ResumeService:
                 raise ValueError("empty or unreadable document")
             # Apply normalization + URL healing before parsing
             norm_text = heal_urls(normalize_text(raw_text))
-            parsed_dict = parse_all_from_text(norm_text)
-            parsed = ResumeParsedJSON(**parsed_dict)
+            parsed_dict = parse_cv_text(norm_text)
+            # parsed_dict structure: {full_text, parsed, meta}; we only store the inner parsed part
+            inner = parsed_dict.get("parsed", {}) if isinstance(parsed_dict, dict) else {}
+            parsed = ResumeParsed(**inner)
         except HTTPException:
             raise
         except Exception as e:
