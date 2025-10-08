@@ -1,14 +1,12 @@
 from __future__ import annotations
 from dataclasses import dataclass, asdict
 import regex as re
-from .normalizers import split_blocks
 
-DEGREE_WORDS = (
-    r"\b(?:B\.?.?Sc\.?|BSc|B\.?.?A\.?|BA|M\.?.?Sc\.?|MSc|M\.?.?A\.?|MA|Bachelor|Master|Ph\.?.?D\.?|Certificate)\b"
-)
+DEGREE_WORDS = r"\b(?:B\.?Sc\.?|BSc|B\.?A\.?|BA|M\.?Sc\.?|MSc|M\.?A\.?|MA|Bachelor|Master|Ph\.?D\.?|Certificate)\b"
 YEAR_RANGE_RE = re.compile(
-    r"(?:(?:20|19)\d{2})(?:\s*[–-]\s*(?:Present|(?:20|19)\d{2}))?|Expected\s+(?:20|19)\d{2}", re.I
-)   
+    r"(?:(?:20|19)\d{2})(?:\s*[–-]\s*(?:Present|(?:20|19)\d{2}))?|Expected\s+(?:20|19)\d{2}",
+    re.I,
+)
 
 @dataclass
 class EducationItem:
@@ -20,32 +18,34 @@ def parse_education(s: str) -> list[dict]:
     if not s:
         return []
     items: list[EducationItem] = []
-    # Split on any newline and build blocks keyed by the presence of a degree word
-    lines = [ln.strip() for ln in s.split('\n') if ln.strip()]
+    degree_pattern = re.compile(DEGREE_WORDS, re.I)
+    lines = [ln.strip() for ln in s.split("\n") if ln.strip()]
     blocks: list[str] = []
     current: str = ""
     for ln in lines:
-        # If this line begins a new education entry, flush the previous one
-        if re.search(DEGREE_WORDS, ln, re.I) and current:
+        if degree_pattern.search(ln) and current:
             blocks.append(current.strip())
             current = ln
         else:
-            # Otherwise append to the current block
-            if current:
-                current += " " + ln
-            else:
-                current = ln
+            current = f"{current} {ln}".strip() if current else ln
     if current:
         blocks.append(current.strip())
     for block in blocks:
         line = " ".join(block.split())
-        deg = re.search(DEGREE_WORDS, line, re.I)
+        deg = degree_pattern.search(line)
         yrs = YEAR_RANGE_RE.search(line)
-        inst = None
+        inst: str | None = None
         if deg:
             after = line[deg.end():].strip(",|-;: ")
-            # crude chop of institution part up to the first parenthesis, pipe or dash
-            inst = after.split(" (")[0].split(" | ")[0].split(" - ")[0] or None
+            inst = (
+                after.split(" (", 1)[0]
+                .split(" | ", 1)[0]
+                .split(" - ", 1)[0]
+                or None
+            )
+            if inst:
+                inst = re.sub(r"^[.\s]*(?:in|of)\s+", "", inst, flags=re.I).strip()
+                inst = re.sub(r"^(?:'s\s+)?degree\s+in\s+", "", inst, flags=re.I).strip()
         items.append(
             EducationItem(
                 degree=deg.group(0) if deg else None,
@@ -53,4 +53,4 @@ def parse_education(s: str) -> list[dict]:
                 years=yrs.group(0) if yrs else None,
             )
         )
-    return [asdict(x) for x in items]
+    return [asdict(x) for x in items if any([x.degree, x.institution, x.years])]

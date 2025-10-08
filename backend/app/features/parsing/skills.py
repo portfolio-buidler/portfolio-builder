@@ -4,18 +4,20 @@ import regex as re
 def parse_skills(s: str) -> list[str]:
     if not s:
         return []
-    parts = re.split(r"[•|,;/]|\s{2,}", s)
+    parts = re.split(r"[•|,;/:]|\s{2,}", s)
     out: list[str] = []
     for p in parts:
         p = p.strip(" .•-|")
         if not p:
             continue
-        if p.lower() in {"javascript/typescript", "js/ts"}:
+        low = p.lower()
+        if any(keyword in low for keyword in ["languages", "frameworks", "technologies", "soft skills"]):
+            continue
+        if low in {"javascript/typescript", "js/ts"}:
             out.extend(["JavaScript", "TypeScript"])
         else:
             out.append(p)
-    # stable dedupe
-    seen = set()
+    seen: set[str] = set()
     dedup: list[str] = []
     for x in out:
         k = x.lower()
