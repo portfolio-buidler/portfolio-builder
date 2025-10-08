@@ -42,9 +42,9 @@ def _parse_experience(s: str) -> list[dict]:
         desc = "\n".join(lines[1:]).strip() or None
         if not any([role, company, desc]):
             continue
-        items.append(ExperienceItem(
-            role=role, company=company, dates=dates.group(0) if dates else None, description=desc
-        ))
+        items.append(
+            ExperienceItem(role=role, company=company, dates=dates.group(0) if dates else None, description=desc)
+        )
     return [asdict(x) for x in items]
 
 def _parse_projects(s: str) -> list[dict]:

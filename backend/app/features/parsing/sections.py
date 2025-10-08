@@ -22,6 +22,6 @@ def find_sections(text: str) -> Tuple[Dict[str, str], List[str]]:
     idxs.sort()
     sections = {k: "" for k in SECTION_ALIASES}
     for n, (i, key) in enumerate(idxs):
-        j = idxs[n+1][0] if n+1 < len(idxs) else len(lines)
-        sections[key] = "\n".join(lines[i+1:j]).strip()
+        j = idxs[n + 1][0] if n + 1 < len(idxs) else len(lines)
+        sections[key] = "\n".join(lines[i + 1 : j]).strip()
     return sections, lines
