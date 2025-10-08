@@ -1,7 +1,5 @@
 import re
 
-import re
-
 def clean_text(text: str | None, replace_newlines: bool = True) -> str:
     """
     Normalize text:
