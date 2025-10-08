@@ -21,16 +21,14 @@ async def upload_cv(file: UploadFile = File(...)) -> UploadResponse:
 
     svc = ResumeService()
     # Parse first. If it fails, DB stays clean.
-    result = await svc.handle_upload(file)  # dict with keys: full_text, parsed, meta
-
-    parsed_model = ResumeParsed(**result["parsed"])
-
+    result = await svc.handle_upload(file)  # UploadResult dataclass
+    parsed_model = result.parsed_json
     # Persist parsed JSON (JSONB) only on success
     async with AsyncSessionLocal() as session:
         resume = Resume(
             user_id=None,  # wire your auth later
             source_file_id=None,
-            original_name=result["meta"]["source_file"],
+            original_name=result.original_name,
             parse_status=ParseStatus.success,
             is_primary=False,
             parsed_json=parsed_model.model_dump(mode="json"),
@@ -41,9 +39,9 @@ async def upload_cv(file: UploadFile = File(...)) -> UploadResponse:
         await session.commit()
 
     extracted = {
-        "full_text": result["full_text"],
+        "full_text": result.raw_text,
         "parsed": parsed_model.model_dump(mode="json"),
-        "file_info": {"filename": result["meta"]["source_file"], "content_type": result["meta"]["mime"]},
+        "file_info": {"filename": result.original_name, "content_type": result.content_type},
     }
     return UploadResponse(
         success=True,
@@ -73,6 +71,6 @@ async def upload_cv_simple(file: UploadFile = File(...)) -> SimpleParsedResponse
     svc = ResumeService()
     result = await svc.handle_upload(file)
     return SimpleParsedResponse(
-        **result["parsed"],
-        full_text=result["full_text"]
+        **result.parsed_json.model_dump(mode="json"),
+        full_text=result.raw_text
     )

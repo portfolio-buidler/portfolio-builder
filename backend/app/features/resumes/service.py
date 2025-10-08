@@ -18,7 +18,7 @@ from app.features.parsing.normalizers import normalize_text, heal_urls
 # New parsing core (handles Projects-as-Experience and header synonyms)
 from app.features.parsing.parser_core import parse_cv_text
 
-from .jsonb_models import ResumeParsed
+from .jsonb_models import ResumeParsed, MAX_DESC_LEN, MAX_SKILL_LEN
 from .security import verify_magic_bytes, SUPPORTED_MIME, verify_extension
 
 @dataclass
@@ -51,8 +51,8 @@ class ResumeService:
             # Apply normalization + URL healing before parsing
             norm_text = heal_urls(normalize_text(raw_text))
             parsed_dict = parse_cv_text(norm_text)
-            # parsed_dict structure: {full_text, parsed, meta}; we only store the inner parsed part
             inner = parsed_dict.get("parsed", {}) if isinstance(parsed_dict, dict) else {}
+            self._truncate_lengths(inner)
             parsed = ResumeParsed(**inner)
         except HTTPException:
             raise
@@ -95,3 +95,30 @@ class ResumeService:
         if content_type == "application/pdf":
             return read_pdf_text(str(path))
         return read_docx_text(str(path))
+
+    def _truncate_lengths(self, data: dict) -> None:
+        if not isinstance(data, dict):
+            return
+        # about
+        about = data.get("about")
+        if isinstance(about, str) and len(about) > MAX_DESC_LEN:
+            data["about"] = about[: MAX_DESC_LEN - 1] + "…"
+        # skills
+        skills = data.get("skills")
+        if isinstance(skills, list):
+            new_skills = []
+            for s in skills:
+                if isinstance(s, str) and len(s) > MAX_SKILL_LEN:
+                    new_skills.append(s[: MAX_SKILL_LEN - 1] + "…")
+                else:
+                    new_skills.append(s)
+            data["skills"] = new_skills
+        # list sections with description
+        for section in ("experience", "projects"):
+            entries = data.get(section)
+            if isinstance(entries, list):
+                for e in entries:
+                    if isinstance(e, dict):
+                        desc = e.get("description")
+                        if isinstance(desc, str) and len(desc) > MAX_DESC_LEN:
+                            e["description"] = desc[: MAX_DESC_LEN - 1] + "…"
