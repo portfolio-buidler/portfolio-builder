@@ -1,6 +1,5 @@
 import re
 from typing import Optional, Tuple
-from pydantic import EmailStr
 from .normalizers import normalize_phone
 
 # Email and phone that don’t overmatch into URLs or glued text
@@ -14,9 +13,14 @@ PHONE_REGEX = (
     r"(?!\d)"
 )
 
+NAME_PIPE_TITLE = re.compile(r"^([A-Z][A-Za-z'`-]+(?:\s+[A-Z][A-Za-z'`-]+){0,3})\s*\|\s*.+" )
+
 def _first_line_name(text: str) -> Optional[str]:
     lines = text.splitlines()
     head = lines[0].strip() if lines else ""
+    m = NAME_PIPE_TITLE.match(head)
+    if m:
+        return m.group(1)
     if 2 <= len(head.split()) <= 5 and re.match(r"^[A-Za-z\u0590-\u05FF][^\d@]+$", head):
         return head
     return None
@@ -52,17 +56,13 @@ def guess_name_from_preamble(preamble_text: str) -> Optional[str]:
             return s
     return None
 
-def extract_contacts(text: str) -> Tuple[Optional[str], Optional[str], Optional[EmailStr]]:
-    name = _first_line_name(text)
-    if not name:
-        # try preamble then email-derived
-        preamble = text.split("\n\n", 1)[0]
-        name = guess_name_from_preamble(preamble)
-        if not name:
-            name = name_from_email(re.search(EMAIL_REGEX, text).group(0) if re.search(EMAIL_REGEX, text) else None)
-
-    phone_m = re.search(PHONE_REGEX, text)
+def extract_contacts(text: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    name = _first_line_name(text) or guess_name_from_preamble(text.split("\n\n", 1)[0])
     email_m = re.search(EMAIL_REGEX, text)
-    phone = normalize_phone(phone_m.group(0)) if phone_m else None
-    email = EmailStr(email_m.group(0)) if email_m else None
+    phone_m = re.search(PHONE_REGEX, text)
+    email = email_m.group(0) if email_m else None
+    phone_raw = phone_m.group(0) if phone_m else None
+    if phone_raw:
+        phone_raw = re.sub(r"\s*[-–]\s*", "-", phone_raw)  # tighten hyphen spacing
+    phone = normalize_phone(phone_raw)
     return name, phone, email

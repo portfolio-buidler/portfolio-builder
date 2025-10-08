@@ -8,6 +8,8 @@ from .contact import extract_contacts
 from .education import extract_education
 from .skills import extract_skills
 
+MAX_DESC_LEN = 280
+
 def extract_about(text: str) -> Optional[str]:
     body = section_slice(text, ABOUT_SECTION_RE, [EXP_SECTION_RE, EDU_SECTION_RE, SKILLS_SECTION_RE])
     if not body:
@@ -19,39 +21,46 @@ def _split_experience_blocks(body: str) -> List[str]:
     parts = re.split(r"\n{2,}", body.strip())
     blocks, buf = [], []
     for p in parts:
-        if DATE_RE.search(p) or re.search(r"\bManager|Lead|Engineer|Developer|Director|Head|Product|Project\b", p, re.I):
-            if buf:
-                blocks.append("\n".join(buf).strip())
-                buf = []
+        header_like = DATE_RE.search(p) or re.search(r"\b(Manager|Lead|Engineer|Developer|Director|Head|Product|Project)\b", p)
+        if header_like and buf:
+            blocks.append("\n".join(buf).strip())
+            buf = []
         buf.append(p)
     if buf:
         blocks.append("\n".join(buf).strip())
     return [b for b in blocks if b]
 
+TITLE_RE = re.compile(r"\b(Manager|Lead|Engineer|Developer|Director|Head|Product|Project|Founder|Owner)\b")
+
 def _extract_header_company_role_dates(block: str) -> Tuple[Optional[str], List[str], Optional[str]]:
     first = block.strip().splitlines()[0]
     dates = None
-    dm = DATE_RE.search(first) or DATE_RE.search(block.splitlines()[0])
+    dm = DATE_RE.search(first)
     if dm:
         dates = dm.group(0)
-        first = first.replace(dates, "").replace("–", "").replace("-", "").strip()
+        first = first.replace(dates, "").replace("–", "-").replace("—", "-").strip()
+    role_guess = None
+    companies: List[str] = []
     if "|" in first:
         parts = [s.strip() for s in first.split("|") if s.strip()]
-        role_guess, company_candidates = parts[0], parts[1:]
+        if parts:
+            role_guess = parts[0] if TITLE_RE.search(parts[0]) else None
+            companies = parts[1:]
     elif "," in first:
         a, b = [s.strip() for s in first.split(",", 1)]
-        if re.search(r"\b(Project|Product|Manager|Lead|Engineer|Developer|Director|Head)\b", a, re.I):
-            role_guess, company_candidates = a, [b]
-        else:
-            role_guess, company_candidates = b, [a]
-    else:
-        role_guess, company_candidates = first, []
-    companies = [re.sub(r"^(at|@)\s+", "", c, flags=re.I) for c in company_candidates if c]
-    return (role_guess or None), companies, (dates or None)
+        if TITLE_RE.search(a):
+            role_guess = a
+            companies = [b]
+        elif TITLE_RE.search(b):
+            role_guess = b
+            companies = [a]
+    elif TITLE_RE.search(first):
+        role_guess = first
+    return role_guess, companies, dates
 
 def _extract_descriptions(block: str) -> List[str]:
     lines = block.splitlines()[1:] if len(block.splitlines()) > 1 else []
-    bullets = []
+    bullets: List[str] = []
     for ln in lines:
         ln = ln.strip()
         if not ln:
@@ -60,23 +69,41 @@ def _extract_descriptions(block: str) -> List[str]:
             bullets.append(re.sub(r"^[•\-\–\*]\s+", "", ln).strip())
         elif len(ln) >= 5:
             bullets.append(ln)
-    return [b.strip(" .;") for b in bullets if b.strip(" .;")][:20]
+    cleaned = []
+    for b in bullets:
+        b = b.strip(" .;")
+        if len(b) > MAX_DESC_LEN:
+            # take first sentence-ish
+            sent = re.split(r"(?<=[.!?])\s", b)[0]
+            cleaned.append(sent[:MAX_DESC_LEN])
+        else:
+            cleaned.append(b)
+    return cleaned[:6]
 
 def extract_experience(text: str) -> List[dict]:
-    body = section_slice(text, EXP_SECTION_RE, [EDU_SECTION_RE, SKILLS_SECTION_RE, ABOUT_SECTION_RE])
-    if not body:
-        body = section_slice(text, PROJECTS_SECTION_RE, [EDU_SECTION_RE, SKILLS_SECTION_RE, ABOUT_SECTION_RE])
-    if not body:
+    exp_body = section_slice(text, EXP_SECTION_RE, [EDU_SECTION_RE, SKILLS_SECTION_RE, ABOUT_SECTION_RE, PROJECTS_SECTION_RE])
+    proj_body = section_slice(text, PROJECTS_SECTION_RE, [EDU_SECTION_RE, SKILLS_SECTION_RE, ABOUT_SECTION_RE])
+    bodies = []
+    if exp_body:
+        bodies.append(exp_body)
+    if proj_body:
+        bodies.append(proj_body)
+    if not bodies:
         return []
     items: List[dict] = []
-    for b in _split_experience_blocks(body):
-        role, companies, dates = _extract_header_company_role_dates(b)
-        items.append({
-            "role": role or None,
-            "companies": companies or [],
-            "dates": dates or None,
-            "descriptions": _extract_descriptions(b) or [],
-        })
+    for body in bodies:
+        for b in _split_experience_blocks(body):
+            role, companies, dates = _extract_header_company_role_dates(b)
+            descs = _extract_descriptions(b)
+            if not descs and len(b.splitlines()) == 1:
+                # treat single line project title as description
+                descs = [b.strip()]
+            items.append({
+                "role": role,
+                "companies": companies,
+                "dates": dates,
+                "descriptions": descs,
+            })
     return items[:12]
 
 def parse_all_from_text(text: str) -> dict:

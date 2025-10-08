@@ -2,6 +2,8 @@ import re
 from .sections import SKILLS_SECTION_RE, EXP_SECTION_RE, EDU_SECTION_RE, ABOUT_SECTION_RE, BULLET
 from .normalizers import dedup_ordered
 
+CONTACT_LIKE = re.compile(r"^(linkedin|github|www\.|https?://|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+|\+?\d)[A-Za-z0-9@._\- ]*$", re.I)
+
 def extract_skills(text: str) -> list[str]:
     stop = [EXP_SECTION_RE, EDU_SECTION_RE, ABOUT_SECTION_RE]
     body = _slice(text, SKILLS_SECTION_RE, stop)
@@ -12,15 +14,17 @@ def extract_skills(text: str) -> list[str]:
             body = m.group(2)
         else:
             return []
-    items = re.split(BULLET + r"|\s*[,\|;/]\s*", body)
+    items = re.split(BULLET + r"|\s*[,\|;/·]\s*", body)
     skills = []
     for it in items:
         it = it.strip("•-–·* \n\t;()")
         if not it:
             continue
-        it = re.sub(r"^(skills|tools|technologies|tech\s*stack)\s*:\s*", "", it, flags=re.I).strip()
-        if 2 <= len(it) <= 48:
-            skills.append(it)
+        it_norm = re.sub(r"^(skills|tools|technologies|tech\s*stack)\s*:\s*", "", it, flags=re.I).strip()
+        if not it_norm or CONTACT_LIKE.match(it_norm):
+            continue
+        if 2 <= len(it_norm) <= 48:
+            skills.append(it_norm)
     return dedup_ordered(skills)[:100]
 
 def _slice(text: str, head, stops):

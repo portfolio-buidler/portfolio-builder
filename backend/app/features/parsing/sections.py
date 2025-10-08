@@ -1,11 +1,12 @@
 import re
 
 # Header synonyms. Humans love reinventing headings.
-EDU_SECTION_RE = re.compile(r"(education|studies|academic background)[:\s]*", re.I)
-EXP_SECTION_RE = re.compile(r"(experience|work experience|professional experience|employment history)[:\s]*", re.I)
-PROJECTS_SECTION_RE = re.compile(r"(projects|selected projects|personal projects)[:\s]*", re.I)
-ABOUT_SECTION_RE = re.compile(r"(summary|objective|about|profile)[:\s]*", re.I)
-SKILLS_SECTION_RE = re.compile(r"(skills|technical skills|technologies|tools|tech stack|stack|tools & technologies)[:\s]*", re.I)
+# Anchor to line starts to avoid matching words appearing mid-sentence
+EDU_SECTION_RE = re.compile(r"(?im)^[ \t]*(education|studies|academic background)[:\s]*$", re.I)
+EXP_SECTION_RE = re.compile(r"(?im)^[ \t]*(experience|work experience|professional experience|employment history)[:\s]*$", re.I)
+PROJECTS_SECTION_RE = re.compile(r"(?im)^[ \t]*(projects|selected projects|personal projects)[:\s]*$", re.I)
+ABOUT_SECTION_RE = re.compile(r"(?im)^[ \t]*(summary|objective|about|profile)[:\s]*$", re.I)
+SKILLS_SECTION_RE = re.compile(r"(?im)^[ \t]*(skills|technical skills|technologies|tools|tech stack|stack|tools & technologies)[:\s]*$", re.I)
 
 # Dates like "2021 – 2025" or "May 2020 – Present"
 DATE_RE = re.compile(

@@ -1,22 +1,49 @@
+[build-system]
+# Editable installs ("-e .") need a build backend. Hatchling is simple and fine.
+requires = ["hatchling>=1.18"]
+build-backend = "hatchling.build"
+
 [project]
 name = "portfolio-backend"
 version = "0.0.1"
+description = "FastAPI backend for CV parsing and portfolio builder"
+requires-python = ">=3.12"
+
+# Runtime dependencies only
 dependencies = [
-  "fastapi",
-  "uvicorn[standard]",
-  "python-multipart",
-  "sqlalchemy>=2.0",
-  "psycopg[binary]",
-  "alembic>=1.7",
-  "asyncpg",
-  "pydantic>=2.0",
-  "python-dotenv",
-  "pypdf",
-  "python-docx",
-  "docx2txt",
-  "docx2python",
-  "defusedxml>=0.7.1",
-  # test deps
-  "pytest",
-  "httpx",
+  # API + server
+  "fastapi>=0.112",
+  "uvicorn[standard]>=0.30",          # includes watchfiles for --reload
+
+  # Validation + forms
+  "pydantic[email]>=2.7",             # pulls in email-validator; stop crashing on EmailStr
+  "python-multipart>=0.0.9",          # UploadFile/form parsing
+
+  # DB stack
+  "SQLAlchemy>=2.0",
+  "alembic>=1.13",
+  "psycopg[binary]>=3.2",             # psycopg3 binary; fine for Alembic
+  "asyncpg>=0.29",                    # if/when you use async engine at runtime
+
+  # Parsing
+  "pypdf>=5.0.0",
+  "defusedxml>=0.7.1",                # DOCX XML parsing (our adapter)
+  "python-dotenv>=1.0.0"
 ]
+
+[project.optional-dependencies]
+# Things you want in dev and CI, not in the prod image
+dev = [
+  "pytest>=8.2",
+  "pytest-asyncio>=0.23",
+  "httpx>=0.27"
+]
+
+# Optional fallbacks for DOCX if you ever want them.
+# We DO NOT need these for the current adapter, they’re just a parachute.
+docx-fallbacks = [
+  "python-docx>=1.1.2"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]

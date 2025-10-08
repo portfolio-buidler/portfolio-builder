@@ -5,7 +5,7 @@ from sqlalchemy import select
 from app.core.db import AsyncSessionLocal
 from app.db.models_resume import Resume
 from app.shared.enums import ParseStatus
-from .upload_schemas import UploadResponse, UploadData
+from .upload_schemas import UploadResponse, UploadData, SimpleParsedResponse
 from .service import ResumeService
 from .security import SUPPORTED_MIME
 
@@ -64,3 +64,10 @@ async def upload_status(file_id: str) -> UploadResponse:
             message="OK",
             data=UploadData(fileId=str(row.id), extractedData=extracted),
         )
+
+# Optional simplified endpoint returning flattened parsed data only
+async def upload_cv_simple(file: UploadFile = File(...)) -> SimpleParsedResponse:
+    svc = ResumeService()
+    result = await svc.handle_upload(file)
+    parsed = result.parsed_json.model_dump(mode="json")
+    return SimpleParsedResponse(**parsed, full_text=result.raw_text)
