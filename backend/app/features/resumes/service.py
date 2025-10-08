@@ -12,6 +12,9 @@ from app.utils.sanitize import safe_filename
 from app.features.adapters.pdf.reader import pdf_to_text as read_pdf_text
 from app.features.adapters.docx.reader import docx_to_text as read_docx_text
 
+# Normalization utilities
+from app.features.parsing.normalizers import normalize_text, heal_urls
+
 # New parsing core (handles Projects-as-Experience and header synonyms)
 from app.features.parsing.parser_core import parse_all_from_text
 
@@ -45,7 +48,9 @@ class ResumeService:
             raw_text = self._extract_text(dst, ct)
             if not raw_text or not raw_text.strip():
                 raise ValueError("empty or unreadable document")
-            parsed_dict = parse_all_from_text(raw_text)
+            # Apply normalization + URL healing before parsing
+            norm_text = heal_urls(normalize_text(raw_text))
+            parsed_dict = parse_all_from_text(norm_text)
             parsed = ResumeParsedJSON(**parsed_dict)
         except HTTPException:
             raise
@@ -63,7 +68,7 @@ class ResumeService:
         return UploadResult(
             original_name=file.filename or "upload.bin",
             content_type=ct,
-            raw_text=raw_text,
+            raw_text=norm_text,
             parsed_json=parsed,
         )
 
