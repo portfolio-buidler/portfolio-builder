@@ -1,0 +1,38 @@
+{
+  "full_text": "Yarin Doanis\nHolon, IL | +972 534324030 | yarin3344s@gmail.com | LinkedIn | GitHub\nSOFTWARE DEVELOPER | BACKEND • QA\nEducation\nHolon Institute of Technology (HIT) | B.Sc. in Computer Science (Expected 2025)\nMilitary Service — Workforce Planning Specialist\nAbout me — Motivated CS student with backend, automation, and QA focus.\nProjects — Parking Lot Management System (C#/.NET); Weather2Day App (Android, MVVM, Retrofit, Room, Hilt, WorkManager)\nSkills — Java, Python, C#, JavaScript, SQL, .NET, NodeJS, Express.js, React, CI/CD, RESTful APIs, MySQL, MongoDB, AWS (learning), Docker, Git; Hebrew/English",
+  "parsed": {
+    "name": "Yarin Doanis",
+    "email": "yarin3344s@gmail.com",
+    "phone": "+972534324030",
+    "linkedin": null,
+    "github": null,
+    "about": "Motivated and versatile CS student focused on backend development, automation, and QA; hands-on with scalable apps and test solutions.",
+    "skills": ["Java","Python","C#","JavaScript","SQL",".NET","NodeJS","Express.js","React","CI/CD","RESTful APIs","MySQL","MongoDB","AWS (learning)","Docker","Git"],
+    "education": [
+      {
+        "degree": "B.Sc. in Computer Science",
+        "institution": "Holon Institute of Technology (HIT)",
+        "years": "Expected 2025"
+      }
+    ],
+    "experience": [],
+    "projects": [
+      {
+        "project_name": "Parking Lot Management System",
+        "description": "C#/.NET system for real-time vehicle tracking and price calculation; applied OOP and SQL persistence."
+      },
+      {
+        "project_name": "Weather2Day App",
+        "description": "Android app using MVVM with Retrofit and Room, background tasks via WorkManager, DI with Hilt, and dynamic network handling."
+      }
+    ],
+    "military_service": "Workforce Planning Specialist; analyzed manpower requirements and optimized resource allocation."
+  },
+  "meta": {
+    "source_file": "CV v2.docx",
+    "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "pages": null,
+    "parse_status": "success",
+    "errors": []
+  }
+}

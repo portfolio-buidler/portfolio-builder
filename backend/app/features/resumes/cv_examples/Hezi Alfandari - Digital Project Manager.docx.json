@@ -1,0 +1,53 @@
+{
+  "full_text": "Hezi Alfandari | Digital Project Manager\nLinkedIn | 050-388-9900 | Hezi779@gmail.com | Yavne, Israel\nProject manager with proven experience in digital transformations, process streamlining, and CX improvements.\nProfessional Experience\nEqual in Lecturing (2025–Present)\nGamification Game Development (2025–Present)\nDigital Transformation & Business Processes, Shufersal (2021–2025)\nEducation\nProject Management Certificate — Product Experts (2024)\nB.A. Communication and Humanities — College of Management (2016)\nTools & Technologies — CRM (Salesforce), BI (Power BI, Tableau, Google Data Studio), Agile (Jira, Monday, ClickUp, Trello, Asana), Automation, Advanced Excel, Workflow Optimization",
+  "parsed": {
+    "name": "Hezi Alfandari",
+    "email": "Hezi779@gmail.com",
+    "phone": "+972503889900",
+    "linkedin": null,
+    "github": null,
+    "about": "Project manager experienced in digital transformation, business process optimization, and customer-experience improvements; focused on tech project management with Agile practices.",
+    "skills": ["Salesforce","Power BI","Tableau","Google Data Studio","Jira","Monday","ClickUp","Trello","Asana","Automation","Advanced Excel","Workflow Management","WCAG 2.1"],
+    "education": [
+      {
+        "degree": "Project Management Certificate",
+        "institution": "Product Experts",
+        "years": "2024"
+      },
+      {
+        "degree": "B.A. in Communication and Humanities",
+        "institution": "College of Management",
+        "years": "2016"
+      }
+    ],
+    "experience": [
+      {
+        "role": "Project Manager",
+        "company": "Equal in Lecturing",
+        "dates": "2025–Present",
+        "description": "Leading development of a national accessibility platform; defined UX/UI and IA; ensured WCAG 2.1 compliance; coordinating cross-functional teams."
+      },
+      {
+        "role": "Project Manager",
+        "company": "Gamification Game Development",
+        "dates": "2025–Present",
+        "description": "Simulates high-tech recruitment to improve hiring; lab for Agile management, cross-disciplinary coordination, and KPI-driven improvements."
+      },
+      {
+        "role": "Project Manager, Digital Transformation & Business Processes",
+        "company": "Shufersal",
+        "dates": "2021–2025",
+        "description": "Led projects increasing digital engagement by 72% through automation and process improvements; implemented CRM, BI, and automation tools; managed teams with Agile."
+      }
+    ],
+    "projects": [],
+    "military_service": null
+  },
+  "meta": {
+    "source_file": "Hezi Alfandari - Digital Project Manager.docx",
+    "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "pages": null,
+    "parse_status": "success",
+    "errors": []
+  }
+}

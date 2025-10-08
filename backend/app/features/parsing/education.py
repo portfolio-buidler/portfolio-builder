@@ -1,60 +1,33 @@
-import re
-from .sections import EDU_SECTION_RE, EXP_SECTION_RE, SKILLS_SECTION_RE, ABOUT_SECTION_RE, BULLET
+from __future__ import annotations
+from dataclasses import dataclass, asdict
+import regex as re
+from .normalizers import split_blocks
 
-DEGREE_WORDS = r"(B\.?A\.?|B\.?Sc\.?|BSc|BA|M\.?A\.?|M\.?Sc\.?|MSc|MA|MBA|LLB|LL\.B\.|Ph\.?D\.?|Bachelor.?s|Master.?s|Doctorate|Diploma|Associate|Certificate)"
+DEGREE_WORDS = r"(B\.?Sc\.?|BSc|B\.?A\.?|BA|M\.?Sc\.?|MSc|M\.?A\.?|MA|Bachelor|Master|Ph\.?D\.?)"
+YEAR_RANGE_RE = re.compile(r"(?:(?:20|19)\d{2})(?:\s*[–-]\s*(?:Present|(?:20|19)\d{2}))?|Expected\s+(?:20|19)\d{2}", re.I)
 
-def extract_education(text: str) -> list[dict]:
-    stop = [EXP_SECTION_RE, SKILLS_SECTION_RE, ABOUT_SECTION_RE]
-    body = _slice(text, EDU_SECTION_RE, stop) or text
+@dataclass
+class EducationItem:
+    degree: str | None = None
+    institution: str | None = None
+    years: str | None = None
 
-    lines = [ln.strip() for ln in body.splitlines() if ln.strip()]
-    items: list[dict] = []
-
-    for ln in lines:
-        if not re.search(DEGREE_WORDS, ln, re.I):
-            continue
-        year = _first_year(ln)
-        degree, institution = _split_degree_institution(ln)
-        items.append({"degree": degree, "institution": institution, "year": year})
-
-    if not items:
-        for b in re.split(BULLET, body):
-            b = b.strip()
-            if b and re.search(DEGREE_WORDS, b, re.I):
-                items.append({
-                    "degree": re.search(rf"{DEGREE_WORDS}.*", b, re.I).group(0) if re.search(rf"{DEGREE_WORDS}", b, re.I) else None,
-                    "institution": None,
-                    "year": _first_year(b),
-                })
-    return items[:8]
-
-def _first_year(s: str) -> str | None:
-    m = re.search(r"(19|20)\d{2}", s)
-    return m.group(0) if m else None
-
-def _split_degree_institution(ln: str) -> tuple[str | None, str | None]:
-    ln = re.sub(r"\(\s*(19|20)\d{2}\s*(?:[-–]\s*(19|20)\d{2})?\s*\)", "", ln)  # drop parenthesized years
-    if "," in ln or "|" in ln:
-        a, b = re.split(r",|\|", ln, maxsplit=1)
-        a, b = a.strip(), b.strip()
-        if re.search(DEGREE_WORDS, a, re.I):
-            return a, _clean_tail(b)
-        return (re.search(rf"{DEGREE_WORDS}.*", b, re.I).group(0) if re.search(DEGREE_WORDS, b, re.I) else None, _clean_tail(a))
-    m = re.search(rf"({DEGREE_WORDS}).*?\s+(?:at|@)\s+(.+)", ln, re.I)
-    if m:
-        return m.group(0), _clean_tail(m.group(2))
-    degree = re.search(rf"{DEGREE_WORDS}.*", ln, re.I)
-    return (degree.group(0).strip() if degree else None, None)
-
-def _clean_tail(s: str) -> str:
-    return re.sub(r"\s*\(?\b\d{4}(?:\s*[-–]\s*\d{4})?\)?$", "", s).strip(" ,.;-")
-
-def _slice(text, head, stops):
-    m = head.search(text)
-    if not m:
-        return None
-    start = m.end()
-    ends = [r.search(text, start) for r in stops]
-    ends = [e for e in ends if e]
-    end = min([e.start() for e in ends], default=len(text))
-    return text[start:end].strip() or None
+def parse_education(s: str) -> list[dict]:
+    if not s:
+        return []
+    items: list[EducationItem] = []
+    for block in split_blocks(s):
+        line = " ".join(block.split())
+        deg = re.search(DEGREE_WORDS, line, re.I)
+        yrs = YEAR_RANGE_RE.search(line)
+        inst = None
+        if deg:
+            after = line[deg.end():].strip(",|-;: ")
+            # crude chop
+            inst = after.split(" (")[0].split(" | ")[0].split(" - ")[0] or None
+        items.append(EducationItem(
+            degree=deg.group(0) if deg else None,
+            institution=inst,
+            years=yrs.group(0) if yrs else None
+        ))
+    return [asdict(x) for x in items]

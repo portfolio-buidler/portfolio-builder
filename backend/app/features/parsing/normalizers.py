@@ -1,38 +1,26 @@
-import re
-from typing import Iterable
+from __future__ import annotations
+import regex as re
+from ftfy import fix_text
 
-def clean_text(text: str | None, replace_newlines: bool = True) -> str:
-    if not text:
-        return ""
-    text = text.replace("\\n", "\n").replace("\r\n", "\n").replace("\r", "\n")
-    text = text.translate(str.maketrans({
-        "\u00A0": " ",  # NBSP
-        "\u2010": "-",  # hyphen
-        "\u2011": "-",  # non-breaking hyphen
-        "\u2012": "-",  # figure dash
-        "\u2013": "-",  # en dash
-        "\u2014": "-",  # em dash
-        "\u2015": "-",  # horizontal bar
-        "\u2212": "-",  # minus sign
-    }))
-    text = text.replace("\u200B", "").replace("\u200C", "").replace("\u200D", "").replace("\u00AD", "")
-    text = re.sub(r"[ \t]+", " ", text)
-    if replace_newlines:
-        text = re.sub(r"\n+", ", ", text)
-    return text.strip()
+NBSP = "\xa0"
 
-def normalize_phone(s: str | None) -> str | None:
-    if not s:
-        return None
-    s = re.sub(r"\s*-\s*", " - ", s)
-    s = re.sub(r"\s{2,}", " ", s).strip()
+def normalize_text(s: str) -> str:
+    # Unicode fixes first
+    s = fix_text(s or "")
+    s = s.replace(NBSP, " ")
+    # normalize bullets to a single char
+    s = s.replace("•", "•").replace("·", "•")
+    # collapse whitespace
+    s = re.sub(r"[ \t]+", " ", s)
+    s = re.sub(r"[ \t]+\n", "\n", s)
+    s = re.sub(r"\n{3,}", "\n\n", s)
+    return s.strip()
+
+def heal_urls(s: str) -> str:
+    # merge "https://example.\ncom/path" -> "https://example.com/path"
+    s = re.sub(r"(https?://[^\s]+)\.\n([^\s]+)", r"\1.\2", s, flags=re.I)
+    s = re.sub(r"(https?://[^\s]+)\n([^\s]+)", r"\1\2", s, flags=re.I)
     return s
 
-def dedup_ordered(items: Iterable[str]) -> list[str]:
-    seen, out = set(), []
-    for x in items:
-        k = x.strip().lower()
-        if k and k not in seen:
-            seen.add(k)
-            out.append(x.strip())
-    return out
+def split_blocks(text: str) -> list[str]:
+    return [b.strip() for b in re.split(r"\n{2,}", text) if b.strip()]

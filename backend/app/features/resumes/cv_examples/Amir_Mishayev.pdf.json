@@ -1,0 +1,45 @@
+{
+  "full_text": "Amir_Mishayev_Full_Stack_Developer\nAmir Mishayev · Full Stack Developer\nLinkedIn | GitHub | 052-6880371 | Amir.Mishayev@gmail.com\nSUMMARY\nB.Sc. Software Engineering graduate with strong Backend and Web development skills...\nEXPERIENCE\nMVP Platform — cross-functional leadership, scalable, secure, maintainable platform.\nPROJECTS\nReal-Time Call Translation App — Flutter, Python, Whisper, Google NMT, Coqui xTTS.\nRecipe Website — React, TypeScript, Tailwind, Node.js.\nEDUCATION\nGraduate B.Sc. in Software Engineering | Braude, Karmiel\nTECHNICAL SKILLS\nReact · TypeScript · Tailwind · CSS · Node.js · Python · Flutter · Dart · FastAPI · MySQL · MongoDB · PostgreSQL · Firebase/Supabase · Git · Agile Scrum",
+  "parsed": {
+    "name": "Amir Mishayev",
+    "email": "Amir.Mishayev@gmail.com",
+    "phone": "+972526880371",
+    "linkedin": "http://www.linkedin.com/in/amir-mishayev",
+    "github": "http://github.com/amir3x0",
+    "about": "B.Sc. Software Engineering graduate with strong backend and web development skills, including AI integration; experienced in small-team leadership and delivering production-ready solutions.",
+    "skills": ["React","TypeScript","Tailwind","CSS","Node.js","Python","Flutter","Dart","FastAPI","MySQL","MongoDB","PostgreSQL","Firebase","Supabase","Git","Agile Scrum"],
+    "education": [
+      {
+        "degree": "B.Sc. in Software Engineering",
+        "institution": "Braude (Karmiel)",
+        "years": null
+      }
+    ],
+    "experience": [
+      {
+        "role": "Project Lead",
+        "company": "MVP Platform",
+        "dates": null,
+        "description": "Led cross-functional team, set architecture, coordinated backend/frontend/devops, and drove toward a stable production-ready solution."
+      }
+    ],
+    "projects": [
+      {
+        "project_name": "Real-Time Call Translation App",
+        "description": "Mobile app translating calls in real time while preserving speaker voices using Flutter, Python, Whisper, Google NMT, and Coqui xTTS."
+      },
+      {
+        "project_name": "Recipe Website",
+        "description": "Responsive web app with 30+ recipes, search and category filters using React, TypeScript, Tailwind, and Node.js."
+      }
+    ],
+    "military_service": null
+  },
+  "meta": {
+    "source_file": "Amir_Mishayev.pdf",
+    "mime": "application/pdf",
+    "pages": null,
+    "parse_status": "success",
+    "errors": []
+  }
+}

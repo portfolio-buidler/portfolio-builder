@@ -43,23 +43,29 @@ class ResumeService:
 
         try:
             raw_text = self._extract_text(dst, ct)
-            if not raw_text.strip():
-                raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                                    detail="Empty or unreadable document")
-
+            if not raw_text or not raw_text.strip():
+                raise ValueError("empty or unreadable document")
             parsed_dict = parse_all_from_text(raw_text)
             parsed = ResumeParsedJSON(**parsed_dict)
-            return UploadResult(
-                original_name=file.filename or "upload.bin",
-                content_type=ct,
-                raw_text=raw_text,
-                parsed_json=parsed,
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Failed to parse document: {e!s}",
             )
         finally:
             try:
                 dst.unlink(missing_ok=True)
             except Exception:
                 pass
+
+        return UploadResult(
+            original_name=file.filename or "upload.bin",
+            content_type=ct,
+            raw_text=raw_text,
+            parsed_json=parsed,
+        )
 
     async def _save_streamed(self, upload: UploadFile, dst: Path, limit: int) -> bytes:
         header = b""

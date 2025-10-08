@@ -1,0 +1,69 @@
+{
+  "full_text": "AMIR MISHAYEV\n\nAmir.Mishayev@gmail.com LinkedIn GitHub  0526880371\n\nB.Sc. Software Engineering. Passionate about learning, writing clean, reliable code and collaborating closely with teammates to turn ideas into polished products. Eager to join an environment that challenges me, nurtures growth and lets me contribute fresh energy to meaningful software.\n\nTECHNICAL SKILLS\n\nReact · Node.js · Python · Java · JavaScript/TypeScript · Flutter/Dart · REST/GraphQL · MySQL · MongoDB · Firebase · Supabase · Git · Agile Scrum · Unity · AWS\n\nPROJECTS\n\nGym Classes Registration App:\nSituation: Local gym used error-prone spreadsheets for class sign-ups.\nAction: Building a mobile app with secure Supabase Auth, real-time booking and capacity dashboards.\nResult (in rollout): Aiming to cut front-desk registration time and data errors; metrics will be added post-launch.\n\nRecipe Website:\nSituation: Course project to practice React & UI design.\nAction: Built responsive site hosting 30+ recipes with search & category filters.\nResult: Delivered a smooth, mobile-first user experience that highlights front-end performance and UX best practices.\n\nReal-Time Call Translation App:\nSituation: Global teams still struggle with voice-preserved, low-latency translation in Hebrew, English & Russian.\nAction: capstone R & D of a modular speech-to-speech pipeline—streaming Whisper for ASR, Google NMT for context-aware translation, and Coqui xTTS voice-cloning for natural playback.\nResult: Designing a mobile app that turns multilingual calls into seamless native-language conversations while keeping each speaker’s voice identity.\n\nScientific Citation Network Reconstruction:\nSituation: Simulated 30% citation loss across 500 runs.\nAction: Trained GraphSAGE GNN (Python + PyTorch Geometric) to predict missing links.\nResult: Restored ~48k citations and visualized impact-factor shifts, demonstrating graph-ML expertise.\n\nSecure Payment App:\nSituation: Needed proof of concept for encrypted payments.\nAction: Implemented EC-DH key exchange, Schnorr signatures and IDEA-OFB encryption.\nResult: Achieved end-to-end confidentiality & integrity aligned with modern crypto practices.\n\nEDUCATION\nGraduate B.Sc. in Software Engineering | Braude, Karmiel\nRelevant Coursework: Data Structures, Algorithms, Object-Oriented Programming, Web & Cloud Development, Network Security, Deep Learning\n\nMILITARY SERVICE\nIDF Naval Unit 3 – Combat Soldier & Fitness Instructor.\n\nLANGUAGES\nHebrew (native), English (fluent), Russian (intermediate)",
+  "parsed": {
+    "name": "Amir Mishayev",
+    "email": "Amir.Mishayev@gmail.com",
+    "phone": "+972526880371",
+    "linkedin": null,
+    "github": null,
+    "about": "B.Sc. Software Engineering. Passionate about learning, writing clean, reliable code and collaborating closely with teammates to turn ideas into polished products. Eager to join an environment that challenges me, nurtures growth and lets me contribute fresh energy to meaningful software.",
+    "skills": [
+      "React",
+      "Node.js",
+      "Python",
+      "Java",
+      "JavaScript",
+      "TypeScript",
+      "Flutter",
+      "Dart",
+      "REST",
+      "GraphQL",
+      "MySQL",
+      "MongoDB",
+      "Firebase",
+      "Supabase",
+      "Git",
+      "Agile Scrum",
+      "Unity",
+      "AWS"
+    ],
+    "education": [
+      {
+        "degree": "B.Sc. in Software Engineering",
+        "institution": "ORT Braude College (Karmiel)",
+        "years": null
+      }
+    ],
+    "experience": [],
+    "projects": [
+      {
+        "project_name": "Gym Classes Registration App",
+        "description": "Mobile app with Supabase Auth, real-time booking, capacity dashboards; replacing spreadsheet sign-ups."
+      },
+      {
+        "project_name": "Recipe Website",
+        "description": "Responsive React site with ~30 recipes, search and category filters; mobile-first UX."
+      },
+      {
+        "project_name": "Real-Time Call Translation App",
+        "description": "R&D capstone: streaming Whisper ASR, Google NMT, Coqui xTTS for low-latency voice-preserved translation."
+      },
+      {
+        "project_name": "Scientific Citation Network Reconstruction",
+        "description": "GraphSAGE GNN on simulated 30% citation loss; restored ~48k citations and analyzed impact-factor shifts."
+      },
+      {
+        "project_name": "Secure Payment App",
+        "description": "EC-DH key exchange, Schnorr signatures, IDEA-OFB; end-to-end confidentiality and integrity."
+      }
+    ],
+    "military_service": "IDF Naval Unit 3 — Combat Soldier & Fitness Instructor"
+  },
+  "meta": {
+    "source_file": "Amir Mishayev-master.docx",
+    "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "pages": null,
+    "parse_status": "success",
+    "errors": []
+  }
+}

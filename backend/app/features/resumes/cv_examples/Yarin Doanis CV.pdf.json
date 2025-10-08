@@ -1,0 +1,54 @@
+{
+  "full_text": "Yarin Doanis\n\nSOFTWARE DEVELOPER\n\nHolon, IL | +972 534324030 | yarin3344s@gmail.com | LinkedIn | GitHub\n\nProfile\n\nHighly motivated Computer Science student with strong skills in backend development and practical exposure to QA and automation frameworks. Eager to contribute across multiple roles, from developing scalable systems to ensuring quality through automated testing\n\nEducation\n\nHolon Institute of Technology (HIT) | Holon, IL\nB.Sc. in Computer Science (Expected Graduation: 2025)\nRelevant Coursework: Algorithms, Data Structures, Object-Oriented Programming, Databases (SQL), Server-Side Development.\n\nProjects\n\nParking Lot Management System (C#/ .NET) |\n• Developed a scalable parking management system for real-time vehicle tracking and price calculation.\n• Applied solid OOP principles and integrated SQL data persistence for robust state management.\n\nWeather2Day App (Android, Team of 3) |\n• Implemented MVVM architecture with Retrofit and Room for data handling.\n• Created background tasks with WorkManager and integrated API calls.\n• Managed Dependency Injection setup with Hilt and handled network status dynamically.\n\nSkills\n\n• Languages & Frameworks: Java, Python, C#, JavaScript, SQL, .NET, NodeJS, Express.js, React\n• Technologies: CI/CD, RESTful APIs, MySQL, MongoDB, Docker, Git\n• Soft Skills: Analytical thinking, problem-solving, team collaboration, adaptability\n• Languages: Hebrew (Native), English (Fluent)\n\nMilitary Service\n\nWorkforce Planning Specialist\n• Analyzed manpower requirements and optimized resource allocation across military branches.\n• Collaborated with team members to meet organizational goals.\n\nLinks\nhttps://www.linkedin.com/in/yarind1/\nhttps://github.com/yarind1\nhttps://github.com/yarind1/OOP-Project-Parking-Lot-Management-\nhttps://github.com/yarind1/Weather2Day",
+  "parsed": {
+    "name": "Yarin Doanis",
+    "email": "yarin3344s@gmail.com",
+    "phone": "+972534324030",
+    "linkedin": "https://www.linkedin.com/in/yarind1/",
+    "github": "https://github.com/yarind1",
+    "about": "Highly motivated Computer Science student with strong skills in backend development and practical exposure to QA and automation frameworks. Eager to contribute across multiple roles, from developing scalable systems to ensuring quality through automated testing.",
+    "skills": [
+      "Java",
+      "Python",
+      "C#",
+      "JavaScript",
+      "SQL",
+      ".NET",
+      "NodeJS",
+      "Express.js",
+      "React",
+      "CI/CD",
+      "RESTful APIs",
+      "MySQL",
+      "MongoDB",
+      "Docker",
+      "Git"
+    ],
+    "education": [
+      {
+        "degree": "B.Sc. in Computer Science",
+        "institution": "Holon Institute of Technology (HIT)",
+        "years": "Expected Graduation: 2025"
+      }
+    ],
+    "experience": [],
+    "projects": [
+      {
+        "project_name": "Parking Lot Management System",
+        "description": "C#/.NET project for real-time vehicle tracking and price calculation; applied OOP principles and SQL-backed state persistence."
+      },
+      {
+        "project_name": "Weather2Day App",
+        "description": "Android app using MVVM with Retrofit and Room, background tasks with WorkManager, DI via Hilt, and dynamic network handling."
+      }
+    ],
+    "military_service": "Workforce Planning Specialist. Analyzed manpower requirements, optimized resource allocation across branches, and collaborated to meet organizational goals."
+  },
+  "meta": {
+    "source_file": "yarin cv.pdf",
+    "mime": "application/pdf",
+    "pages": null,
+    "parse_status": "success",
+    "errors": []
+  }
+}

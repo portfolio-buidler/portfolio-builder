@@ -1,38 +1,26 @@
-import re
-from .sections import SKILLS_SECTION_RE, EXP_SECTION_RE, EDU_SECTION_RE, ABOUT_SECTION_RE, BULLET
-from .normalizers import dedup_ordered
+from __future__ import annotations
+import regex as re
 
-CONTACT_LIKE = re.compile(r"^(linkedin|github|www\.|https?://|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+|\+?\d)[A-Za-z0-9@._\- ]*$", re.I)
-
-def extract_skills(text: str) -> list[str]:
-    stop = [EXP_SECTION_RE, EDU_SECTION_RE, ABOUT_SECTION_RE]
-    body = _slice(text, SKILLS_SECTION_RE, stop)
-    if not body:
-        # inline line like "Technical Skills: React, TS, ..."
-        m = re.search(r"(?im)^\s*(skills|technical skills|technologies|tools|tech stack|stack)[:\-]\s*(.+)$", text)
-        if m:
-            body = m.group(2)
+def parse_skills(s: str) -> list[str]:
+    if not s:
+        return []
+    parts = re.split(r"[•|,;/]|\s{2,}", s)
+    out: list[str] = []
+    for p in parts:
+        p = p.strip(" .•-|")
+        if not p:
+            continue
+        if p.lower() in {"javascript/typescript", "js/ts"}:
+            out.extend(["JavaScript", "TypeScript"])
         else:
-            return []
-    items = re.split(BULLET + r"|\s*[,\|;/·]\s*", body)
-    skills = []
-    for it in items:
-        it = it.strip("•-–·* \n\t;()")
-        if not it:
+            out.append(p)
+    # stable dedupe
+    seen = set()
+    dedup: list[str] = []
+    for x in out:
+        k = x.lower()
+        if k in seen:
             continue
-        it_norm = re.sub(r"^(skills|tools|technologies|tech\s*stack)\s*:\s*", "", it, flags=re.I).strip()
-        if not it_norm or CONTACT_LIKE.match(it_norm):
-            continue
-        if 2 <= len(it_norm) <= 48:
-            skills.append(it_norm)
-    return dedup_ordered(skills)[:100]
-
-def _slice(text: str, head, stops):
-    m = head.search(text)
-    if not m:
-        return None
-    start = m.end()
-    ends = [r.search(text, start) for r in stops]
-    ends = [e for e in ends if e]
-    end = min([e.start() for e in ends], default=len(text))
-    return text[start:end].strip() or None
+        seen.add(k)
+        dedup.append(x)
+    return dedup

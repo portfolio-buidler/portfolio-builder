@@ -8,6 +8,7 @@ from app.shared.enums import ParseStatus
 from .upload_schemas import UploadResponse, UploadData, SimpleParsedResponse
 from .service import ResumeService
 from .security import SUPPORTED_MIME
+from .jsonb_models import ResumeParsed
 
 async def upload_cv(file: UploadFile = File(...)) -> UploadResponse:
     # Quick content-type guard; we still validate magic bytes later.
@@ -20,17 +21,19 @@ async def upload_cv(file: UploadFile = File(...)) -> UploadResponse:
 
     svc = ResumeService()
     # Parse first. If it fails, DB stays clean.
-    result = await svc.handle_upload(file)
+    result = await svc.handle_upload(file)  # dict with keys: full_text, parsed, meta
+
+    parsed_model = ResumeParsed(**result["parsed"])
 
     # Persist parsed JSON (JSONB) only on success
     async with AsyncSessionLocal() as session:
         resume = Resume(
             user_id=None,  # wire your auth later
             source_file_id=None,
-            original_name=result.original_name,
+            original_name=result["meta"]["source_file"],
             parse_status=ParseStatus.success,
             is_primary=False,
-            parsed_json=result.parsed_json.model_dump(mode="json"),
+            parsed_json=parsed_model.model_dump(mode="json"),
         )
         session.add(resume)
         await session.flush()
@@ -38,9 +41,9 @@ async def upload_cv(file: UploadFile = File(...)) -> UploadResponse:
         await session.commit()
 
     extracted = {
-        "full_text": result.raw_text,
-        "parsed": result.parsed_json.model_dump(mode="json"),
-        "file_info": {"filename": result.original_name, "content_type": result.content_type},
+        "full_text": result["full_text"],
+        "parsed": parsed_model.model_dump(mode="json"),
+        "file_info": {"filename": result["meta"]["source_file"], "content_type": result["meta"]["mime"]},
     }
     return UploadResponse(
         success=True,
@@ -69,5 +72,7 @@ async def upload_status(file_id: str) -> UploadResponse:
 async def upload_cv_simple(file: UploadFile = File(...)) -> SimpleParsedResponse:
     svc = ResumeService()
     result = await svc.handle_upload(file)
-    parsed = result.parsed_json.model_dump(mode="json")
-    return SimpleParsedResponse(**parsed, full_text=result.raw_text)
+    return SimpleParsedResponse(
+        **result["parsed"],
+        full_text=result["full_text"]
+    )
