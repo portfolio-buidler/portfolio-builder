@@ -4,18 +4,68 @@ from .sections import (
     EXP_SECTION_RE, EDU_SECTION_RE, SKILLS_SECTION_RE, ABOUT_SECTION_RE, PROJECTS_SECTION_RE,
     DATE_RE, BULLET, section_slice
 )
-from .contact import extract_contacts
+from .contact import extract_contacts, EMAIL_REGEX, PHONE_REGEX  # import patterns for fallback filtering
 from .education import extract_education
 from .skills import extract_skills
 
 MAX_DESC_LEN = 280
 
+# def extract_about(text: str) -> Optional[str]:
+#     body = section_slice(text, ABOUT_SECTION_RE, [EXP_SECTION_RE, EDU_SECTION_RE, SKILLS_SECTION_RE])
+#     if not body:
+#         return None
+#     para = body.strip().split("\n\n")[0]
+#     return para[:1200].strip()
+
 def extract_about(text: str) -> Optional[str]:
-    body = section_slice(text, ABOUT_SECTION_RE, [EXP_SECTION_RE, EDU_SECTION_RE, SKILLS_SECTION_RE])
-    if not body:
+    """Return summary/about paragraph.
+    1. If an explicit About/Summary header exists -> first paragraph under it.
+    2. Else fallback: take first contiguous paragraph block (excluding name/contact lines) that appears
+       before the Experience / Education / Skills / Projects sections.
+    """
+    body = section_slice(text, ABOUT_SECTION_RE, [EXP_SECTION_RE, EDU_SECTION_RE, SKILLS_SECTION_RE, PROJECTS_SECTION_RE])
+    if body:
+        return body.strip().split("\n\n")[0][:1200].strip() or None
+
+    # Fallback region: slice from after first line (name/title) up to first major section heading
+    section_heads = [EXP_SECTION_RE, EDU_SECTION_RE, SKILLS_SECTION_RE, PROJECTS_SECTION_RE]
+    first_head_pos = len(text)
+    for pat in section_heads:
+        m = pat.search(text)
+        if m and m.start() < first_head_pos:
+            first_head_pos = m.start()
+    preface = text[:first_head_pos]
+    lines = [ln.strip() for ln in preface.splitlines()]
+    if not lines:
         return None
-    para = body.strip().split("\n\n")[0]
+    # Drop first line (likely name/title) and any contact-ish lines
+    content_lines: list[str] = []
+    for ln in lines[1:]:
+        if not ln:
+            # preserve paragraph breaks to limit about to first paragraph
+            if content_lines and content_lines[-1] != "":
+                content_lines.append("")
+            continue
+        if re.search(EMAIL_REGEX, ln) or re.search(PHONE_REGEX, ln) or re.search(r"(linkedin|github|https?://|www\.)", ln, re.I):
+            continue
+        # stop if this line itself is (erroneously) a heading-like token
+        if (EXP_SECTION_RE.match(ln) or EDU_SECTION_RE.match(ln) or SKILLS_SECTION_RE.match(ln) or PROJECTS_SECTION_RE.match(ln)):
+            break
+        content_lines.append(ln)
+    # Build first paragraph from accumulated lines until blank separator
+    paragraph_tokens: list[str] = []
+    for ln in content_lines:
+        if ln == "":
+            break
+        paragraph_tokens.append(ln)
+    if not paragraph_tokens:
+        return None
+    para = " ".join(paragraph_tokens)
+    # Heuristic: skip if the paragraph looks like just a title or <= 10 words
+    if len(para.split()) < 10:
+        return None
     return para[:1200].strip()
+
 
 def _split_experience_blocks(body: str) -> List[str]:
     parts = re.split(r"\n{2,}", body.strip())
