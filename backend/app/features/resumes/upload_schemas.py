@@ -3,7 +3,7 @@ from typing import Any
 
 class UploadData(BaseModel):
     fileId: str
-    extractedData: Any | None = None  # מחזיק {"full_text": ..., "parsed": {...}}
+    extractedData: Any | None = None  # {"full_text": ..., "parsed": {...}, "file_info": {...}}
 
 class UploadResponse(BaseModel):
     success: bool

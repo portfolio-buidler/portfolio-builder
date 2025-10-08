@@ -1,13 +1,18 @@
 import re
 
+# Header synonyms. Humans love reinventing headings.
 EDU_SECTION_RE = re.compile(r"(education|studies|academic background)[:\s]*", re.I)
 EXP_SECTION_RE = re.compile(r"(experience|work experience|professional experience|employment history)[:\s]*", re.I)
-ABOUT_SECTION_RE = re.compile(r"(summary|about|profile)[:\s]*", re.I)
-SKILLS_SECTION_RE = re.compile(r"(skills|technologies|tools)[:\s]*", re.I)
 PROJECTS_SECTION_RE = re.compile(r"(projects|selected projects|personal projects)[:\s]*", re.I)
+ABOUT_SECTION_RE = re.compile(r"(summary|objective|about|profile)[:\s]*", re.I)
+SKILLS_SECTION_RE = re.compile(r"(skills|technical skills|technologies|tools|tech stack|stack|tools & technologies)[:\s]*", re.I)
 
-
-DATE_RE = re.compile(r"((Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t\.?|tember)|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+\d{4}\s*[–-]\s*(Present|\d{4})|\d{4}\s*[–-]\s*(Present|\d{4}))", re.I)
+# Dates like "2021 – 2025" or "May 2020 – Present"
+DATE_RE = re.compile(
+    r"((Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|"
+    r"Sep(?:t\.?|tember)|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+\d{4}\s*[–-]\s*(Present|\d{4})|\d{4}\s*[–-]\s*(Present|\d{4}))",
+    re.I,
+)
 
 BULLET = r"(?:^|\n)[\s•\-–·\*]\s+"
 

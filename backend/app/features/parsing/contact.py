@@ -1,137 +1,68 @@
 import re
+from typing import Optional, Tuple
+from pydantic import EmailStr
+from .normalizers import normalize_phone
 
-# Email: allow multi-part TLDs and prevent trailing letters (e.g., '...@gmail.comLinkedIn')
-EMAIL_REGEX = r"[a-zA-Z0-9.\-+_]+@[a-zA-Z0-9.\-+_]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})*(?![A-Za-z])"
-
-# General phone numbers pattern (verbose in original code)
+# Email and phone that don’t overmatch into URLs or glued text
+EMAIL_REGEX = r"[A-Za-z0-9.\-+_]+@[A-Za-z0-9.\-+_]+\.[A-Za-z]{2,}(?:\.[A-Za-z]{2,})*(?![A-Za-z])"
 PHONE_REGEX = (
-    r"(?x)"                      # verbose mode
-    r"(?<!\d)"                  # don't start mid-number
-    r"(?:\+?\d{1,3}[\s\-]?)?" # optional country code
-    r"(?:0[\s\-]?)?"            # optional trunk 0
-    r"(?:"                       # main number
-    r"  \d{2,3}[\s\-]?\d{3}[\s\-]?\d{4}"  # 2-3 + 3 + 4
-    r"| \d{2,3}[\s\-]?\d{7}"                # 2-3 + 7
-    r"| \d{8,10}"                              # or straight digits
-    r")"
-    r"(?!\d)"                   # don't end mid-number
+    r"(?x)"
+    r"(?<!\d)"
+    r"(?:\+?\d{1,3}[\s\-]?)?"
+    r"(?:0[\s\-]?)?"
+    r"(?:\d{2,3}[\s\-]?\d{3}[\s\-]?\d{3,4}|\d{8,10})"
+    r"(?!\d)"
 )
 
-
-def first_match(pattern: str, text: str) -> str | None:
-    # Try the main regex first
-    m = re.search(pattern, text)
-    if m:
-        return m.group(0)
-    
-    # Flexible phone regex: optional +country, optional 0, digits separated by space/dash
-    flexible_phone = re.compile(r"""
-        (?<!\d)                    # not preceded by a digit
-        (\+?\d{1,3}[\s\-]?)?       # optional country code
-        (0?[\s\-]?)?               # optional leading 0
-        (\d{2,3}[\s\-]?\d{3}[\s\-]?\d{3,4})  # main number
-        (?!\d)                      # not followed by a digit
-    """, re.VERBOSE)
-    
-    m = flexible_phone.search(text)
-    if m:
-        return re.sub(r"\D", "", m.group(0))  # return digits only
-    
-    # Fallback: find any 9–11 digit cluster
-    digit_cluster = re.findall(r"\d{9,11}", text)
-    if digit_cluster:
-        return digit_cluster[0]
-    
+def _first_line_name(text: str) -> Optional[str]:
+    lines = text.splitlines()
+    head = lines[0].strip() if lines else ""
+    if 2 <= len(head.split()) <= 5 and re.match(r"^[A-Za-z\u0590-\u05FF][^\d@]+$", head):
+        return head
     return None
 
-
-
-def name_from_email(email: str | None) -> str | None:
+def name_from_email(email: str | None) -> Optional[str]:
     if not email:
         return None
     local = email.split("@", 1)[0]
     parts = re.split(r"[._\-+]+", local)
-    parts = [re.sub(r"\d+", "", p).strip() for p in parts]
-    parts = [p for p in parts if p]
+    parts = [re.sub(r"\d+", "", p).strip() for p in parts if p and not p.isdigit()]
     if parts:
         return " ".join(w.capitalize() for w in parts[:4])
     return None
 
-def guess_name_from_preamble(preamble_text: str) -> str | None:
+def guess_name_from_preamble(preamble_text: str) -> Optional[str]:
     if not preamble_text:
         return None
-    
-    # Split by newlines OR commas (in case text was already cleaned)
-    lines = re.split(r'[\n,]', preamble_text)
-    
-    candidates = []
-    
-    for ln in lines[:50]:
-        s = ln.strip()
+    # naive: first reasonable line that isn’t a header/contact/link
+    for s in re.split(r"[\n,]", preamble_text)[:50]:
+        s = s.strip()
         if not s or len(s) < 5:
             continue
-        
-        # Skip lines with email or phone
-        if re.search(EMAIL_REGEX, s) or re.search(PHONE_REGEX, s):
+        if re.search(EMAIL_REGEX, s) or re.search(PHONE_REGEX, s) or re.search(r"(https?://|www\.)", s, re.I):
             continue
-        
-        # Skip URLs and common non-name patterns
-        if re.search(r'(https?://|www\.|\.com|profile|portfolio|github|linkedin)', s, re.IGNORECASE):
+        if re.match(r"^(profile|summary|objective|about|experience|education|skills|professional)", s, re.I):
             continue
-        
-        # Skip common section headers
-        if re.match(r'^(profile|summary|objective|about|experience|education|skills|professional)', s, re.IGNORECASE):
+        if any(w.lower() in s.lower() for w in ("city", "israel", "tel aviv", "jerusalem", "haifa", "yavne")):
             continue
-        
-        # If line contains separators (| or -), extract all parts
-        if '|' in s or '–' in s or ' - ' in s:
-            parts = re.split(r'\s*[|\-–]\s*', s)
-            for part in parts:
-                part = part.strip()
-                if part:
-                    candidates.append(part)
-        else:
-            candidates.append(s)
-    
-    # Now evaluate all candidates and pick the best one
-    for candidate in candidates:
-        # Skip if starts with special chars or numbers
-        if re.match(r'^[^\w\s]', candidate) or re.match(r'^\d', candidate):
+        if re.search(r"(manager|engineer|developer|designer|analyst|consultant|director|specialist|coordinator)", s, re.I):
             continue
-        
-        # Skip locations (common patterns)
-        if re.search(r'(city|state|country|israel|tel aviv|jerusalem|haifa|yavne)', candidate, re.IGNORECASE):
-            continue
-        
-        # Skip job titles (common patterns)
-        if re.search(r'(manager|engineer|developer|designer|analyst|consultant|director|specialist|coordinator)', candidate, re.IGNORECASE):
-            continue
-        
-        words = candidate.split()
-        
-        # Name should be 2-4 words
-        if not (2 <= len(words) <= 4):
-            continue
-        
-        # Name should be reasonable length
-        if not (5 <= len(candidate) <= 60):
-            continue
-        
-        # Each word should start with capital letter (proper name)
-        if not all(w[0].isupper() for w in words if w):
-            continue
-        
-        # Should be mostly alphabetic (allow spaces)
-        alpha_ratio = sum(c.isalpha() or c.isspace() for c in candidate) / len(candidate)
-        if alpha_ratio < 0.75:
-            continue
-        
-        # Should not be all caps (likely a header)
-        if candidate.isupper():
-            continue
-        
-        # This looks like a valid name!
-        return candidate
-    
+        words = s.split()
+        if 2 <= len(words) <= 4 and not s.isupper() and s[0].isalpha():
+            return s
     return None
 
+def extract_contacts(text: str) -> Tuple[Optional[str], Optional[str], Optional[EmailStr]]:
+    name = _first_line_name(text)
+    if not name:
+        # try preamble then email-derived
+        preamble = text.split("\n\n", 1)[0]
+        name = guess_name_from_preamble(preamble)
+        if not name:
+            name = name_from_email(re.search(EMAIL_REGEX, text).group(0) if re.search(EMAIL_REGEX, text) else None)
+
+    phone_m = re.search(PHONE_REGEX, text)
+    email_m = re.search(EMAIL_REGEX, text)
+    phone = normalize_phone(phone_m.group(0)) if phone_m else None
+    email = EmailStr(email_m.group(0)) if email_m else None
+    return name, phone, email

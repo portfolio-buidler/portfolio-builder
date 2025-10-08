@@ -1,6 +1,6 @@
 from pydantic import Field, PositiveInt
 from app.shared.schemas import APIModel, IDModel, Timestamped
-from app.shared.enums import ParseStatus, EmploymentType
+from app.shared.enums import ParseStatus
 from .jsonb_models import ResumeParsedJSON
 
 class ResumeCreate(APIModel):

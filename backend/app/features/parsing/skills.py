@@ -1,92 +1,34 @@
 import re
-from .sections import SECTION_HEADERS
+from .sections import SKILLS_SECTION_RE, EXP_SECTION_RE, EDU_SECTION_RE, ABOUT_SECTION_RE, BULLET
+from .normalizers import dedup_ordered
 
-SKILLS_HEADERS = {
-    "SKILLS",
-    "TECHNICAL SKILLS",
-    "TOOLS",
-    "TECHNOLOGIES",
-    "TECH STACK",
-    "STACK",
-    "TOOLS & TECHNOLOGIES"
-}
-
-CURATED_SKILL_PATTERNS: dict[str, str] = {
-    # Frontend
-    "React": r"\breact(?:\.?(?:js|jsx))?\b",
-    "TypeScript": r"\btypescript\b",
-    "JavaScript": r"\bjavascript\b|\bjs\b(?!on)",
-    "Tailwind": r"\btailwind(?:\s*css)?\b",
-    "CSS": r"\bcss\b",
-    "HTML": r"\bhtml(?:5)?\b",
-    # Backend / Platforms
-    "Node.js": r"\bnode(?:\.?(?:js))?\b",
-    "Python": r"\bpython\b",
-    "FastAPI": r"\bfast\s*api\b|\bfastapi\b",
-    "Django": r"\bdjango\b",
-    "Flask": r"\bflask\b",
-    # Mobile
-    "Flutter": r"\bflutter\b",
-    "Dart": r"\bdart\b",
-    # Databases
-    "MySQL": r"\bmy\s*sql\b|\bmysql\b",
-    "PostgreSQL": r"\bpostgre(?:sql)?\b|\bpostgres\b",
-    "MongoDB": r"\bmongo(?:db)?\b",
-    "SQLite": r"\bsqlite\b",
-    # Cloud / BaaS
-    "Firebase": r"\bfirebase\b",
-    "Supabase": r"\bsupabase\b",
-    # DevOps / Tools
-    "Git": r"\bgit\b",
-    "Docker": r"\bdocker\b",
-    "Kubernetes": r"\bkubernetes\b|\bk8s\b",
-    # Practices / Methods
-    "Agile": r"\bagile\b",
-    "Scrum": r"\bscrum\b",
-}
-
-COMPILED_SKILL_PATTERNS: list[tuple[str, re.Pattern]] = [
-    (name, re.compile(pattern, flags=re.IGNORECASE)) for name, pattern in CURATED_SKILL_PATTERNS.items()
-]
-
-def parse_skills(sections: dict[str, str], full_text: str) -> list[str] | None:
-    # Try to get skills from known headers in sections
-    blocks: list[str] = [sections[hdr] for hdr in SKILLS_HEADERS if hdr in sections and sections[hdr]]
-
-    # Fallback: search full text for skills section headers if no section found
-    if not blocks:
-        m = re.search(
-            r"(?im)^(skills|technical skills|tools & technologies|technologies|tech stack|stack)[:\-]?\s*(.+)$",
-            full_text
-        )
+def extract_skills(text: str) -> list[str]:
+    stop = [EXP_SECTION_RE, EDU_SECTION_RE, ABOUT_SECTION_RE]
+    body = _slice(text, SKILLS_SECTION_RE, stop)
+    if not body:
+        # inline line like "Technical Skills: React, TS, ..."
+        m = re.search(r"(?im)^\s*(skills|technical skills|technologies|tools|tech stack|stack)[:\-]\s*(.+)$", text)
         if m:
-            blocks.append(m.group(2))
+            body = m.group(2)
+        else:
+            return []
+    items = re.split(BULLET + r"|\s*[,\|;/]\s*", body)
+    skills = []
+    for it in items:
+        it = it.strip("•-–·* \n\t;()")
+        if not it:
+            continue
+        it = re.sub(r"^(skills|tools|technologies|tech\s*stack)\s*:\s*", "", it, flags=re.I).strip()
+        if 2 <= len(it) <= 48:
+            skills.append(it)
+    return dedup_ordered(skills)[:100]
 
-    if not blocks:
+def _slice(text: str, head, stops):
+    m = head.search(text)
+    if not m:
         return None
-
-    scan_text = "\n".join(blocks)
-
-    # Split by commas, semicolons, pipes, bullets, parentheses, newlines
-    sep_regex = re.compile(r"\s*(?:[,\|\u00B7\u2022/;\(\)\n])+\s*")
-    raw_tokens = [tok.strip() for tok in sep_regex.split(scan_text) if tok.strip()]
-
-    # Remove duplicates
-    seen = set()
-    results = []
-    for tok in raw_tokens:
-        if tok not in seen:
-            seen.add(tok)
-            results.append(tok)
-
-    return results or None
-
-
-
-def parse_skills_inline(text: str) -> list[str] | None:
-    m = re.search(r"(?im)^\s*(skills|technical skills|technologies)\s*[:\-]\s*(.+)$", text)
-    if m:
-        parts = re.split(r"[,\|\u00B7\u2022]", m.group(2))
-        skills = [p.strip() for p in parts if p.strip()]
-        return skills or None
-    return None
+    start = m.end()
+    ends = [r.search(text, start) for r in stops]
+    ends = [e for e in ends if e]
+    end = min([e.start() for e in ends], default=len(text))
+    return text[start:end].strip() or None

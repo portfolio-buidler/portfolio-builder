@@ -1,22 +1,23 @@
-from pathlib import Path
+from typing import List
 from zipfile import ZipFile
-from typing import Iterable
-
-# Prefer defusedxml for safety, but fall back to stdlib if not installed
-try:  # pragma: no cover - simple import guard
-    from defusedxml.ElementTree import fromstring as safe_fromstring  # type: ignore
-except Exception:  # defusedxml not installed
-    from xml.etree.ElementTree import fromstring as safe_fromstring  # type: ignore
+from defusedxml.ElementTree import fromstring as safe_fromstring  # pip install defusedxml
 
 DOCX_WORD_NS = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
 
-def _iter_docx_xml_text(zf: ZipFile, names: Iterable[str], max_nodes: int = 200_000) -> list[str]:
-    lines: list[str] = []
+def docx_to_text(path: str, max_nodes: int = 300_000) -> str:
+    lines: List[str] = []
     nodes_seen = 0
-    for name in names:
-        try:
-            data = zf.read(name)
-            root = safe_fromstring(data)  # safe parser when available
+    with ZipFile(path) as zf:
+        # prefer main document; include headers/footers if present
+        names = [n for n in zf.namelist() if n in (
+            "word/document.xml", "word/header1.xml", "word/footer1.xml"
+        ) or n.startswith(("word/header", "word/footer"))]
+        for name in names:
+            try:
+                data = zf.read(name)
+                root = safe_fromstring(data)
+            except Exception:
+                continue
             for p in root.findall(".//w:p", DOCX_WORD_NS):
                 if nodes_seen > max_nodes:
                     break
@@ -26,83 +27,10 @@ def _iter_docx_xml_text(zf: ZipFile, names: Iterable[str], max_nodes: int = 200_
                     if ln:
                         lines.append(ln)
                 nodes_seen += 1
-        except Exception:
-            continue
-    return lines
-
-def read_docx_text(path: Path) -> str:
-    candidates: list[str] = []
-    # python-docx
-    try:
-        import docx  # python-docx
-        doc = docx.Document(str(path))
-        def add_paragraphs(paragraphs, out):
-            for p in paragraphs:
-                s = (p.text or "").strip()
-                if s:
-                    out.append(s)
-        lines: list[str] = []
-        add_paragraphs(doc.paragraphs, lines)
-        for table in doc.tables:
-            for row in table.rows:
-                for cell in row.cells:
-                    add_paragraphs(cell.paragraphs, lines)
-        for section in doc.sections:
-            add_paragraphs(section.header.paragraphs, lines)
-            add_paragraphs(section.footer.paragraphs, lines)
-        seen = set(); uniq: list[str] = []
-        for ln in lines:
-            if ln not in seen:
-                seen.add(ln); uniq.append(ln)
-        candidates.append("\n".join(uniq).strip())
-    except Exception:
-        pass
-    # docx2txt
-    try:
-        import docx2txt  # type: ignore
-        txt = docx2txt.process(str(path)) or ""
-        txt = txt.replace("\r\n", "\n").replace("\r", "\n").strip()
-        if txt:
-            candidates.append(txt)
-    except Exception:
-        pass
-    # docx2python
-    try:
-        from docx2python import docx2python  # type: ignore
-        with docx2python(str(path)) as d:
-            flat: list[str] = []
-            def _walk(x):
-                if isinstance(x, (list, tuple)):
-                    for y in x:
-                        _walk(y)
-                else:
-                    s = str(x).strip()
-                    if s:
-                        flat.append(s)
-            _walk(d.body)
-            t = "\n".join(flat).replace("\r\n", "\n").replace("\r", "\n").strip()
-            if t:
-                candidates.append(t)
-    except Exception:
-        pass
-    # raw XML sweep (safe)
-    try:
-        with ZipFile(str(path), "r") as zf:
-            names = [
-                n for n in zf.namelist()
-                if n.startswith("word/") and n.endswith(".xml") and "/_rels/" not in n
-            ]
-            lines = _iter_docx_xml_text(zf, names)
-            if lines:
-                candidates.append("\n".join(lines).strip())
-    except Exception:
-        pass
-    if not candidates:
-        return ""
-    seen = set(); merged: list[str] = []
-    for txt in candidates:
-        for ln in txt.replace("\r\n", "\n").replace("\r", "\n").split("\n"):
-            s = ln.strip()
-            if s and s not in seen:
-                seen.add(s); merged.append(s)
-    return "\n".join(merged).strip()
+    text = "\n".join(lines)
+    # normalize like PDF to keep downstream regexes stable
+    text = (text.replace("•", "\n• ")
+                .replace("\u2013", "–")
+                .replace("\u2014", "-")
+                .replace("\uf0b7", "•"))
+    return text.strip()
