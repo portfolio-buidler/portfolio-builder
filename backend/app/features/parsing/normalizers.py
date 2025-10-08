@@ -1,6 +1,6 @@
 from __future__ import annotations
 import regex as re
-from ftfy import fix_text
+from ftfy import fix_text # type: ignore
 
 NBSP = "\xa0"
 

@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, StrictStr, StringConstraints, EmailS
 MAX_NAME_LEN = 200
 MAX_SKILL_LEN = 64
 MAX_EDU_FIELD_LEN = 200
-MAX_DESC_LEN = 1500  # bullets can be long; JSONB can take it
+MAX_DESC_LEN = 300  # bullets can be long; JSONB can take it
 
 NonEmptyShortStr = Annotated[str, StringConstraints(min_length=1, max_length=MAX_NAME_LEN, strip_whitespace=True)]
 SkillStr = Annotated[str, StringConstraints(min_length=1, max_length=MAX_SKILL_LEN, strip_whitespace=True)]
