@@ -11,8 +11,6 @@ __pycache__/
 
 # personal copilot instructions
 .copilot-instructions.md
-copilot-personal.md
-.copilot-personal/
 
 # frontend
 frontend/node_modules/
