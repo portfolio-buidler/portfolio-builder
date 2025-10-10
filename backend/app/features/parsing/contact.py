@@ -18,6 +18,26 @@ def _format_phone(s: str | None, country="IL") -> Optional[str]:
         return s
     return s
 
+def _guess_name_from_header(lines: List[str]) -> Optional[str]:
+    """Try to extract a proper name from top header lines that mix contact chunks.
+
+    Heuristics:
+    - Split by common separators (|, -, •, comma)
+    - Choose the segment with 2–4 tokens, capitalized words, no digits/@
+    - Prefer the earliest such segment among first 3 lines
+    """
+    seps = re.compile(r"\s*[|•·\-–—,]\s*")
+    for ln in lines[:3]:
+        parts = [p.strip() for p in seps.split(ln) if p.strip()]
+        for p in parts:
+            if any(ch.isdigit() for ch in p) or "@" in p.lower():
+                continue
+            tokens = p.split()
+            if 2 <= len(tokens) <= 4 and sum(t[:1].isupper() for t in tokens) >= 2:
+                return p
+    return None
+
+
 def parse_contacts(lines: List[str], country="IL") -> Dict[str, Optional[str]]:
     top = "\n".join(lines[:8])
     email = (EMAIL_RE.search(top) or EMAIL_RE.search("\n".join(lines)))
@@ -32,19 +52,20 @@ def parse_contacts(lines: List[str], country="IL") -> Dict[str, Optional[str]]:
 
     )
 
-    # name heuristic: first reasonable capitalized line near top
+    # name heuristic: prefer header split, then fallback to first capitalized line near top
     disallow = {"skills","experience","projects","education","profile","summary","military","about"}
-    name = None
-    for ln in lines[:6]:
-        t = ln.strip()
-        if not t or any(k in t.lower() for k in disallow):
-            continue
-        if EMAIL_RE.search(t) or PHONE_RE.search(t) or URL_RE.search(t):
-            continue
-        tokens = t.split()
-        if 1 < len(tokens) <= 6 and sum(w[:1].isupper() for w in tokens) >= 2:
-            name = t
-            break
+    name = _guess_name_from_header(lines)
+    if not name:
+        for ln in lines[:6]:
+            t = ln.strip()
+            if not t or any(k in t.lower() for k in disallow):
+                continue
+            if EMAIL_RE.search(t) or PHONE_RE.search(t) or URL_RE.search(t):
+                continue
+            tokens = t.split()
+            if 1 < len(tokens) <= 6 and sum(w[:1].isupper() for w in tokens) >= 2:
+                name = t
+                break
 
     return {
         "name": name,

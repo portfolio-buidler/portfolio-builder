@@ -1,9 +1,21 @@
 from __future__ import annotations
 import regex as re
 
+_CATEGORY_WORDS = {"languages", "frameworks", "technologies", "soft skills", "crm", "bi", "agile", "tools"}
+
+def _split_parenthetical_items(token: str) -> list[str]:
+    # e.g., "BI (Power BI, Tableau, Google Data Studio)" -> ["Power BI", "Tableau", "Google Data Studio"]
+    m = re.search(r"\(([^)]+)\)", token)
+    if not m:
+        return []
+    inner = m.group(1)
+    items = [x.strip() for x in re.split(r",|/|;|\|", inner) if x.strip()]
+    return items
+
 def parse_skills(s: str) -> list[str]:
     if not s:
         return []
+    # Break on bullets, pipes, commas, semicolons, slashes, or 2+ spaces
     parts = re.split(r"[•|,;/:]|\s{2,}", s)
     out: list[str] = []
     for p in parts:
@@ -11,12 +23,23 @@ def parse_skills(s: str) -> list[str]:
         if not p:
             continue
         low = p.lower()
-        if any(keyword in low for keyword in ["languages", "frameworks", "technologies", "soft skills"]):
+        # Expand parenthetical lists
+        inner_items = _split_parenthetical_items(p)
+        if inner_items:
+            out.extend(inner_items)
+            # Retain category token only if it's informative and not generic
+            if all(w not in low for w in _CATEGORY_WORDS):
+                out.append(p.split("(", 1)[0].strip())
             continue
+        # Drop generic category tokens
+        if any(word in low for word in _CATEGORY_WORDS):
+            continue
+        # Split combos like "JavaScript/TypeScript"
         if low in {"javascript/typescript", "js/ts"}:
             out.extend(["JavaScript", "TypeScript"])
         else:
             out.append(p)
+    # Deduplicate while preserving order (case-insensitive)
     seen: set[str] = set()
     dedup: list[str] = []
     for x in out:

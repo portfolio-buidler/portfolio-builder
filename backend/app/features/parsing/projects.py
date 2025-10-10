@@ -9,6 +9,22 @@ class ProjectItem:
     description: Optional[str] = None
 
 _BULLET_RE = re.compile(r"^[•\-–—]")
+_MAX_TITLE_LEN = 200
+
+_VERB_START = re.compile(r"^(Led|Managed|Implemented|Coordinating|Building|Developed|Driving|Driving|Improved|Created|Designed|Orchestrated)\b", re.I)
+
+def _is_probable_title(s: str) -> bool:
+    # Titles are typically short and noun-phrasy
+    if len(s) > 120:
+        return False
+    if s.endswith('.'):
+        return False
+    words = s.split()
+    if len(words) > 12 or len(words) < 1:
+        return False
+    if _VERB_START.match(s):
+        return False
+    return True
 
 def parse_projects(section_text: str) -> List[Dict]:
     if not section_text:
@@ -23,13 +39,23 @@ def parse_projects(section_text: str) -> List[Dict]:
             if current_name:
                 description_lines.append(desc)
             continue
+        # Non-bullet line: decide if it's a title or a description continuation
         if current_name:
-            items.append(ProjectItem(
-                project_name=current_name.strip(":-• "),
-                description=(" ".join(description_lines).strip() or None),
-            ))
-            description_lines = []
-        current_name = ln
+            if _is_probable_title(ln):
+                items.append(ProjectItem(
+                    project_name=current_name.strip(":-• "),
+                    description=(" ".join(description_lines).strip() or None),
+                ))
+                description_lines = []
+                current_name = ln
+            else:
+                description_lines.append(ln)
+        else:
+            if _is_probable_title(ln):
+                current_name = ln
+            else:
+                # Ignore narrative lines if no current project started
+                continue
     if current_name:
         items.append(ProjectItem(
             project_name=current_name.strip(":-• "),
@@ -39,5 +65,9 @@ def parse_projects(section_text: str) -> List[Dict]:
     for item in items:
         if not item.project_name and not item.description:
             continue
-        out.append(asdict(item))
+        name = item.project_name or ""
+        if len(name) > _MAX_TITLE_LEN:
+            # Truncate to avoid validation errors
+            name = name[: _MAX_TITLE_LEN].rstrip() + "…"
+        out.append({"project_name": name or None, "description": item.description})
     return out
