@@ -19,9 +19,10 @@ def normalize_text(s: str) -> str:
 def heal_urls(s: str) -> str:
     # merge "https://example.\ncom/path" -> "https://example.com/path"
     s = re.sub(r"(https?://[^\s]+)\.\n([^\s]+)", r"\1.\2", s, flags=re.I)
-    # Only merge when the next line looks like a continuation (NOT a new URL/protocol)
-    # Avoid gluing distinct URLs like "https://a.com\nhttps://b.com" or mailto links
-    s = re.sub(r"(https?://[^\s]+)\n(?!https?://|www\.|mailto:)([^\s]+)", r"\1\2", s, flags=re.I)
+    # Only merge URL across newline if the next line is a clear path continuation
+    # Acceptable continuations: starts with '/', '#', '?', '&', or a URL-encoded sequence like '%'
+    # DO NOT merge if the next line starts with letters/digits (to avoid gluing names like '.../Hezi')
+    s = re.sub(r"(https?://[^\s]+)\n([/#?&%][^\s]*)", r"\1\2", s, flags=re.I)
     return s
 
 def split_blocks(text: str) -> list[str]:

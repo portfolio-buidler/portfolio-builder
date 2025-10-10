@@ -48,6 +48,33 @@ def parse_cv_text(raw_text: str) -> dict:
     military_service = sections.get("military_service") or None
     if military_service:
         military_service = military_service.split("\n")[0].strip()
+    # Primary skills from sections
+    primary_skills = parse_skills(sections.get("skills", ""))
+    # Fallback: if no skills detected, try to find a line containing tools/technologies inline in the raw text
+    if not primary_skills:
+        # 1) Inline tools/technologies line
+        m = re.search(r"(?im)^(?:tools\s*&\s*technologies|technologies|tools)\s*[:\-]?\s*(.+)$", text)
+        if m:
+            primary_skills = parse_skills(m.group(1))
+        # 2) A 'Skills' heading with lines below
+        if not primary_skills:
+            # Find the 'Skills' line and collect subsequent non-empty lines until next heading or blank line
+            lines_iter = text.splitlines()
+            for idx, ln in enumerate(lines_iter):
+                if re.match(r"^\s*skills\s*:?\s*$", ln, flags=re.I):
+                    collected = []
+                    for l in lines_iter[idx+1: idx+8]:
+                        t = l.strip()
+                        if not t:
+                            break
+                        # stop if another section heading appears
+                        if any(t.lower().startswith(a) for a in (alias for aliases in find_sections.__globals__["SECTION_ALIASES"].values() for alias in aliases)):
+                            break
+                        collected.append(t)
+                    if collected:
+                        primary_skills = parse_skills(" ".join(collected))
+                    break
+
     parsed = {
         "name": contacts["name"],
         "email": contacts["email"],
@@ -55,7 +82,7 @@ def parse_cv_text(raw_text: str) -> dict:
         "linkedin": contacts["linkedin"],
         "github": contacts["github"],
         "about": (sections.get("about") or None),
-        "skills": parse_skills(sections.get("skills", "")),
+        "skills": primary_skills,
         "education": parse_education(sections.get("education", "")),
         "experience": _parse_experience(sections.get("experience", ""), fallback_role=fallback_role),
         "projects": _parse_projects(sections.get("projects", "")),
