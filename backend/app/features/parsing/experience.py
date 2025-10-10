@@ -47,7 +47,7 @@ def _prejoin_broken_headers(lines: List[str]) -> List[str]:
         i += 1
     return out
 
-def parse_experience(section_text: str) -> List[Dict]:
+def parse_experience(section_text: str, fallback_role: Optional[str] = None) -> List[Dict]:
     if not section_text:
         return []
     raw_lines = [l.rstrip() for l in section_text.splitlines()]
@@ -59,6 +59,8 @@ def parse_experience(section_text: str) -> List[Dict]:
     current_dates: Optional[str] = None
     description_lines: list[str] = []
 
+    pending_role_from_title: Optional[str] = fallback_role
+    # If the section starts with a single short line (e.g., company name) followed by a paragraph, use fallback role
     for ln in lines:
         # First, try an explicit header match capturing role/company/dates/tail
         m = HEADER_RE_A.match(ln) or HEADER_RE_B.match(ln)
@@ -149,7 +151,20 @@ def parse_experience(section_text: str) -> List[Dict]:
             if tail_desc:
                 description_lines.append(tail_desc)
         else:
-            description_lines.append(ln)
+            # If we see a single short capitalized line after starting the section, treat it as company header when followed by text
+            if len(ln) <= 60 and (ln.istitle() or ln.isupper()) and not any(ch.isdigit() for ch in ln):
+                # If we already have an open item with description, just append
+                if current_role or current_company:
+                    description_lines.append(ln)
+                else:
+                    # Assume this is the company name; defer opening item until we see paragraph
+                    current_company = ln
+            else:
+                # Treat as description text
+                if current_role is None and current_company and pending_role_from_title:
+                    # Open the item now using the pending role
+                    current_role = pending_role_from_title
+                description_lines.append(ln)
 
     if current_role or current_company or description_lines:
         items.append(ExperienceItem(

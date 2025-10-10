@@ -6,32 +6,9 @@ import regex as re
 from pypdf import PdfReader
 
 # heal broken URLs that PDFs love to split
-_URL_PART = re.compile(r"(https?://[^\s)]+)", re.I)
-
 def _heal_broken_urls(text: str) -> str:
-    # join lines that split a URL in the middle (e.g., "\n" inside an http chunk)
-    text = text.replace("\r\n", "\n")
-    lines = text.split("\n")
-    out: list[str] = []
-    carry = ""
-    for ln in lines:
-        if carry:
-            cand = carry + ln.strip()
-            if _URL_PART.search(cand):
-                out.append(cand)
-                carry = ""
-                continue
-            else:
-                out.append(carry)
-                carry = ""
-        if ln.strip().startswith("http"):
-            # try to look ahead by gluing the next line later; keep in carry
-            carry = ln.strip()
-        else:
-            out.append(ln)
-    if carry:
-        out.append(carry)
-    return "\n".join(out)
+    # Do not merge separate URL lines here; rely on downstream normalizer to merge only true continuations
+    return text.replace("\r\n", "\n")
 
 def _dehyphenate(text: str) -> str:
     # remove hyphen at line end if next line continues a word
@@ -42,6 +19,29 @@ def read_pdf_text(path: Path | str) -> str:
     reader = PdfReader(str(p))
     pages = [pg.extract_text() or "" for pg in reader.pages]
     raw = "\n".join(pages)
+
+    # Collect URLs from annotations (clickable links) that often aren't in extracted text
+    urls: list[str] = []
+    try:
+        for page in reader.pages:
+            annots = page.get("/Annots") or []
+            for a in annots:
+                try:
+                    obj = a.get_object()
+                    action = obj.get("/A")
+                    if action and action.get("/URI"):
+                        uri = action.get("/URI")
+                        if isinstance(uri, str):
+                            urls.append(uri)
+                except Exception:
+                    continue
+    except Exception:
+        # Annotation extraction is best-effort; ignore failures
+        pass
+
+    if urls:
+        # Append discovered URLs at the top to help contact parsing
+        raw = ("\n".join(urls) + "\n" + raw).strip()
     raw = _dehyphenate(raw)
     raw = _heal_broken_urls(raw)
     # normalize multiple blank lines

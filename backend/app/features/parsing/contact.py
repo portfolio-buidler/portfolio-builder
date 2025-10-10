@@ -4,6 +4,7 @@ import regex as re
 import phonenumbers
 
 EMAIL_RE = re.compile(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", re.I)
+# Capture standalone URLs; we'll also split concatenated sequences later
 URL_RE = re.compile(r"https?://\S+", re.I)
 PHONE_RE = re.compile(r"(?:\+?\d[\d\s\-().]{7,}\d)")
 
@@ -28,7 +29,9 @@ def _guess_name_from_header(lines: List[str]) -> Optional[str]:
     """
     seps = re.compile(r"\s*[|•·\-–—,]\s*")
     for ln in lines[:3]:
-        parts = [p.strip() for p in seps.split(ln) if p.strip()]
+        # Remove obvious labels like 'LinkedIn'/'GitHub' before splitting
+        ln_clean = re.sub(r"\b(LinkedIn|GitHub)\b", "", ln, flags=re.I)
+        parts = [p.strip() for p in seps.split(ln_clean) if p.strip()]
         for p in parts:
             if any(ch.isdigit() for ch in p) or "@" in p.lower():
                 continue
@@ -38,19 +41,54 @@ def _guess_name_from_header(lines: List[str]) -> Optional[str]:
     return None
 
 
+def _split_concatenated_urls(s: str) -> List[str]:
+    # Split sequences like "http://a...http://b..." into separate URLs
+    parts: List[str] = []
+    for m in re.finditer(r"https?://", s, flags=re.I):
+        parts.append(m.start())
+    if not parts:
+        return []
+    idxs = parts + [len(s)]
+    out: List[str] = []
+    for i in range(len(parts)):
+        out.append(s[idxs[i]:idxs[i+1]].strip())
+    return [x for x in out if x]
+
 def parse_contacts(lines: List[str], country="IL") -> Dict[str, Optional[str]]:
     top = "\n".join(lines[:8])
-    email = (EMAIL_RE.search(top) or EMAIL_RE.search("\n".join(lines)))
-    email_val = email.group(0) if email else None
+    # Prefer the first clear email anywhere, but strip 'mailto:' if present in source text
+    email_match = (EMAIL_RE.search(top) or EMAIL_RE.search("\n".join(lines)))
+    email_val = email_match.group(0) if email_match else None
 
     phone_match = PHONE_RE.search(top)
     phone_val = _format_phone(phone_match.group(0), country) if phone_match else None
 
-    urls = URL_RE.findall("\n".join(lines))
-    linkedin = next((u for u in urls if "linkedin.com" in u.lower()), None)
-    github = next((u for u in urls if "github.com" in u.lower()), None
-
-    )
+    raw = "\n".join(lines)
+    urls = URL_RE.findall(raw)
+    # Also handle glued URLs on the same line by splitting them
+    extra_urls: List[str] = []
+    for u in urls:
+        if "http" in u and u.count("http") > 1:
+            extra_urls.extend(_split_concatenated_urls(u))
+    if extra_urls:
+        urls.extend(extra_urls)
+    # Clean urls and strip trailing punctuation/artifacts; split glued ones
+    clean_urls: List[str] = []
+    for u in urls:
+        if "http" in u and u.count("http") > 1:
+            clean_urls.extend([p.strip().rstrip(').,;') for p in _split_concatenated_urls(u)])
+        else:
+            clean_urls.append(u.strip().rstrip(').,;'))
+    # Dedup preserve order
+    seen: set[str] = set()
+    dedup_urls: List[str] = []
+    for u in clean_urls:
+        if u in seen:
+            continue
+        seen.add(u)
+        dedup_urls.append(u)
+    linkedin = next((u for u in dedup_urls if "linkedin.com" in u.lower()), None)
+    github = next((u for u in dedup_urls if "github.com" in u.lower()), None)
 
     # name heuristic: prefer header split, then fallback to first capitalized line near top
     disallow = {"skills","experience","projects","education","profile","summary","military","about"}
@@ -63,7 +101,8 @@ def parse_contacts(lines: List[str], country="IL") -> Dict[str, Optional[str]]:
             if EMAIL_RE.search(t) or PHONE_RE.search(t) or URL_RE.search(t):
                 continue
             tokens = t.split()
-            if 1 < len(tokens) <= 6 and sum(w[:1].isupper() for w in tokens) >= 2:
+            # Avoid picking job titles as names by requiring at least 2 words and no trailing 'Developer/Engineer/Manager'
+            if 1 < len(tokens) <= 6 and sum(w[:1].isupper() for w in tokens) >= 2 and not re.search(r"\b(Developer|Engineer|Manager|Lead|Consultant)\b", t, re.I):
                 name = t
                 break
 

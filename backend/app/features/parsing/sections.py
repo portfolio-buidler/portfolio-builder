@@ -72,7 +72,7 @@ def _extract_first_paragraph_after_contacts(lines: List[str], stop_idx: int) -> 
             if start_idx > 0 and len(t) > 10:
                 break
 
-    # Accumulate the first paragraph until blank line or heading
+    # Accumulate all lines after contacts until next heading or blank line
     para: list[str] = []
     alias_inlines = [
         re.compile(rf"\b{re.escape(alias)}\b", re.I)
@@ -85,11 +85,27 @@ def _extract_first_paragraph_after_contacts(lines: List[str], stop_idx: int) -> 
             if para:
                 break
             continue
-        # If a section alias appears inline, stop before it
-        if any(p.search(t) for p in alias_inlines):
+        # Stop if a section heading is detected at line start
+        if any(t.upper().startswith(a.upper()) for a in SECTION_ALIASES.keys()):
+            break
+        # If a section alias appears inline, include only the part before the alias and stop
+        earliest = None
+        for p in alias_inlines:
+            m = p.search(t)
+            if m:
+                if earliest is None or m.start() < earliest:
+                    earliest = m.start()
+        if earliest is not None:
+            chunk = t[:earliest].strip()
+            if chunk:
+                para.append(chunk)
             break
         para.append(t)
-    return (" ".join(para)).strip()
+    # Join lines into a single paragraph
+    joined = " ".join(para)
+    # De-duplicate spaces
+    joined = re.sub(r"\s+", " ", joined).strip()
+    return joined
 
 def find_sections(text: str) -> Tuple[Dict[str, str], List[str]]:
     lines = [l.rstrip() for l in text.splitlines()]
@@ -112,11 +128,16 @@ def find_sections(text: str) -> Tuple[Dict[str, str], List[str]]:
             if start_alias:
                 pre = work[:lead]
                 alias_chunk = lstripped[: len(start_alias)]
-                post = lstripped[len(start_alias) :]
+                post = lstripped[len(start_alias) :].lstrip(" :-\t")
                 if pre.strip():
                     split_lines.append(pre.rstrip())
-                split_lines.append((alias_chunk + post).strip())
-                work = ""
+                # Push alias as its own line
+                split_lines.append(alias_chunk.strip())
+                # If there is remainder, push as next line and keep processing
+                if post:
+                    work = post
+                else:
+                    work = ""
                 changed = True
                 continue
 
@@ -145,30 +166,72 @@ def find_sections(text: str) -> Tuple[Dict[str, str], List[str]]:
             if best_alias is not None:
                 pre = work[:best_idx]
                 alias_chunk = work[best_idx : best_idx + len(best_alias)]
-                post = work[best_idx + len(best_alias) :]
+                post = work[best_idx + len(best_alias) :].lstrip(" :-\t")
                 if pre.strip():
                     split_lines.append(pre.rstrip())
-                split_lines.append((alias_chunk + post).strip())
-                work = ""
+                # Push alias as its own line
+                split_lines.append(alias_chunk.strip())
+                if post:
+                    work = post
+                else:
+                    work = ""
                 changed = True
-            else:
-                break
+                continue
+            # 3) If alias is glued to next word (e.g., 'LinkedIn|https://...'), split at the alias and treat the rest as a new line
+            for a in all_aliases:
+                pos = low.find(a)
+                if pos != -1:
+                    # If alias is not at start, but glued to next word, split
+                    if pos > 0 and (work[pos - 1] not in ".:;|()•·-–— \t\u00a0" or work[pos - 1].isalnum()):
+                        pre = work[:pos]
+                        alias_chunk = work[pos : pos + len(a)]
+                        post = work[pos + len(a) :].lstrip(" :-\t")
+                        if pre.strip():
+                            split_lines.append(pre.rstrip())
+                        split_lines.append(alias_chunk.strip())
+                        if post:
+                            work = post
+                        else:
+                            work = ""
+                        changed = True
+                        break
+            if changed:
+                continue
+            break
         if not changed and work is not None:
             split_lines.append(work)
     lines = split_lines
 
     # Detect headings; support inline content on same line as heading
+    def _looks_like_heading(s: str, alias: str) -> bool:
+        t = s.strip()
+        if not t:
+            return False
+        tlow = t.lower().rstrip(":")
+        if tlow == alias:
+            return True
+        if not tlow.startswith(alias):
+            return False
+        # Remaining text after alias
+        rem = t[len(t) :]
+        # Heuristics: short, not sentence-like, title-ish
+        if t.endswith('.'):
+            return False
+        if len(t) <= 40 and (t.isupper() or t.istitle() or t.endswith(':')):
+            return True
+        # If alias is multi-word (e.g., "professional experience"), allow looser check
+        if ' ' in alias and len(t) <= 50:
+            return True
+        return False
+
     idxs: list[tuple[int, str]] = []
     inline_remainders: Dict[int, str] = {}
     for i, ln in enumerate(lines):
         raw = ln.strip()
-        low = raw.lower().strip(":")
         for key, aliases in SECTION_ALIASES.items():
             for a in aliases:
-                if low.startswith(a):
+                if _looks_like_heading(raw, a):
                     idxs.append((i, key))
-                    # If line contains content after alias (e.g., "EducationProject ..."),
-                    # keep the remainder as the first content line of the section.
                     remainder = raw[len(a) :].strip(" :\t-–—")
                     if remainder:
                         inline_remainders[i] = remainder

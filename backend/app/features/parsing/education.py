@@ -58,8 +58,10 @@ def parse_education(s: str) -> list[dict]:
             ]
             end = min(end_candidates) if end_candidates else len(line)
             degree_phrase = line[start:end].strip(" ,-|()")
+            # Normalize prefixes like 'Graduate B.Sc.' -> 'B.Sc.'
+            degree_phrase = re.sub(r"^Graduate\s+", "", degree_phrase, flags=re.I)
 
-            # Institution: text after the degree phrase to the next delimiter sequence
+            # Institution: try text after degree phrase; if missing, use preceding portion of block
             after = line[end:].strip(",|-;: ")
             inst = (
                 after.split(" (", 1)[0]
@@ -70,6 +72,29 @@ def parse_education(s: str) -> list[dict]:
             if inst:
                 inst = re.sub(r"^[.\s]*(?:in|of)\s+", "", inst, flags=re.I).strip()
                 inst = re.sub(r"^(?:'s\s+)?degree\s+in\s+", "", inst, flags=re.I).strip()
+                # Trim trailing narrative like 'Relevant Coursework', 'Completed coursework', etc.
+                inst = re.split(r"\b(Relevaknt|Relevant|Completed) coursework\b", inst, flags=re.I)[0].strip()
+            else:
+                # Fall back: try text before degree phrase (institution first line)
+                before = line[:start].strip(" ,-|()")
+                if before:
+                    inst = before
+                else:
+                    # Try previous line in block
+                    block_lines = block.splitlines()
+                    idx = None
+                    for i, bl in enumerate(block_lines):
+                        if deg.group(0) in bl:
+                            idx = i
+                            break
+                    if idx is not None and idx > 0:
+                        inst_candidate = block_lines[idx - 1].strip()
+                        if inst_candidate:
+                            inst = inst_candidate
+                    elif idx is not None and idx + 1 < len(block_lines):
+                        inst_candidate = block_lines[idx + 1].strip()
+                        if inst_candidate:
+                            inst = inst_candidate
 
         items.append(
             EducationItem(

@@ -24,6 +24,9 @@ def _is_probable_title(s: str) -> bool:
         return False
     if _VERB_START.match(s):
         return False
+    # Require Title Case or ALL CAPS start (first char uppercase)
+    if not s[:1].isupper():
+        return False
     return True
 
 def parse_projects(section_text: str) -> List[Dict]:
@@ -39,26 +42,31 @@ def parse_projects(section_text: str) -> List[Dict]:
             if current_name:
                 description_lines.append(desc)
             continue
+        # Filter out stray 'Action:', 'Result:', 'View Project' as separate projects
+        if ln.strip().lower() in {"action:", "result:", "view project"}:
+            continue
         # Non-bullet line: decide if it's a title or a description continuation
         if current_name:
             if _is_probable_title(ln):
                 items.append(ProjectItem(
-                    project_name=current_name.strip(":-• "),
+                    project_name=current_name.strip(":-• | "),
                     description=(" ".join(description_lines).strip() or None),
                 ))
                 description_lines = []
-                current_name = ln
+                current_name = ln.rstrip("|").strip()
             else:
                 description_lines.append(ln)
         else:
             if _is_probable_title(ln):
-                current_name = ln
+                current_name = ln.rstrip("|").strip()
             else:
-                # Ignore narrative lines if no current project started
+                # Join consecutive description lines until next probable title
+                if items:
+                    description_lines.append(ln)
                 continue
     if current_name:
         items.append(ProjectItem(
-            project_name=current_name.strip(":-• "),
+            project_name=current_name.strip(":-• | "),
             description=(" ".join(description_lines).strip() or None),
         ))
     out: List[Dict] = []
