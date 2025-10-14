@@ -4,4 +4,5 @@ export interface PreviewProps {
 
 export interface PreviewViewProps {
   backgroundUrl: string;
+  previewArea?: React.ReactNode;
 }

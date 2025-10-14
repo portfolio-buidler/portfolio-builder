@@ -85,8 +85,8 @@ function UploadCV() {
       setErrorMessage(undefined);
 
       console.log('[UploadCV] Simulated read back from store:', useResumeStore.getState().resumeData);
-      // Navigate to preview page after successful upload
-      navigate('/Preview');
+  // Navigate to preview page after successful upload
+  navigate('/preview');
     } catch (err: any) {
       const msg = err?.response?.data?.detail || err?.message || 'Upload failed';
       console.error('❌ Upload error:', err);
