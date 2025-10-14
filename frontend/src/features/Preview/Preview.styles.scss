@@ -1,0 +1,44 @@
+@use '../../styles/tokens/colors';
+@use '../../styles/tokens/spacing';
+@use '../../styles/tokens/typography';
+
+.preview {
+  min-height: 100vh;
+  padding: var(--space-16);
+  
+  &__container {
+    max-width: 60rem;
+    margin: 0 auto;
+  }
+  
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-24);
+  }
+  
+  &__back-button {
+    padding: var(--space-8) var(--space-16);
+    background: var(--color-border-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    
+    &:hover {
+      background: var(--color-border-secondary);
+    }
+  }
+  
+  &__title {
+    font-size: var(--font-size-2xl);
+    margin: 0;
+  }
+  
+  &__content {
+    padding: var(--space-16);
+    background: var(--color-bg-primary);
+    border-radius: var(--radius-lg);
+    text-align: center;
+  }
+}
