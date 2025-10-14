@@ -1,7 +1,7 @@
 
 import { Routes, Route, Navigate } from 'react-router-dom';
 import UploadCV from './features/UploadCV/UploadCV';
-import Preview from './features/Preview/preview';
+import Preview from './features/Preview/Preview';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 

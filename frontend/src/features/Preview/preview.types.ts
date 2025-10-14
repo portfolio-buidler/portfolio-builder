@@ -1,7 +1,7 @@
 export interface PreviewProps {
-  // מינימלי - אפשר להוסיף props לפי הצורך
+  backgroundUrl?: string;
 }
 
 export interface PreviewViewProps {
-  onBack: () => void;
+  backgroundUrl: string;
 }

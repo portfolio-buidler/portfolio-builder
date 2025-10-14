@@ -1,27 +1,14 @@
 import React from 'react'
-import type { PreviewViewProps } from './preview.types'
+import type { PreviewViewProps } from './Preview.types'
 import './Preview.styles.scss'
 
-export const PreviewView: React.FC<PreviewViewProps> = ({
-  onBack
-}) => {
+export const PreviewView: React.FC<PreviewViewProps> = ({ backgroundUrl }) => {
   return (
-    <div className="preview">
-      <div className="preview__container">
-        <header className="preview__header">
-          <button 
-            className="preview__back-button" 
-            onClick={onBack}
-          >
-            חזרה להעלאה
-          </button>
-          <h1 className="preview__title">תצוגה מקדימה</h1>
-        </header>
-        
-        <main className="preview__content">
-          <p>כאן יופיע התוכן שהועלה - פשוט ומינימלי</p>
-        </main>
-      </div>
+    <div
+      className="preview"
+      style={{ ['--preview-bg' as any]: `url(${backgroundUrl})` }}
+    >
+      <h1 className="preview__title">Portify.</h1>
     </div>
   )
 }

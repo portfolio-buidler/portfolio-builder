@@ -1,18 +1,11 @@
-import { useNavigate } from 'react-router-dom'
+import backgroundImage from '../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6c8.jpg'
 import { PreviewView } from './Preview.view'
-import type { PreviewViewProps } from './preview.types'
+import type { PreviewViewProps } from './Preview.types'
 
 function Preview() {
-  const navigate = useNavigate()
-
-  const handleBack = (): void => {
-    navigate('/')
-  }
-
   const viewProps: PreviewViewProps = {
-    onBack: handleBack
+    backgroundUrl: backgroundImage
   }
-
   return <PreviewView {...viewProps} />
 }
 
