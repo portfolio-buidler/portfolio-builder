@@ -42,27 +42,13 @@
   }
 
   &__container {
-    overflow-y: auto;
+    overflow-y: visible;
     overflow-x: hidden;
-    /* Add right vertical border line */
     position: relative;
-    &::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      right: 0;
-      transform: translateY(-50%);
-      width: 0;
-      height: 296px;
-      border-right: 3px solid #00000066;
-      opacity: 1;
-      pointer-events: none;
-    }
     width: 100%;
     max-width: 92rem;
     margin-inline: auto;
     padding: 2rem;
-    position: relative;
     z-index: 1;
   }
 
@@ -78,10 +64,38 @@
     margin-top: 127px;
     padding: 0;
     box-sizing: border-box;
+    /* Make the preview area frame invisible */
     opacity: 1;
-    border-radius: var(--radius-2xl);
-    background: var(--glass-bg-accent);
-    box-shadow: var(--shadow-glass-inset);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
     z-index: var(--z-base);
+    /* Preview area itself will be scrollable */
+    max-height: calc(100vh - 127px - 4rem);
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    
+    /* Hide native scrollbar */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+    &::-webkit-scrollbar {
+      display: none; /* Chrome/Safari/Opera */
+    }
+    
+    /* Custom scrollbar using "Line 4" as scroll indicator */
+    &::after {
+      content: '';
+      position: absolute;
+      top: var(--scroll-indicator-top, 50%);
+      transform: var(--scroll-indicator-transform, translateY(-50%));
+      right: 0;
+      width: 0;
+      height: 296px;
+      border-right: 3px solid #00000066;
+      opacity: 1;
+      pointer-events: none;
+      transition: top 0.1s ease-out, transform 0.1s ease-out;
+    }
   }
 }
