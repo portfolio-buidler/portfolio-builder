@@ -1,5 +1,5 @@
 import React from 'react'
-import type { PreviewAreaViewProps, PreviewSection } from './PreviewArea.types'
+import type { PreviewAreaViewProps } from './PreviewArea.types'
 import './PreviewArea.styles.scss'
 
 /**
