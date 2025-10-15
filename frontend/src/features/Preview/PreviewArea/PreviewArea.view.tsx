@@ -104,38 +104,46 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
 
       {/* Footer navigation bar with undo/redo and next */}
       <div className="preview-area__footer">
-        <div className="preview-area__history">
+        <div className="preview-area__controls">
+          <div className="preview-area__history">
+            <button
+              type="button"
+              className="preview-area__history-btn"
+              onClick={onUndo}
+              disabled={!undoAvailable}
+              aria-disabled={!undoAvailable || undefined}
+              aria-label="Undo"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 14L4 9l5-5" />
+                <path d="M20 20v-7a4 4 0 0 0-4-4H4" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              className="preview-area__history-btn"
+              onClick={onRedo}
+              disabled={!redoAvailable}
+              aria-disabled={!redoAvailable || undefined}
+              aria-label="Redo"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 14l5-5-5-5" />
+                <path d="M4 20v-7a4 4 0 0 1 4-4h12" />
+              </svg>
+            </button>
+          </div>
           <button
             type="button"
-            className="preview-area__history-btn"
-            onClick={onUndo}
-            disabled={!undoAvailable}
-            aria-disabled={!undoAvailable || undefined}
-            aria-label="Undo"
+            className="preview-area__next"
+            onClick={isNextEnabled ? onNext : undefined}
+            disabled={!isNextEnabled}
+            aria-disabled={!isNextEnabled || undefined}
           >
-            ‹
-          </button>
-          <button
-            type="button"
-            className="preview-area__history-btn"
-            onClick={onRedo}
-            disabled={!redoAvailable}
-            aria-disabled={!redoAvailable || undefined}
-            aria-label="Redo"
-          >
-            ›
+            Next
+            <span className="preview-area__next-icon">›</span>
           </button>
         </div>
-        <button
-          type="button"
-          className="preview-area__next"
-          onClick={isNextEnabled ? onNext : undefined}
-          disabled={!isNextEnabled}
-          aria-disabled={!isNextEnabled || undefined}
-        >
-          Next
-          <span className="preview-area__next-icon">›</span>
-        </button>
       </div>
     </div>
   )

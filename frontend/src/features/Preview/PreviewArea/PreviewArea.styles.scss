@@ -112,10 +112,23 @@
   &__footer {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     margin-top: 2rem;
-    gap: 1rem;
     flex-shrink: 0;
+  }
+
+  /* Container for all controls */
+  &__controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    width: 326px;
+    height: 60px;
+    border-radius: 15px;
+    background: #9B4D4E33;
+    opacity: 1;
+    padding: 0 1rem;
   }
 
   /* History container styled as a pill with two buttons inside. */
