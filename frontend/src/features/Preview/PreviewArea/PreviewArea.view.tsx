@@ -1,6 +1,13 @@
 import React from 'react'
 import type { PreviewAreaViewProps } from './PreviewArea.types'
 import './PreviewArea.styles.scss'
+import {
+  AboutSection,
+  EducationSection,
+  SkillsSection,
+  CommunicationSection,
+  ExperienceSection,
+} from './Sections'
 
 /**
  * Stateless presentational component for the preview area. This component
@@ -53,75 +60,45 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
       {/* Content area containing the cards. This element is scrollable */}
       <div className="preview-area__content">
         {about && (
-          <section
-            className="preview-section preview-section--about"
-            data-complete={about.complete ?? true}
-          >
-            <h3 className="preview-section__title">{about.title}</h3>
-            <div className="preview-section__content">{about.content}</div>
-          </section>
+          <AboutSection
+            title={about.title}
+            content={about.content}
+            complete={about.complete}
+          />
         )}
         {education && (
-          <section
-            className="preview-section preview-section--education"
-            data-complete={education.complete ?? true}
-          >
-            {/* Title always visible at the top of the education card */}
-            <h3 className="preview-section__title">{education.title}</h3>
-            {/* Render content only when the section is expanded */}
-            {!isEducationCollapsed && (
-              <div className="preview-section__content">{education.content}</div>
-            )}
-            {/* Collapse/expand toggle button positioned at the bottom right */}
-            <button
-              type="button"
-              className="preview-section__toggle"
-              onClick={onToggleEducation}
-              aria-label={isEducationCollapsed ? 'Expand education section' : 'Collapse education section'}
-            >
-              {isEducationCollapsed ? '▼' : '▲'}
-            </button>
-          </section>
+          <EducationSection
+            title={education.title}
+            content={education.content}
+            complete={education.complete}
+            isCollapsed={isEducationCollapsed}
+            onToggle={onToggleEducation}
+          />
         )}
         {/* Row containing skills and communication side by side */}
         <div className="preview-area__row">
           {skills && (
-            <section
-              className="preview-section preview-section--skills"
-              data-complete={skills.complete ?? true}
-            >
-              <h3 className="preview-section__title">{skills.title}</h3>
-              <div className="preview-section__content">{skills.content}</div>
-            </section>
+            <SkillsSection
+              title={skills.title}
+              content={skills.content}
+              complete={skills.complete}
+            />
           )}
           {communication && (
-            <section
-              className="preview-section preview-section--communication"
-              data-complete={communication.complete ?? true}
-            >
-              <h3 className="preview-section__title">{communication.title}</h3>
-              <div className="preview-section__content">
-                {communication.content}
-                <button
-                  type="button"
-                  className="preview-section__add-link"
-                  onClick={onAddLink}
-                  aria-label="Add communication link"
-                >
-                  +
-                </button>
-              </div>
-            </section>
+            <CommunicationSection
+              title={communication.title}
+              content={communication.content}
+              complete={communication.complete}
+              onAddLink={onAddLink}
+            />
           )}
         </div>
         {experience && (
-          <section
-            className="preview-section preview-section--experience"
-            data-complete={experience.complete ?? true}
-          >
-            <h3 className="preview-section__title">{experience.title}</h3>
-            <div className="preview-section__content">{experience.content}</div>
-          </section>
+          <ExperienceSection
+            title={experience.title}
+            content={experience.content}
+            complete={experience.complete}
+          />
         )}
       </div>
 
