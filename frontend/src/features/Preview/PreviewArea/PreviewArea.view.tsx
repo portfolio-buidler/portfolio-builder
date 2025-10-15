@@ -1,47 +1,71 @@
 import React from 'react';
 import './PreviewArea.styles.scss';
-import type { PreviewAreaProps } from './PreviewArea.types';
+import type { PreviewAreaViewProps, PreviewSection } from './PreviewArea.types';
 
-export const PreviewAreaView: React.FC<PreviewAreaProps> = () => {
+export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
+ sections,
+  onBack,
+  onNext,
+  isNextEnabled,
+}) => {
   return (
     <div className="preview-area">
-      <div className="preview-area__frame preview-area__frame--small">
-        <div className="preview-area__rect38" />
-        <div className="preview-area__chevron">
-          <svg
-            width="30"
-            height="30"
-            viewBox="0 0 30 30"
-            style={{ transform: 'rotate(180deg)' }}
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <g>
-              <rect width="30" height="30" fill="none" />
-              <path
-                d="M18.75 7.5L11.25 15L18.75 22.5"
-                stroke="#354052"
-                strokeWidth="4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </g>
-          </svg>
-        </div>
-      </div>
-      <div className="preview-area__frame preview-area__frame--large">
-        <div className="preview-area__inner preview-area__inner--row">
-          <h2 className="preview-area__row-title">Preview</h2>
-          <p className="preview-area__row-message">
-            Please complete all required fields before continuing (not included work experience). You won’t be able to move to the next step until everything is filled out.
+      {/* Header with back arrow and instructional text */}
+      <div className="preview-area__header">
+        <button
+          type="button"
+          className="preview-area__back"
+          onClick={onBack}
+          aria-label="Go back"
+        >
+          {/* Using a simple left chevron character for the back arrow. Replace with an SVG if required. */}
+          ‹
+        </button>
+        <div className="preview-area__intro">
+          <h2 className="preview-area__title">Preview</h2>
+          <p className="preview-area__subtitle">
+            Please complete all required fields before continuing (not included work experience).<br />
+            You won't be able to move to the next step until everything is filled out.
           </p>
         </div>
-        <div className="preview-area__inner preview-area__inner--block-a" />
-        <div className="preview-area__inner preview-area__inner--block-b" />
-        <div className="preview-area__inner preview-area__inner--block-c" />
-        <div className="preview-area__inner preview-area__inner--block-d" />
-        <div className="preview-area__inner preview-area__inner--block-e" />
+      </div>
+
+      {/* Scrollable container of preview sections */}
+      <div className="preview-area__sections">
+        {sections.map((section: PreviewSection) => (
+          <section
+            key={section.id}
+            className="preview-section"
+            data-complete={section.completed ?? true}
+          >
+            <h3 className="preview-section__title">{section.title}</h3>
+            <div className="preview-section__content">{section.content}</div>
+          </section>
+        ))}
+      </div>
+
+      {/* Navigation controls at the bottom */}
+      <div className="preview-area__navigation">
+        <button
+          type="button"
+          className="preview-area__nav preview-area__nav--back"
+          onClick={onBack}
+          aria-label="Back"
+        >
+          ‹
+        </button>
+        <button
+          type="button"
+          className="preview-area__nav preview-area__nav--next"
+          onClick={isNextEnabled ? onNext : undefined}
+          disabled={!isNextEnabled}
+          aria-disabled={!isNextEnabled || undefined}
+        >
+          Next
+        </button>
       </div>
     </div>
-  );
-};
+  )
+}
+
+export default PreviewAreaView

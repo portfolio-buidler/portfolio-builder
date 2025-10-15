@@ -1,148 +1,196 @@
+/*
+ * Styles for the preview area. These rules build upon the global design
+ * system tokens defined elsewhere in the application. Cards within the
+ * preview make heavy use of the glass dark mode aesthetic: blurred
+ * backgrounds, semi–transparent fills and subtle inset shadows. The
+ * navigation controls reuse the brand colours for a cohesive look.
+ */
+
 .preview-area {
-  position: absolute;
-  width: 868px;
-  height: 733px;
-  top: 127px;
-  left: 301px;
-  gap: 12px;
-  opacity: 1;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  z-index: 3; // ensure above background and title if needed
-  outline: 2px dashed rgba(255,255,255,0.6); // debug
-  outline-offset: 2px;
+  align-items: stretch;
+  width: 100%;
+  height: 100%;
 
-  &__frame {
-    background: rgba(255,255,255,0.08); // debug background
-    border: 1px solid rgba(255,255,255,0.3); // debug border
-    backdrop-filter: blur(2px);
-  }
-
-  &__frame--small {
-    width: 30px;
-    height: 34px;
-    opacity: 1;
-    margin-bottom: 12px;
-    position: relative;
+  /* Header containing the back button and instructional text */
+  &__header {
     display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 4px;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
   }
 
-  &__rect38 {
-    width: 4px;
-    height: 4px;
-    background: #D9D9D9;
-    opacity: 1;
-    border-radius: 1px;
-    margin-left: 2px;
-  }
-
-  &__chevron {
-    width: 30px;
-    height: 30px;
+  &__back {
+    /* Circle button for navigating back */
+    width: 2rem;
+    height: 2rem;
+    min-width: 2rem;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    font-size: 1.25rem;
+    line-height: 1;
+    font-weight: var(--font-weight-bold);
+    color: var(--title-color);
+    background-color: var(--glass-bg-accent);
+    backdrop-filter: blur(var(--blur-md, 12px));
+    box-shadow: var(--shadow-glass-inset);
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
-    opacity: 1;
+    cursor: pointer;
+    transition: background-color 200ms ease, color 200ms ease;
+
+    &:hover {
+      background-color: var(--glass-bg-accent-active);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.4);
+    }
   }
 
-  &__frame--large {
-    width: 826px;
-    height: 1295px;
-    opacity: 1;
-    margin-bottom: 20px;
+  &__intro {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 0.25rem;
+    max-width: 42rem;
   }
 
-  &__inner {
-    background: rgba(0, 128, 255, 0.12); // debug: light blue tint
-    border: 1px solid rgba(0, 128, 255, 0.4);
-    box-sizing: border-box;
-  }
-
-  &__inner--row { /* first: width 781 height 38 gap 18 between children -> currently empty */
-    width: 781px;
-    height: 38px;
-    display: flex;
-    gap: 18px;
-    align-items: center;
-  }
-
-  &__row-title {
-    width: 163px;
-    height: 28px; /* visual bounding box; actual line-height controls height */
-    font-family: var(--font-family-base, 'Poppins');
-    font-weight: 700;
-    font-size: 40px;
-    line-height: 100%;
+  &__title {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-2xl);
+    line-height: var(--line-height-tight);
+    font-weight: var(--font-weight-bold);
+    color: var(--title-color);
+    margin: 0;
     text-transform: capitalize;
-    color: var(--text-black, #354052);
+  }
+
+  &__subtitle {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+    color: var(--color-fg-muted);
     margin: 0;
+  }
+
+  /* Container for the list of sections. It is scrollable to
+   * accommodate long content without affecting the overall page layout. */
+  &__sections {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+    flex: 1;
+  }
+
+  /* Navigation buttons at the bottom of the preview. Centre aligned.
+   */
+  &__navigation {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  &__nav {
     display: flex;
     align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 1.05rem;
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    border: none;
+    transition: background-color 200ms ease, color 200ms ease;
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.4);
+    }
   }
 
-  &__row-message {
-    width: 600px;
-    height: 38px; /* matches spec */
-    font-family: var(--font-family-base, 'Poppins');
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 22px; /* per spec */
-    letter-spacing: 0;
-    color: #ffffff;
-    background: #35405299; /* semi-transparent backdrop per spec */
+  &__nav--back {
+    background-color: var(--glass-bg-accent);
+    color: var(--title-color);
+    backdrop-filter: blur(var(--blur-md, 12px));
+    box-shadow: var(--shadow-glass-inset);
+
+    &:hover {
+      background-color: var(--glass-bg-accent-active);
+    }
+  }
+
+  &__nav--next {
+    background-color: var(--brand-500);
+    color: #fff;
+
+    &:hover {
+      background-color: var(--brand-600);
+    }
+
+    &:active {
+      background-color: var(--brand-700);
+    }
+
+    &:disabled,
+    &[aria-disabled='true'] {
+      background-color: var(--gray-500);
+      cursor: not-allowed;
+    }
+  }
+}
+
+/* Individual section card styling */
+.preview-section {
+  border-radius: var(--radius-2xl);
+  padding: 1rem 1.5rem;
+  background-color: var(--glass-bg-accent);
+  border: 1px solid var(--border-overlay-30);
+  box-shadow: var(--shadow-glass-inset);
+  backdrop-filter: blur(var(--blur-md, 12px));
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: var(--color-fg-default);
+
+  /* When a required section is incomplete we can optionally adjust the
+   * appearance to draw attention. This rule lightens the border colour
+   * when data-complete is false. */
+  &[data-complete='false'] {
+    border-color: var(--Colors-Red, #FF3B30);
+  }
+
+  &__title {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    color: var(--title-color);
     margin: 0;
-    padding: 6px 12px; /* slight breathing room */
-    border-radius: 4px; /* small rounding for readability */
-    display: flex;
-    align-items: center;
   }
 
-  &__inner--block-a { /* second */
-    width: 826px;
-    height: 156px;
-    border-radius: 15px;
-    background: rgba(0,255,128,0.12); // distinguish blocks
-    border: 1px solid rgba(0,255,128,0.4);
-  }
+  &__content {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-normal);
+    color: var(--color-fg-default);
 
-  &__inner--block-b { /* third */
-    width: 826px;
-    height: 177px;
-    border-radius: 15px;
-    background: rgba(255,128,0,0.12);
-    border: 1px solid rgba(255,128,0,0.4);
-  }
+    /* Ensure nested lists display bullets properly */
+    ul {
+      margin: 0.5rem 0 0 1.25rem;
+      padding: 0;
+      list-style-type: disc;
+    }
 
-  &__inner--block-c { /* fourth */
-    width: 826px;
-    height: 156px;
-    display: flex;
-    gap: 18px;
-    background: rgba(128,0,255,0.12);
-    border: 1px solid rgba(128,0,255,0.4);
-  }
-
-  &__inner--block-d { /* fifth */
-    width: 826px;
-    height: 334px;
-    border-radius: 15px;
-    background: rgba(255,0,128,0.12);
-    border: 1px solid rgba(255,0,128,0.4);
-  }
-
-  &__inner--block-e { /* sixth */
-    width: 826px;
-    height: 334px;
-    border-radius: 15px;
-    background: rgba(0,128,64,0.14);
-    border: 1px solid rgba(0,128,64,0.4);
+    li {
+      margin-bottom: 0.25rem;
+    }
   }
 }
