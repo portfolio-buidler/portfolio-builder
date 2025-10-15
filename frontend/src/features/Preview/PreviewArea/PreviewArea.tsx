@@ -1,18 +1,27 @@
-import React from 'react';
+import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { PreviewSection } from './PreviewArea.types';
-import { PreviewAreaView } from './PreviewArea.view';
+import { PreviewAreaView } from './PreviewArea.view'
+import type { PreviewSection } from './PreviewArea.types'
 
+/**
+ * Smart container component for the preview area. In a real
+ * implementation this component would subscribe to your global
+ * resume/curriculum vitae store and derive the contents of each
+ * section as well as whether it is complete. For demonstration
+ * purposes we construct a static set of sections that mirror the
+ * example provided in the specification.
+ */
 const PreviewArea: React.FC = () => {
   const navigate = useNavigate()
 
-  // Define the content for each section of the preview. In the real app
-  // these values should come from the user's uploaded CV or manually
-  // entered data. The `required` flag determines whether the section
-  // must be complete before allowing the user to proceed to the next
-  // step. The `complete` flag would be computed based on whether
-  // required fields are filled in.
-  const sections: PreviewSection[] = [
+  /**
+   * Define the initial content for each section of the preview. In the real
+   * application these values should be derived from the user’s uploaded
+   * CV or the data they input during the editing flow. Each section
+   * includes a title and JSX content. A required flag marks
+   * which sections gate the Next button.
+   */
+  const initialSections: PreviewSection[] = [
     {
       id: 'about',
       title: 'About Me',
@@ -23,14 +32,14 @@ const PreviewArea: React.FC = () => {
         </p>
       ),
       required: true,
-      completed: true,
+      complete: true,
     },
     {
       id: 'education',
       title: 'Education',
       content: (
         <div>
-          <p>B.Sc. in Computer Science – Tel Aviv University (2017–2020)</p>
+          <p>B.Sc. in Computer Science – Tel Aviv University (2017–2020)</p>
           <ul>
             <li>Specialized in software engineering, algorithms and system design</li>
             <li>Completed projects in distributed systems and AI applications</li>
@@ -42,43 +51,75 @@ const PreviewArea: React.FC = () => {
         </div>
       ),
       required: true,
-      completed: true,
+      complete: true,
     },
     {
       id: 'skills',
       title: 'Skills',
+      // Render the languages and technologies as individual tags for
+      // improved readability. Each tag is styled in PreviewArea.styles.scss.
       content: (
         <div className="preview-skills">
           <p>
-            <strong>Languages:</strong> Hebrew, English
+            <strong>Languages:</strong>{' '}
+            {['Hebrew', 'English'].map((lang) => (
+              <span key={lang} className="preview-tag">
+                {lang}
+              </span>
+            ))}
           </p>
           <p>
-            <strong>Technologies:</strong> React.js, Next.js, TypeScript, Redux,
-            TailwindCSS, Node.js, Express, MongoDB, PostgreSQL, Firebase
+            <strong>Technologies:</strong>{' '}
+            {[
+              'React.js',
+              'Next.js',
+              'TypeScript',
+              'Redux',
+              'TailwindCSS',
+              'Node.js',
+              'Express',
+              'MongoDB',
+              'PostgreSQL',
+              'Firebase',
+            ].map((tech) => (
+              <span key={tech} className="preview-tag">
+                {tech}
+              </span>
+            ))}
           </p>
         </div>
       ),
       required: true,
-      completed: true,
+      complete: true,
     },
     {
       id: 'communication',
       title: 'Communication',
+      // Display phone and email as pill‑like inputs and links as tags. The
+      // values here serve as initial examples and should come from user
+      // data in a real implementation.
       content: (
-        <div>
+        <div className="preview-communication">
           <p>
-            <strong>Mobile:</strong> +972 8887657
+            <strong>Mobile:</strong>{' '}
+            <span className="preview-field">+972 8887657</span>
           </p>
           <p>
-            <strong>Email:</strong> yoadmadmonoj@gmail.com
+            <strong>Email:</strong>{' '}
+            <span className="preview-field">yoadmadmonoj@gmail.com</span>
           </p>
           <p>
-            <strong>Links:</strong> GitHub, LinkedIn, Instagram
+            <strong>Links:</strong>{' '}
+            {['GitHub', 'LinkedIn', 'Instagram'].map((link) => (
+              <span key={link} className="preview-tag">
+                {link}
+              </span>
+            ))}
           </p>
         </div>
       ),
       required: true,
-      completed: true,
+      complete: true,
     },
     {
       id: 'experience',
@@ -104,39 +145,123 @@ const PreviewArea: React.FC = () => {
           </ul>
         </div>
       ),
-      // Work experience is not considered required according to the
-      // specification text. The Next button should still be enabled
-      // regardless of the completion state of this section.
       required: false,
-      completed: true,
+      complete: true,
     },
   ]
 
-  // Compute whether all required sections are complete. If any required
-  // section is missing or incomplete the user won’t be able to proceed.
-  const isNextEnabled = sections
-    .filter((s) => s.required)
-    .every((s) => s.completed)
+  // Maintain a history of section arrays to support undo/redo. Each
+  // entry in the history represents a snapshot of the preview data
+  // following an edit. For the MVP we seed the history with the initial
+  // sections only. When edits are made (e.g. adding a link), a new
+  // snapshot should be pushed to history and historyIndex advanced.
+  const [history, setHistory] = React.useState<PreviewSection[][]>([initialSections])
+  const [historyIndex, setHistoryIndex] = React.useState(0)
 
-  const handleBack = () => {
-    // Navigate one step back in the browser history. In the real app
-    // this would return the user to the CV upload page.
+  // Track whether the education section is collapsed. When true the
+  // details of the education card are hidden.
+  const [educationCollapsed, setEducationCollapsed] = React.useState(false)
+
+  // Compute derived values for convenience
+  const currentSections = history[historyIndex]
+  const undoAvailable = historyIndex > 0
+  const redoAvailable = historyIndex < history.length - 1
+
+  // Determine whether all required sections are complete. If any required
+  // section is missing or incomplete the user won’t be able to proceed.
+  const isNextEnabled = currentSections
+    .filter((s) => s.required)
+    .every((s) => s.complete)
+
+  /**
+   * Navigate one step back in the browser history. In the real app this
+   * would return the user to the CV upload page. This handler is
+   * assigned to the back arrow in the page header.
+   */
+  const handlePageBack = () => {
     navigate(-1)
   }
 
+  /**
+   * Advance to the next step of the wizard. Replace the placeholder
+   * route with your actual route name when integrating.
+   */
   const handleNext = () => {
-    // Navigate to the next step in the wizard. For the purpose of this
-    // example we simply push a placeholder route. Replace with your
-    // actual route name when integrating.
     navigate('/next-step')
+  }
+
+  /**
+   * Step backwards through the edit history if available. When the
+   * historyIndex is greater than 0 this decrements the index.
+   */
+  const handleUndo = () => {
+    if (undoAvailable) {
+      setHistoryIndex((i) => i - 1)
+    }
+  }
+
+  /**
+   * Step forwards through the edit history if available. When the
+   * historyIndex is less than the last index this increments the index.
+   */
+  const handleRedo = () => {
+    if (redoAvailable) {
+      setHistoryIndex((i) => i + 1)
+    }
+  }
+
+  /**
+   * Toggle the collapsed state of the education section. When collapsed
+   * the education card should only display its header and the toggle
+   * arrow. When expanded the full details appear.
+   */
+  const handleToggleEducation = () => {
+    setEducationCollapsed((prev) => !prev)
+  }
+
+  /**
+   * Handle adding a new link in the communication section. For
+   * demonstration purposes this function appends a dummy link entry
+   * labelled “New Link” to the list of links and records a new history
+   * snapshot. In a real application you would prompt the user for the
+   * link and update the appropriate data structure.
+   */
+  const handleAddLink = () => {
+    // Append a new link as a tag to the communication section. We wrap
+    // the existing content in a div and append a new <span> element. In
+    // a production implementation you would likely update a structured
+    // data model instead of manipulating JSX directly.
+    const updated = currentSections.map((section) => {
+      if (section.id !== 'communication') return section
+      return {
+        ...section,
+        content: (
+          <div>
+            {section.content}
+            <span className="preview-tag">New Link</span>
+          </div>
+        ),
+      }
+    })
+    const newHistory = history.slice(0, historyIndex + 1)
+    newHistory.push(updated)
+    setHistory(newHistory)
+    setHistoryIndex(newHistory.length - 1)
   }
 
   return (
     <PreviewAreaView
-      sections={sections}
-      onBack={handleBack}
+      sections={currentSections}
+      onPageBack={handlePageBack}
       onNext={handleNext}
+      onUndo={handleUndo}
+      onRedo={handleRedo}
+      undoAvailable={undoAvailable}
+      redoAvailable={redoAvailable}
       isNextEnabled={isNextEnabled}
+      onToggleEducation={handleToggleEducation}
+      isEducationCollapsed={educationCollapsed}
+      onAddLink={handleAddLink}
     />
   )
 }

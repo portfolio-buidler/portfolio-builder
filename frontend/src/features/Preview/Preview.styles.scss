@@ -69,22 +69,19 @@
   &__body {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 868px;
-    height: 733px;
+    align-items: stretch;
+    justify-content: flex-start;
+    width: 100%;
+    max-width: 868px;
     gap: var(--space-3);
     margin-inline: auto;
     margin-top: 127px;
-    opacity: 1;
+    padding: 0;
     box-sizing: border-box;
+    opacity: 1;
     border-radius: var(--radius-2xl);
     background: var(--glass-bg-accent);
     box-shadow: var(--shadow-glass-inset);
     z-index: var(--z-base);
-    @include mq.mq(md) {
-      width: 868px;
-      height: 733px;
-    }
   }
 }

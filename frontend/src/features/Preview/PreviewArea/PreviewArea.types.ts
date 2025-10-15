@@ -5,7 +5,7 @@ export interface PreviewSection{
     title: string;
     content: ReactNode;
     required?: boolean;
-    completed?: boolean;
+    complete?: boolean;
 }
 
 export interface PreviewAreaProps {}
@@ -13,7 +13,14 @@ export interface PreviewAreaProps {}
 
 export interface PreviewAreaViewProps{
     sections: PreviewSection[];
-    onBack: () => void;
+    onPageBack: () => void;
+    onUndo: () => void;
+    onRedo: () => void;
     onNext: () => void;
     isNextEnabled: boolean;
+    undoAvailable: boolean;
+    redoAvailable: boolean;
+    onToggleEducation: () => void;
+    isEducationCollapsed: boolean;
+    onAddLink: () => void;
 }

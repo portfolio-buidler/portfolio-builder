@@ -1,3 +1,6 @@
+@use '../../../styles/mixins/mq' as mq;
+
+
 /*
  * Styles for the preview area. These rules build upon the global design
  * system tokens defined elsewhere in the application. Cards within the
@@ -77,9 +80,8 @@
     margin: 0;
   }
 
-  /* Container for the list of sections. It is scrollable to
-   * accommodate long content without affecting the overall page layout. */
-  &__sections {
+  /* Scrollable content container. This replaces the old __sections. */
+  &__content {
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
@@ -88,16 +90,69 @@
     flex: 1;
   }
 
-  /* Navigation buttons at the bottom of the preview. Centre aligned.
-   */
-  &__navigation {
+  /* Row layout for skills and communication sections. On narrow
+   * viewports the sections will stack; on larger screens they appear
+   * side by side. */
+  &__row {
     display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin-top: 2rem;
+    flex-direction: column;
+    gap: 1.25rem;
+    @include mq.mq(md) {
+      flex-direction: row;
+    }
   }
 
-  &__nav {
+  /* Footer navigation bar containing undo/redo and next. */
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 2rem;
+    gap: 1rem;
+  }
+
+  /* History container styled as a pill with two buttons inside. */
+  &__history {
+    display: flex;
+    border-radius: 1.05rem;
+    overflow: hidden;
+    backdrop-filter: blur(var(--blur-md, 12px));
+    background-color: var(--glass-bg-accent);
+    box-shadow: var(--shadow-glass-inset);
+  }
+
+  &__history-btn {
+    padding: 0.5rem 0.75rem;
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    color: var(--title-color);
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    cursor: pointer;
+    transition: background-color 150ms ease;
+
+    &:hover:not(:disabled) {
+      background-color: var(--glass-bg-accent-active);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.4);
+    }
+  }
+
+  /* Next button in the footer. Reuses the brand colours. */
+  &__next {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -106,36 +161,17 @@
     font-family: var(--font-family-base);
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-medium);
-    cursor: pointer;
-    border: none;
-    transition: background-color 200ms ease, color 200ms ease;
-
-    &:focus-visible {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.4);
-    }
-  }
-
-  &__nav--back {
-    background-color: var(--glass-bg-accent);
-    color: var(--title-color);
-    backdrop-filter: blur(var(--blur-md, 12px));
-    box-shadow: var(--shadow-glass-inset);
-
-    &:hover {
-      background-color: var(--glass-bg-accent-active);
-    }
-  }
-
-  &__nav--next {
     background-color: var(--brand-500);
     color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 200ms ease;
 
-    &:hover {
+    &:hover:not(:disabled) {
       background-color: var(--brand-600);
     }
 
-    &:active {
+    &:active:not(:disabled) {
       background-color: var(--brand-700);
     }
 
@@ -144,6 +180,17 @@
       background-color: var(--gray-500);
       cursor: not-allowed;
     }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.4);
+    }
+  }
+
+  &__next-icon {
+    margin-left: 0.5rem;
+    font-size: 1.25rem;
+    line-height: 1;
   }
 }
 
@@ -193,4 +240,159 @@
       margin-bottom: 0.25rem;
     }
   }
+
+  /* Header row used in cards that support collapsing. Aligns the
+   * title with a toggle button on the right. */
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  /* Toggle button used in collapsible cards (e.g. education). */
+  &__toggle {
+    border: none;
+    background: transparent;
+    font-size: var(--font-size-lg);
+    color: var(--title-color);
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 200ms ease;
+
+    /* When placed within a card (e.g. education) this toggle will be
+     * positioned absolutely at the bottom right. See the modifier rule
+     * for preview-section--education below. */
+
+    &:hover,
+    &:focus-visible {
+      color: var(--brand-500);
+    }
+  }
+
+  /* Button for adding a new link in the communication card. Positioned
+   * below the content and styled similarly to a pill. */
+  &__add-link {
+    margin-top: 0.5rem;
+    margin-left: auto;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-lg);
+    color: var(--title-color);
+    background-color: var(--glass-bg-accent);
+    backdrop-filter: blur(var(--blur-md, 12px));
+    box-shadow: var(--shadow-glass-inset);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 200ms ease;
+
+    &:hover {
+      background-color: var(--glass-bg-accent-active);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.4);
+    }
+  }
+}
+
+/* Modifiers for specific preview sections. These classes allow you to
+ * assign unique background gradients or sizing rules to certain cards. */
+// Modifier classes for side-by-side cards
+.preview-section--skills,
+.preview-section--communication {
+  /* Ensure side-by-side sections share available space */
+  flex: 1 1 0;
+}
+
+/* Gradient backgrounds for individual cards. These gradients are
+ * approximations of the desired palette shown in the design mockups.
+ * Each card uses a unique combination of colours to differentiate
+ * between sections while maintaining the glass effect overlay. */
+.preview-section--about {
+  background: linear-gradient(135deg, #f5a3c1 0%, #e8c6f5 100%);
+}
+
+.preview-section--education {
+  background: linear-gradient(135deg, #6fa7e1 0%, #b1adf0 100%);
+  position: relative;
+}
+
+.preview-section--skills {
+  background: linear-gradient(135deg, #59c4f7 0%, #9fd2fe 100%);
+}
+
+.preview-section--communication {
+  background: linear-gradient(135deg, #9ab8ff 0%, #cbd7ff 100%);
+}
+
+.preview-section--experience {
+  background: linear-gradient(135deg, #f0a5c8 0%, #d6a3de 100%);
+}
+
+/* Position the collapse toggle within the education card at the
+ * bottom right. This rule relies on the parent section being
+ * relatively positioned (see .preview-section--education). */
+.preview-section--education .preview-section__toggle {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 1rem;
+}
+
+/* Generic tag styling for languages, technologies and communication links. */
+.preview-tag {
+  display: inline-block;
+  background-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-lg, 0.75rem);
+  padding: 0.2rem 0.5rem;
+  margin: 0 0.25rem 0.25rem 0;
+  font-size: var(--font-size-sm);
+  line-height: 1;
+  color: var(--title-color);
+  white-space: nowrap;
+}
+
+/* Input‑like field styling for communication details (mobile/email). */
+.preview-field {
+  display: inline-block;
+  background-color: var(--glass-bg-accent);
+  border: 1px solid var(--border-overlay-30);
+  border-radius: var(--radius-lg, 0.75rem);
+  padding: 0.2rem 0.5rem;
+  margin-left: 0.25rem;
+  font-size: var(--font-size-sm);
+  color: var(--title-color);
+}
+
+/* Customize the vertical scrollbar on the content container to match
+ * the mockup. Only WebKit-based browsers will pick up these rules.
+ */
+.preview-area__content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.preview-area__content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.preview-area__content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+  transition: background-color 200ms ease;
+}
+
+.preview-area__content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.35);
 }
