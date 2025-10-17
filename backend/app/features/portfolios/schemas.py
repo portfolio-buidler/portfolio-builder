@@ -69,20 +69,37 @@ class SiteBuildOut(IDModel, APIModel):
 
 # ---------------------- Draft (חדש ל-PC-64) ----------------------
 
-# שמות סקשנים חוקיים (שמור את הרשימה במקום אחד)
+# Legal section names (keep this list centralized / single source of truth)
+# NOTE: Using a Literal limits valid values at type-check time and improves editor autocomplete.
 SectionName = Literal["about", "projects", "skills", "experience", "education", "contact"]
 
+
 class AboutDTO(APIModel):
+    """DTO representing the 'About' section content of a portfolio draft."""
     text: StrictStr | None = None
 
+
 class ContactDTO(APIModel):
+    """
+    DTO for contact information displayed in the portfolio.
+
+    Notes:
+      - `EmailStr` enforces RFC-compliant email format.
+      - `Phone` is assumed to be a custom validated type for phone numbers.
+    """
     email: EmailStr | None = None
     phone: Phone | None = None
     website: StrictStr | None = None
     github: StrictStr | None = None
     linkedin: StrictStr | None = None
 
+
 class SectionsVisibilityDTO(APIModel):
+    """
+    DTO controlling the visibility of each portfolio section.
+
+    All fields default to True (section visible) unless explicitly set to False.
+    """
     about: bool | None = True
     projects: bool | None = True
     skills: bool | None = True
@@ -90,32 +107,56 @@ class SectionsVisibilityDTO(APIModel):
     education: bool | None = True
     contact: bool | None = True
 
+
 class PortfolioDraftBase(APIModel):
     """
-    Base DTO לדראפט – משמש גם ל-Create וגם ל-Update (Partial).
-    שים לב: data הוא מבנה גמיש לפי סקשן, ולא מחויב לסכימה קשיחה.
+    Base DTO for portfolio drafts – used for both Create and Update (partial) flows.
+
+    Important:
+      - `data` is intentionally flexible and schema-light to allow per-section custom payloads.
+      - `sections_order` defines the order of sections; duplicates are not allowed (validated below).
+      - `sections_visibility` allows toggling sections on/off without deleting their data.
     """
     about: AboutDTO | None = None
     contact: ContactDTO | None = None
     sections_order: List[SectionName] | None = None
     sections_visibility: SectionsVisibilityDTO | None = None
-    data: Dict[str, object] | None = None  # JSON דינמי (projects/skills/experience/education וכו')
+    data: Dict[str, object] | None = None  # Dynamic JSON (projects/skills/experience/education, etc.)
 
     @staticmethod
     def ensure_unique_order(order: Optional[List[SectionName]]) -> Optional[List[SectionName]]:
+        """
+        Validate that `sections_order` contains no duplicate section names.
+
+        Raises:
+            ValueError: if duplicates are detected.
+
+        Returns:
+            The original order if valid, or None if not provided.
+        """
         if order and len(order) != len(set(order)):
             raise ValueError("sections_order contains duplicates")
         return order
 
+
 class PortfolioDraftCreate(PortfolioDraftBase):
+    # All fields are optional – partial initialization is allowed.
     pass  # כל השדות אופציונליים – התחלה חלקית מותרת
 
+
 class PortfolioDraftUpdate(PortfolioDraftBase):
+    # Partial updates (PATCH/POST merge) – merging behavior is implemented in the service layer.
     pass  # עדכונים חלקיים (PATCH/POST מיזוג) – ימומש בלוגיקה של ה-service
+
 
 class PortfolioDraftOut(PortfolioDraftBase, IDModel, Timestamped):
     """
-    אובייקט דראפט כפי שנשמר בבסיס הנתונים.
+    The persisted portfolio draft object as stored in the database.
+
+    Inherits:
+      - `PortfolioDraftBase` for content/structure.
+      - `IDModel` for primary key handling.
+      - `Timestamped` for created/updated timestamps.
     """
     user_id: int
     version: int

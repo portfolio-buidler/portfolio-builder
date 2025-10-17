@@ -21,8 +21,10 @@ from sqlalchemy import (
     Index,
     CheckConstraint,
     text,
+    DateTime,
 )
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.sql import func
 from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
 
@@ -68,9 +70,17 @@ class PortfolioDraft(Base):
     # Server-side timestamps.
     # NOTE: text("now()") sets defaults only. If you need updated_at to change on every SQL UPDATE
     # (outside SQLAlchemy onupdate), add a DB trigger. SQLAlchemy's onupdate helps on ORM flush paths only.
-    created_at: Mapped[datetime] = mapped_column(server_default=text("now()"), nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(server_default=text("now()"), onupdate=text("now()"), nullable=False)
-
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
     __table_args__ = (
         # Keep version non-negative and non-zero.
         CheckConstraint("version >= 1", name="ck_portfolios_draft_version_pos"),
