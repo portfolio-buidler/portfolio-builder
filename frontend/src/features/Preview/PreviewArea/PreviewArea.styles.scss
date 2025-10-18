@@ -237,7 +237,8 @@
   padding: 1rem 1.5rem;
   background-color: var(--glass-bg-accent);
   border: 1px solid var(--border-overlay-30);
-  box-shadow: var(--shadow-glass-inset);
+  /* Updated shadows per spec: two inset shadows; keep blur */
+  box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
   backdrop-filter: blur(var(--blur-md, 12px));
   display: flex;
   flex-direction: column;
@@ -357,24 +358,24 @@
  * Each card uses a unique combination of colours to differentiate
  * between sections while maintaining the glass effect overlay. */
 .preview-section--about {
-  background: linear-gradient(135deg, #f5a3c1 0%, #e8c6f5 100%);
+  background: #9B4D4E33;
 }
 
 .preview-section--education {
-  background: linear-gradient(135deg, #6fa7e1 0%, #b1adf0 100%);
+  background: #9B4D4E33;
   position: relative;
 }
 
 .preview-section--skills {
-  background: linear-gradient(135deg, #59c4f7 0%, #9fd2fe 100%);
+  background: #9B4D4E33;
 }
 
 .preview-section--communication {
-  background: linear-gradient(135deg, #9ab8ff 0%, #cbd7ff 100%);
+  background: #9B4D4E33;
 }
 
 .preview-section--experience {
-  background: linear-gradient(135deg, #f0a5c8 0%, #d6a3de 100%);
+  background: #9B4D4E33;
 }
 
 /* Position the collapse toggle within the education card at the

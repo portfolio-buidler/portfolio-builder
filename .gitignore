@@ -11,6 +11,8 @@ __pycache__/
 
 # personal copilot instructions
 .github/copilot-instructions.md
+.github/instructions/
+.github/COPILOT_INSTRUCTIONS_IMPROVEMENTS.md
 
 # frontend
 frontend/node_modules/
