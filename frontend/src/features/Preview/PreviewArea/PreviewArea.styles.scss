@@ -133,45 +133,72 @@
   /* History container styled as a pill with two buttons inside. */
   &__history {
     display: flex;
-    border-radius: 1.05rem;
-    overflow: hidden;
-    backdrop-filter: blur(var(--blur-md, 12px));
-    background-color: var(--glass-bg-accent);
-    box-shadow: var(--shadow-glass-inset);
+    align-items: center;
+    justify-content: center;
+    width: 90px;
+    height: 30px;
+    gap: 12px;
+    border-radius: 15px;
+    background: #9B4D4E33;
+    box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
+    opacity: 1;
   }
 
   &__history-btn {
-    padding: 0.5rem 0.75rem;
-    font-family: var(--font-family-base);
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-medium);
-    color: var(--title-color);
-    background: transparent;
+    /* Button dimensions */
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    padding: 0;
     border: none;
+    background: transparent;
+    opacity: 1;
+    
+    /* Display & alignment */
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 2rem;
+    
+    /* Behavior */
     cursor: pointer;
-    transition: background-color 150ms ease;
+    transition: opacity 150ms ease;
+    position: relative;
 
-    svg {
+    /* SVG icons rendered as background images */
+    &::before {
+      content: '';
       display: block;
-      color: var(--title-color);
+      width: 24px;
+      height: 24px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      transition: opacity 150ms ease;
     }
 
-    &:hover:not(:disabled) {
-      background-color: var(--glass-bg-accent-active);
+    /* Undo button - arrow-back-up.svg */
+    &--undo::before {
+      background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M9 14L5 10M5 10L9 6M5 10H16C17.0609 10 18.0783 10.4214 18.8284 11.1716C19.5786 11.9217 20 12.9391 20 14C20 15.0609 19.5786 16.0783 18.8284 16.8284C18.0783 17.5786 17.0609 18 16 18H15" stroke="%23354052" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/%3E%3C/svg%3E');
+    }
+
+    /* Redo button - arrow-forward-up.svg */
+    &--redo::before {
+      background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M15 14L19 10M19 10L15 6M19 10H8C6.93913 10 5.92172 10.4214 5.17157 11.1716C4.42143 11.9217 4 12.9391 4 14C4 15.0609 4.42143 16.0783 5.17157 16.8284C5.92172 17.5786 6.93913 18 8 18H9" stroke="%23354052" stroke-opacity="0.6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/%3E%3C/svg%3E');
+    }
+
+    &:hover:not(:disabled)::before {
+      opacity: 0.8;
     }
 
     &:disabled {
-      opacity: 0.5;
+      opacity: 0.4;
       cursor: not-allowed;
     }
 
     &:focus-visible {
       outline: none;
-      box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.4);
+      box-shadow: 0 0 0 2px rgba(52, 199, 89, 0.4);
+      border-radius: 4px;
     }
   }
 
