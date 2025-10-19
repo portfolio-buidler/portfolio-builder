@@ -58,7 +58,7 @@
     align-items: stretch;
     justify-content: flex-start;
     width: 100%;
-    max-width: 868px;
+    max-width: 1200px;
     gap: var(--space-3);
     margin-inline: auto;
     margin-top: 127px;
@@ -81,21 +81,6 @@
     -ms-overflow-style: none; /* IE/Edge */
     &::-webkit-scrollbar {
       display: none; /* Chrome/Safari/Opera */
-    }
-    
-    /* Custom scrollbar using "Line 4" as scroll indicator */
-    &::after {
-      content: '';
-      position: absolute;
-      top: var(--scroll-indicator-top, 50%);
-      transform: var(--scroll-indicator-transform, translateY(-50%));
-      right: 0;
-      width: 0;
-      height: 296px;
-      border-right: 3px solid #00000066;
-      opacity: 1;
-      pointer-events: none;
-      transition: top 0.1s ease-out, transform 0.1s ease-out;
     }
   }
 }

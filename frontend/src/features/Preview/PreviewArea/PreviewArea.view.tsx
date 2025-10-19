@@ -29,12 +29,80 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
   isEducationCollapsed,
   onAddLink,
 }) => {
+  const contentRef = React.useRef<HTMLDivElement>(null)
+
   // Extract specific sections by id for layout
   const about = sections.find((s) => s.id === 'about')
   const education = sections.find((s) => s.id === 'education')
   const skills = sections.find((s) => s.id === 'skills')
   const communication = sections.find((s) => s.id === 'communication')
   const experience = sections.find((s) => s.id === 'experience')
+
+  React.useEffect(() => {
+    const contentElement = contentRef.current
+    if (!contentElement) return
+
+    const getSectionEl = (sectionClass: string): HTMLElement | null =>
+      contentElement.querySelector(`.preview-section--${sectionClass}`) as HTMLElement | null
+
+    const handleScroll = () => {
+      const scrollTop = contentElement.scrollTop
+      const clientHeight = contentElement.clientHeight
+      const lineHeight = 296
+      const maxTravel = clientHeight - lineHeight
+
+      // Find about and experience sections
+      const aboutEl = getSectionEl('about')
+      const experienceEl = getSectionEl('experience')
+      
+      if (!aboutEl || !experienceEl) {
+        // Fallback to center if sections not found
+        contentElement.style.setProperty('--scroll-indicator-top', '50%')
+        contentElement.style.setProperty('--scroll-indicator-transform', 'translateY(-50%)')
+        return
+      }
+
+      // Get offsets relative to scroll container
+      const aboutTop = aboutEl.offsetTop
+      const experienceBottom = experienceEl.offsetTop + experienceEl.offsetHeight
+      
+      // Indicator should start when about is at top, end when experience bottom is at viewport bottom
+      const scrollStart = aboutTop
+      const scrollEnd = experienceBottom - clientHeight
+      const scrollableRange = scrollEnd - scrollStart
+
+      // If not enough content to scroll between anchors, center the line
+      if (scrollableRange <= 0) {
+        contentElement.style.setProperty('--scroll-indicator-top', '50%')
+        contentElement.style.setProperty('--scroll-indicator-transform', 'translateY(-50%)')
+        return
+      }
+
+      // Calculate scroll progress between the two anchors
+      // When scrollTop < scrollStart: indicator at 0%
+      // When scrollTop >= scrollEnd: indicator at 100%
+      // In between: linear interpolation
+      let scrollProgress = 0
+      if (scrollTop <= scrollStart) {
+        scrollProgress = 0
+      } else if (scrollTop >= scrollEnd) {
+        scrollProgress = 1
+      } else {
+        scrollProgress = (scrollTop - scrollStart) / scrollableRange
+      }
+
+      const topPosition = scrollProgress * maxTravel
+
+      contentElement.style.setProperty('--scroll-indicator-top', `${topPosition}px`)
+      contentElement.style.setProperty('--scroll-indicator-transform', 'translateY(0)')
+    }
+
+    // Initial position
+    handleScroll()
+
+    contentElement.addEventListener('scroll', handleScroll)
+    return () => contentElement.removeEventListener('scroll', handleScroll)
+  }, [sections])
 
   return (
     <div className="preview-area">
@@ -58,7 +126,7 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
       </div>
 
       {/* Content area containing the cards. This element is scrollable */}
-      <div className="preview-area__content">
+      <div className="preview-area__content" ref={contentRef}>
         {about && (
           <AboutSection
             title={about.title}

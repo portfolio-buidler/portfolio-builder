@@ -14,8 +14,10 @@
   flex-direction: column;
   align-items: stretch;
   width: 100%;
+  max-width: 868px;
   height: 100%;
   padding-right: 1rem;
+  margin-inline: auto;
 
   /* Header containing the back button and instructional text */
   &__header {
@@ -99,8 +101,31 @@
     flex-direction: column;
     gap: 1.25rem;
     overflow-y: auto;
-    padding-right: 0.25rem;
+    padding-right: 1.5rem;
     flex: 1;
+    position: relative;
+    
+    /* Hide native scrollbar */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+    &::-webkit-scrollbar {
+      display: none; /* Chrome/Safari/Opera */
+    }
+    
+    /* Custom scrollbar using "Line 4" as scroll indicator */
+    &::after {
+      content: '';
+      position: absolute;
+      top: var(--scroll-indicator-top, 50%);
+      transform: var(--scroll-indicator-transform, translateY(-50%));
+      right: 0.75rem;
+      width: 0;
+      height: 296px;
+      border-right: 3px solid #00000066;
+      opacity: 1;
+      pointer-events: none;
+      transition: top 0.1s ease-out, transform 0.1s ease-out;
+    }
   }
 
   /* Row layout for skills and communication sections. On narrow
