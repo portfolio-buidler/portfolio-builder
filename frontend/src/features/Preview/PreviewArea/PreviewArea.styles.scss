@@ -209,12 +209,35 @@
     justify-content: center;
     width: 192px;
     height: 44px;
-    gap: 8px;
+    gap: 10px;
     padding: 22px 8px 22px 14px;
     border-radius: 15px;
-    font-family: var(--font-family-base);
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-medium);
+  font-family: var(--font-family-base, 'Poppins', sans-serif);
+  font-size: 20px;
+  font-weight: 500;
+  /* Next button text styling */
+  &__next-text {
+    display: inline-block;
+    width: 45px;
+    height: 14px;
+    /* angle: 0deg; Not a real CSS property */
+    opacity: 1;
+    font-family: 'Poppins', var(--font-family-base, sans-serif);
+    font-weight: 500;
+    font-style: normal;
+    font-size: 20px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: center;
+    vertical-align: middle;
+    text-transform: capitalize;
+    background: var(--White-Text, #FFFEFF);
+    color: #354052;
+    /* leading-trim: cap-height; Not a real CSS property */
+    border-radius: 6px;
+    /* Optional: add padding if you want the background to be visible */
+    padding: 0 4px;
+  }
     background-color: var(--brand-500);
     color: #fff;
     border: none;
@@ -246,6 +269,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    width: 24px;
+    height: 24px;
+    /* angle: 0deg; Not a real CSS property */
+    opacity: 1;
     
     svg {
       width: 24px;
@@ -380,29 +407,65 @@
   flex: 1 1 0;
 }
 
-/* Gradient backgrounds for individual cards. These gradients are
- * approximations of the desired palette shown in the design mockups.
- * Each card uses a unique combination of colours to differentiate
- * between sections while maintaining the glass effect overlay. */
+
+/* Gradient backgrounds for individual cards (grouped for DRYness) */
+
 .preview-section--about {
+  height: 156px;
+  /* angle: 0deg; Not a real CSS property */
+  opacity: 1;
+  border-radius: 15px;
+  background: #9B4D4E33;
+  box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
+  padding: 6px;
+  position: relative;
+
+  .preview-section__title-container {
+    width: 802px;
+    height: 22px;
+    gap: 2px;
+    /* angle: 0deg; Not a real CSS property */
+    opacity: 1;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    padding-top: 8px;
+  }
+
+  .preview-section__title {
+    font-family: Poppins;
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 20px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-transform: capitalize;
+  }
+
+  .preview-section__content {
+    height: 120px;
+    margin-top: 1px;
+    /* angle: 0deg; Not a real CSS property */
+    opacity: 1;
+    border-radius: 12px;
+    background: #FFFEFF66;
+    padding: 0.5rem;
+    margin-left: 0;
+    margin-right: 0;
+    overflow: auto;
+    box-sizing: border-box;
+  }
+}
+
+.preview-section--education,
+.preview-section--skills,
+.preview-section--communication,
+.preview-section--experience {
   background: #9B4D4E33;
 }
 
 .preview-section--education {
-  background: #9B4D4E33;
   position: relative;
-}
-
-.preview-section--skills {
-  background: #9B4D4E33;
-}
-
-.preview-section--communication {
-  background: #9B4D4E33;
-}
-
-.preview-section--experience {
-  background: #9B4D4E33;
 }
 
 /* Position the collapse toggle within the education card at the

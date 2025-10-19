@@ -7,7 +7,9 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ title, content, comp
       className="preview-section preview-section--about"
       data-complete={complete ?? true}
     >
-      <h3 className="preview-section__title">{title}</h3>
+      <div className="preview-section__title-container">
+        <h3 className="preview-section__title">{title}</h3>
+      </div>
       <div className="preview-section__content">{content}</div>
     </section>
   )

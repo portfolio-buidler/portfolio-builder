@@ -130,7 +130,7 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
             disabled={!isNextEnabled}
             aria-disabled={!isNextEnabled || undefined}
           >
-            Next
+            <span className="preview-area__next-text">Next</span>
             <span className="preview-area__next-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M9 6L15 12L9 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
