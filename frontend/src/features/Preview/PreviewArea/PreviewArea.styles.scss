@@ -61,19 +61,26 @@
     display: flex;
     flex-direction: row;
     align-items: flex-start;
-    gap: 0.5rem;
+    gap: 2rem;
     text-align: left;
   }
 
   &__title {
-    font-family: var(--font-family-base);
-    font-size: var(--font-size-2xl);
-    line-height: var(--line-height-tight);
-    font-weight: var(--font-weight-bold);
-    color: var(--title-color);
+    width: 163px;
+    height: 28px;
+    /* angle: 0deg; Not a real CSS property */
+    opacity: 1;
+    font-family: var(--font-family-base, 'Poppins', sans-serif);
+    font-weight: 700; /* Bold */
+    font-style: normal; /* 'Bold' is represented via font-weight */
+  font-size: var(--font-size-3xl);
+    line-height: 100%;
+    letter-spacing: 0;
+    text-transform: capitalize;
+  color: var(--title-color);
     margin: 0;
     white-space: nowrap;
-    text-transform: capitalize;
+    /* leading-trim: cap-height; Not a real CSS property */
   }
 
   &__subtitle {
@@ -126,7 +133,7 @@
     width: 326px;
     height: 60px;
     border-radius: 15px;
-    background: #9B4D4E33;
+  background: var(--glass-bg-accent);
     opacity: 1;
   }
 
@@ -139,7 +146,7 @@
     height: 30px;
     gap: 12px;
     border-radius: 15px;
-    background: #9B4D4E33;
+  background: var(--glass-bg-accent);
     box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
     opacity: 1;
   }
@@ -212,32 +219,9 @@
     gap: 10px;
     padding: 22px 8px 22px 14px;
     border-radius: 15px;
-  font-family: var(--font-family-base, 'Poppins', sans-serif);
-  font-size: 20px;
-  font-weight: 500;
-  /* Next button text styling */
-  &__next-text {
-    display: inline-block;
-    width: 45px;
-    height: 14px;
-    /* angle: 0deg; Not a real CSS property */
-    opacity: 1;
-    font-family: 'Poppins', var(--font-family-base, sans-serif);
-    font-weight: 500;
-    font-style: normal;
+    font-family: var(--font-family-base, 'Poppins', sans-serif);
     font-size: 20px;
-    line-height: 100%;
-    letter-spacing: 0;
-    text-align: center;
-    vertical-align: middle;
-    text-transform: capitalize;
-    background: var(--White-Text, #FFFEFF);
-    color: #354052;
-    /* leading-trim: cap-height; Not a real CSS property */
-    border-radius: 6px;
-    /* Optional: add padding if you want the background to be visible */
-    padding: 0 4px;
-  }
+    font-weight: 500;
     background-color: var(--brand-500);
     color: #fff;
     border: none;
@@ -263,6 +247,27 @@
       outline: none;
       box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.4);
     }
+  }
+
+  /* Next button text styling (BEM element as sibling, not nested). */
+  &__next-text {
+    display: inline-block;
+    width: 45px;
+    height: 14px;
+    /* angle: 0deg; Not a real CSS property */
+    opacity: 1;
+    font-family: var(--font-family-base, 'Poppins', sans-serif);
+    font-weight: 500;
+    font-style: normal;
+    font-size: 20px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: center;
+    vertical-align: middle;
+    text-transform: capitalize;
+    color: var(--color-fg-default);
+    border-radius: 6px;
+    padding-bottom: 8px;
   }
 
   &__next-icon {
@@ -415,7 +420,7 @@
   /* angle: 0deg; Not a real CSS property */
   opacity: 1;
   border-radius: 15px;
-  background: #9B4D4E33;
+  background: var(--glass-bg-accent);
   box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
   padding: 6px;
   position: relative;
@@ -461,7 +466,7 @@
 .preview-section--skills,
 .preview-section--communication,
 .preview-section--experience {
-  background: #9B4D4E33;
+  background: var(--glass-bg-accent);
 }
 
 .preview-section--education {
