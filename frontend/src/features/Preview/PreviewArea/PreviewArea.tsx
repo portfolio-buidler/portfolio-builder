@@ -162,6 +162,9 @@ const PreviewArea: React.FC = () => {
   // details of the education card are hidden.
   const [educationCollapsed, setEducationCollapsed] = React.useState(false)
 
+  // Track which section is currently being edited
+  const [editingSectionId, setEditingSectionId] = React.useState<string | null>(null)
+
   // Compute derived values for convenience
   const currentSections = history[historyIndex]
   const undoAvailable = historyIndex > 0
@@ -249,6 +252,41 @@ const PreviewArea: React.FC = () => {
     setHistoryIndex(newHistory.length - 1)
   }
 
+  /**
+   * Start editing a specific section. Sets the editingSectionId to
+   * the provided section ID.
+   */
+  const handleEditSectionStart = (sectionId: string) => {
+    setEditingSectionId(sectionId)
+  }
+
+  /**
+   * End editing mode. Clears the editingSectionId.
+   */
+  const handleEditSectionEnd = () => {
+    setEditingSectionId(null)
+  }
+
+  /**
+   * Handle content changes for a section while in edit mode.
+   * Updates the section content and creates a new history snapshot.
+   * Preserves line breaks by storing raw text and applying white-space: pre-wrap in CSS.
+   */
+  const handleSectionContentChange = (sectionId: string, content: string) => {
+    const updated = currentSections.map((section) => {
+      if (section.id !== sectionId) return section
+      return {
+        ...section,
+        // Store raw text with line breaks preserved
+        content: <p style={{ whiteSpace: 'pre-wrap' }}>{content}</p>,
+      }
+    })
+    const newHistory = history.slice(0, historyIndex + 1)
+    newHistory.push(updated)
+    setHistory(newHistory)
+    setHistoryIndex(newHistory.length - 1)
+  }
+
   return (
     <PreviewAreaView
       sections={currentSections}
@@ -262,6 +300,10 @@ const PreviewArea: React.FC = () => {
       onToggleEducation={handleToggleEducation}
       isEducationCollapsed={educationCollapsed}
       onAddLink={handleAddLink}
+      editingSectionId={editingSectionId}
+      onEditSectionStart={handleEditSectionStart}
+      onEditSectionEnd={handleEditSectionEnd}
+      onSectionContentChange={handleSectionContentChange}
     />
   )
 }

@@ -28,6 +28,10 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
   onToggleEducation,
   isEducationCollapsed,
   onAddLink,
+  editingSectionId,
+  onEditSectionStart,
+  onEditSectionEnd,
+  onSectionContentChange,
 }) => {
   const contentRef = React.useRef<HTMLDivElement>(null)
 
@@ -132,6 +136,10 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
             title={about.title}
             content={about.content}
             complete={about.complete}
+            isEditing={editingSectionId === 'about'}
+            onEditStart={() => onEditSectionStart('about')}
+            onEditEnd={onEditSectionEnd}
+            onContentChange={(content: string) => onSectionContentChange('about', content)}
           />
         )}
         {education && (

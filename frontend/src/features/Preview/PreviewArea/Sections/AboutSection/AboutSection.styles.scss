@@ -1,0 +1,138 @@
+/*
+ * About Section specific styles.
+ * Handles view/edit mode transitions and content area behavior.
+ * 
+ * Note: This file uses CSS custom properties (--var-name) which are
+ * defined globally, so no token imports are needed.
+ */
+
+.preview-section--about {
+  /* View Mode (default) */
+  height: auto; /* Dynamic height - maintains expanded size */
+  min-height: 156px; /* Initial minimum height */
+  opacity: 1;
+  border-radius: 15px;
+  background: var(--glass-bg-accent);
+  box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
+  padding: 6px;
+  position: relative;
+  cursor: pointer;
+  transition: box-shadow 200ms ease, border-color 200ms ease;
+
+  &:hover:not([data-editing='true']) {
+    box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset, 
+                0 0 0 2px rgba(52, 199, 89, 0.2);
+  }
+
+  /* Edit Mode */
+  &[data-editing='true'] {
+    cursor: default;
+    /* Removed green border box-shadow - keeping only inset shadows */
+    // box-shadow: 1px 1px 2px 0px inset, -3px -3px 3px 0px #DDDDDD26 inset;
+    
+    .preview-section__content {
+      height: auto; /* Remove fixed height */
+      min-height: 120px; /* Maintain minimum content height */
+      overflow: visible; /* No scrolling in edit mode */
+      background: #FFFEFF66; /* Visible background in edit mode */
+    }
+  }
+
+  .preview-section__title-container {
+    width: 100%;
+    max-width: 802px;
+    height: 22px;
+    gap: 2px;
+    opacity: 1;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    padding-top: 8px;
+  }
+
+  .preview-section__title {
+    font-family: var(--font-family-base, 'Poppins', sans-serif);
+    font-weight: 500;
+    font-style: normal;
+    font-size: 20px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-transform: capitalize;
+    color: var(--title-color);
+    margin: 0;
+  }
+
+  .preview-section__content {
+    /* View Mode content area - no visible background */
+    height: auto; /* Dynamic height - maintains expanded size */
+    min-height: 120px; /* Initial minimum height */
+    margin-top: 1px;
+    opacity: 1;
+    border-radius: 12px;
+    background: transparent; /* Hidden in view mode */
+    padding: 0.5rem;
+    margin-left: 0;
+    margin-right: 0;
+    overflow: auto; /* Scrollable if content exceeds container */
+    box-sizing: border-box;
+
+    /* Nested paragraph styling */
+    p {
+      margin: 0;
+      font-family: var(--font-family-base, 'Poppins', sans-serif);
+      font-size: var(--font-size-md);
+      line-height: var(--line-height-normal);
+      color: var(--color-fg-default);
+      white-space: pre-wrap; /* Preserve line breaks and spaces */
+      word-wrap: break-word; /* Prevent overflow on long words */
+    }
+  }
+
+  /* Textarea for edit mode */
+  .preview-section__textarea {
+    width: 100%;
+    min-height: 120px;
+    height: auto;
+    border: none;
+    background: transparent;
+    font-family: var(--font-family-base, 'Poppins', sans-serif);
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-normal);
+    color: var(--color-fg-default);
+    resize: none; /* Disable manual resize */
+    overflow: hidden; /* Auto-expand instead of scrolling */
+    padding: 0;
+    margin: 0;
+    outline: none;
+    box-sizing: border-box;
+
+    &:focus {
+      outline: none;
+    }
+
+    &::placeholder {
+      color: var(--color-fg-muted);
+      opacity: 0.6;
+    }
+  }
+
+  /* Custom scrollbar for view mode content */
+  .preview-section__content::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .preview-section__content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
+  }
+
+  .preview-section__content::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+    transition: background-color 200ms ease;
+  }
+
+  .preview-section__content::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.35);
+  }
+}

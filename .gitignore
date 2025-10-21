@@ -8,6 +8,7 @@
 # python cache
 __pycache__/
 *.py[cod]
+.pytest_cache/
 
 # personal copilot instructions
 .github/copilot-instructions.md
