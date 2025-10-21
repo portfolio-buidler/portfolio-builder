@@ -37,19 +37,13 @@ const PreviewArea: React.FC = () => {
     {
       id: 'education',
       title: 'Education',
-      content: (
-        <div>
-          <p>B.Sc. in Computer Science – Tel Aviv University (2017–2020)</p>
-          <ul>
-            <li>Specialized in software engineering, algorithms and system design</li>
-            <li>Completed projects in distributed systems and AI applications</li>
-            <li>
-              Active member of the university’s programming club, participating in
-              hackathons and coding competitions
-            </li>
-          </ul>
-        </div>
-      ),
+      content: `B.Sc. in Computer Science
+Tel Aviv University
+2017–2020
+
+- Specialized in software engineering, algorithms and system design
+- Completed projects in distributed systems and AI applications
+- Active member of the university's programming club, participating in hackathons and coding competitions`,
       required: true,
       complete: true,
     },
@@ -158,9 +152,9 @@ const PreviewArea: React.FC = () => {
   const [history, setHistory] = React.useState<PreviewSection[][]>([initialSections])
   const [historyIndex, setHistoryIndex] = React.useState(0)
 
-  // Track whether the education section is collapsed. When true the
-  // details of the education card are hidden.
-  const [educationCollapsed, setEducationCollapsed] = React.useState(false)
+  // Track whether the education section is expanded. When true the
+  // full content is visible; when false it's collapsed to default height.
+  const [educationExpanded, setEducationExpanded] = React.useState(false)
 
   // Track which section is currently being edited
   const [editingSectionId, setEditingSectionId] = React.useState<string | null>(null)
@@ -214,12 +208,12 @@ const PreviewArea: React.FC = () => {
   }
 
   /**
-   * Toggle the collapsed state of the education section. When collapsed
-   * the education card should only display its header and the toggle
-   * arrow. When expanded the full details appear.
+   * Toggle the expanded state of the education section. When collapsed
+   * (expanded=false) the section shows default height. When expanded
+   * (expanded=true) the full content is visible.
    */
   const handleToggleEducation = () => {
-    setEducationCollapsed((prev) => !prev)
+    setEducationExpanded((prev) => !prev)
   }
 
   /**
@@ -271,14 +265,21 @@ const PreviewArea: React.FC = () => {
    * Handle content changes for a section while in edit mode.
    * Updates the section content and creates a new history snapshot.
    * Preserves line breaks by storing raw text and applying white-space: pre-wrap in CSS.
+   * 
+   * Different sections store content differently:
+   * - About: Stores as JSX with pre-wrap style for line break preservation
+   * - Education: Stores as raw string (parsed on render)
    */
   const handleSectionContentChange = (sectionId: string, content: string) => {
     const updated = currentSections.map((section) => {
       if (section.id !== sectionId) return section
       return {
         ...section,
-        // Store raw text with line breaks preserved
-        content: <p style={{ whiteSpace: 'pre-wrap' }}>{content}</p>,
+        // Store content based on section type
+        content:
+          sectionId === 'about'
+            ? <p style={{ whiteSpace: 'pre-wrap' }}>{content}</p>
+            : content, // Education stores as raw string
       }
     })
     const newHistory = history.slice(0, historyIndex + 1)
@@ -298,7 +299,7 @@ const PreviewArea: React.FC = () => {
       redoAvailable={redoAvailable}
       isNextEnabled={isNextEnabled}
       onToggleEducation={handleToggleEducation}
-      isEducationCollapsed={educationCollapsed}
+      isEducationExpanded={educationExpanded}
       onAddLink={handleAddLink}
       editingSectionId={editingSectionId}
       onEditSectionStart={handleEditSectionStart}

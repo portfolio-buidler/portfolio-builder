@@ -1,0 +1,220 @@
+/*
+ * Education Section specific styles.
+ * Handles view/edit mode transitions, toggle expand/collapse, and content parsing display.
+ * 
+ * Note: This file uses CSS custom properties (--var-name) which are
+ * defined globally, so no token imports are needed.
+ * 
+ * IMPORTANT: Content area width properties are copied from AboutSection to ensure
+ * visual consistency, while height and vertical spacing are Education-specific.
+ */
+
+.education-section {
+  /* Education's own dimensions with About-matching padding for content width consistency */
+  height: auto;
+  min-height: 200px;
+  opacity: 1;
+  border-radius: 15px;
+  background: var(--glass-bg-accent);
+  box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
+  padding: 6px; /* Issue #3 fix: Match About section padding for consistent content width */
+  position: relative;
+  cursor: pointer;
+  overflow: hidden; /* CRITICAL: Hide overflow when collapsed */
+  transition: height 0.3s ease, box-shadow 200ms ease;
+
+  /* Removed green border on hover - Issue #1 fixed */
+  &:hover:not([data-editing='true']) {
+    box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
+  }
+
+  /* Expanded state (toggle clicked) */
+  &[data-expanded='true'] {
+    height: auto; /* Expand to show all content */
+    overflow: visible;
+
+    .education__content {
+      height: auto;
+      max-height: none;
+      overflow: visible;
+    }
+  }
+
+  /* Edit mode - Issue #2 fixed (no green border) */
+  &[data-editing='true'] {
+    cursor: default;
+
+    .education__content {
+      background: #FFFEFF66; /* Visible light box in edit mode */
+      overflow: visible;
+    }
+
+    /* Hide toggle button in edit mode */
+    .preview-section__toggle {
+      display: none;
+    }
+  }
+
+  .preview-section__title-container {
+    width: 100%;
+    height: 22px;
+    gap: 2px;
+    opacity: 1;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    padding-top: 8px;
+    margin-bottom: 0.5rem;
+  }
+
+  .preview-section__title {
+    font-family: var(--font-family-base, 'Poppins', sans-serif);
+    font-weight: 500;
+    font-style: normal;
+    font-size: 20px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-transform: capitalize;
+    color: var(--title-color);
+    margin: 0;
+  }
+}
+
+/* Content area - width properties copied from About section */
+.education__content {
+  /* HEIGHT - Education's own values (NOT from About) */
+  height: auto;
+  min-height: 150px;
+
+  /* WIDTH - COPIED FROM ABOUT SECTION */
+  /* The About section's .preview-section__content has these horizontal properties: */
+  padding: 0.5rem;
+  margin-left: 0;
+  margin-right: 0;
+  /* No explicit width/max-width in About, so inherits from parent */
+
+  /* Other styling */
+  margin-top: 1px;
+  opacity: 1;
+  border-radius: 12px;
+  background: transparent; /* Hidden in view mode */
+  box-sizing: border-box;
+  overflow: hidden; /* CRITICAL: Truncate when collapsed */
+  transition: height 0.3s ease;
+}
+
+/* Parsed content styling (view mode) */
+.education__parsed-content {
+  font-family: var(--font-family-base, 'Poppins', sans-serif);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
+  color: var(--color-fg-default);
+}
+
+.education__degree {
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.education__university,
+.education__years {
+  margin-bottom: 0.25rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.education__bullets {
+  margin: 0.5rem 0 0 1.25rem;
+  padding: 0;
+  list-style-type: disc;
+
+  li {
+    margin-bottom: 0.25rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+}
+
+/* Textarea styling (edit mode) */
+.education__textarea {
+  width: 100%;
+  height: auto;
+  min-height: 8rem;
+  resize: none;
+  font-family: var(--font-family-base, 'Poppins', sans-serif);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 0.5rem;
+  color: var(--color-fg-default);
+  white-space: pre-wrap;
+  overflow: hidden; /* Auto-expand instead of scrolling */
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: rgba(52, 199, 89, 0.4);
+  }
+
+  &::placeholder {
+    color: var(--color-fg-muted);
+    opacity: 0.6;
+  }
+}
+
+/* Toggle button - SVG icon with specific styling - Issue #4 fixed */
+.preview-section__toggle {
+  /* Position - bottom right corner */
+  position: absolute;
+  bottom: 0.75rem;
+  right: 1rem;
+
+  /* Dimensions - adjusted for proper SVG display */
+  width: 14px;
+  height: 8px;
+
+  /* Behavior */
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease, opacity 150ms ease;
+  z-index: 10;
+  opacity: 1;
+
+  /* Rotation - collapsed state (rotated 90deg from original) */
+  transform: rotate(0deg);
+
+  /* Expanded state - rotate 180deg from collapsed */
+  &[aria-expanded='true'] {
+    transform: rotate(180deg);
+  }
+
+  &:hover {
+    opacity: 0.7;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 2px;
+  }
+
+  /* SVG icon as background image (matching project pattern) */
+  &::before {
+    content: '';
+    display: block;
+    width: 14px;
+    height: 8px;
+    background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M13 1L7 7L1 1" stroke="%23354052" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/%3E%3C/svg%3E');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+}

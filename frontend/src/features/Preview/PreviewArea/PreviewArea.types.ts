@@ -21,7 +21,7 @@ export interface PreviewAreaViewProps{
     undoAvailable: boolean;
     redoAvailable: boolean;
     onToggleEducation: () => void;
-    isEducationCollapsed: boolean;
+    isEducationExpanded: boolean;
     onAddLink: () => void;
     editingSectionId: string | null;
     onEditSectionStart: (sectionId: string) => void;

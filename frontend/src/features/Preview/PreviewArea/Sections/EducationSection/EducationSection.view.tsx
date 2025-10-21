@@ -1,32 +1,85 @@
 import React from 'react'
-import type { EducationSectionProps } from './EducationSection.types'
+import type { EducationSectionViewProps } from './EducationSection.types'
+import './EducationSection.styles.scss'
 
-export const EducationSection: React.FC<EducationSectionProps> = ({
-  title,
-  content,
-  complete,
-  isCollapsed,
-  onToggle,
-}) => {
-  return (
-    <section
-      className="preview-section preview-section--education"
-      data-complete={complete ?? true}
-    >
-      <h3 className="preview-section__title">{title}</h3>
-      {!isCollapsed && (
-        <div className="preview-section__content">{content}</div>
-      )}
-      <button
-        type="button"
-        className="preview-section__toggle"
-        onClick={onToggle}
-        aria-label={isCollapsed ? 'Expand education section' : 'Collapse education section'}
+/**
+ * Presentational component for the Education section.
+ * Renders view mode or edit mode based on isEditing prop.
+ * 
+ * View Mode: Displays parsed structured content (degree, university, years, bullets)
+ * Edit Mode: Shows single textarea with raw content
+ */
+export const EducationSectionView = React.forwardRef<HTMLElement, EducationSectionViewProps>(
+  (
+    {
+      title,
+      content,
+      parsedContent,
+      complete,
+      isExpanded,
+      onToggle,
+      isEditing,
+      onSectionClick,
+      onContentChange,
+      onTextareaRef,
+      onKeyDown,
+    },
+    ref
+  ) => {
+    return (
+      <section
+        ref={ref}
+        className="preview-section preview-section--education education-section"
+        data-complete={complete ?? true}
+        data-expanded={isExpanded ?? false}
+        data-editing={isEditing ?? false}
+        onDoubleClick={onSectionClick}
       >
-        {isCollapsed ? '▼' : '▲'}
-      </button>
-    </section>
-  )
-}
+        <div className="preview-section__title-container">
+          <h3 className="preview-section__title">{title}</h3>
+        </div>
+        <div className="education__content">
+          {isEditing ? (
+            <textarea
+              ref={onTextareaRef}
+              className="education__textarea"
+              value={content}
+              onChange={onContentChange}
+              onKeyDown={onKeyDown}
+              autoFocus
+              onClick={(e) => e.stopPropagation()}
+              placeholder="Degree&#10;University&#10;Years&#10;&#10;- Achievement 1&#10;- Achievement 2"
+            />
+          ) : (
+            <div className="education__parsed-content">
+              <p className="education__degree">{parsedContent.degree}</p>
+              <p className="education__university">{parsedContent.university}</p>
+              <p className="education__years">{parsedContent.years}</p>
+              {parsedContent.bulletPoints.length > 0 && (
+                <ul className="education__bullets">
+                  {parsedContent.bulletPoints.map((bullet, i) => (
+                    <li key={i}>{bullet}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+        </div>
+        <button
+          type="button"
+          className="preview-section__toggle"
+          onClick={(e) => {
+            e.stopPropagation() // CRITICAL: Prevent triggering edit mode
+            onToggle?.()
+          }}
+          aria-label={isExpanded ? 'Collapse education' : 'Expand education'}
+          aria-expanded={isExpanded}
+        />
+      </section>
+    )
+  }
+)
 
-export default EducationSection
+EducationSectionView.displayName = 'EducationSectionView'
+
+export default EducationSectionView

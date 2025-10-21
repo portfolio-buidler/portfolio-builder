@@ -26,7 +26,7 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
   redoAvailable,
   isNextEnabled,
   onToggleEducation,
-  isEducationCollapsed,
+  isEducationExpanded,
   onAddLink,
   editingSectionId,
   onEditSectionStart,
@@ -147,8 +147,12 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
             title={education.title}
             content={education.content}
             complete={education.complete}
-            isCollapsed={isEducationCollapsed}
+            isExpanded={isEducationExpanded}
             onToggle={onToggleEducation}
+            isEditing={editingSectionId === 'education'}
+            onEditStart={() => onEditSectionStart('education')}
+            onEditEnd={onEditSectionEnd}
+            onContentChange={(content: string) => onSectionContentChange('education', content)}
           />
         )}
         {/* Row containing skills and communication side by side */}
