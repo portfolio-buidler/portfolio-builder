@@ -17,6 +17,8 @@ export const AboutSectionView = React.forwardRef<HTMLElement, AboutSectionViewPr
       complete,
       isEditing,
       editableContent,
+      characterCount,
+      maxCharacters,
       onSectionDoubleClick,
       onTextChange,
       onTextareaRef,
@@ -33,6 +35,9 @@ export const AboutSectionView = React.forwardRef<HTMLElement, AboutSectionViewPr
       >
         <div className="preview-section__title-container">
           <h3 className="preview-section__title">{title}</h3>
+          <span className="preview-section__char-counter">
+            {characterCount}/{maxCharacters}
+          </span>
         </div>
         <div className="preview-section__content">
           {isEditing ? (

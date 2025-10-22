@@ -16,6 +16,8 @@ export interface AboutSectionViewProps {
   complete?: boolean
   isEditing?: boolean
   editableContent: string
+  characterCount: number
+  maxCharacters: number
   onSectionDoubleClick: () => void
   onTextChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void
   onTextareaRef: (textarea: HTMLTextAreaElement | null) => void

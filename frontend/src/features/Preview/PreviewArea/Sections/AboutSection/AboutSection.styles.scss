@@ -45,7 +45,9 @@
     opacity: 1;
     display: flex;
     align-items: center;
+    justify-content: space-between; /* Position title left, counter right */
     padding-left: 10px;
+    padding-right: 10px; /* Add right padding for counter */
     padding-top: 8px;
   }
 
@@ -59,6 +61,23 @@
     text-transform: capitalize;
     color: var(--title-color);
     margin: 0;
+  }
+
+  /* Character counter - positioned to the right of title */
+  .preview-section__char-counter {
+    width: 37px;
+    height: 8px;
+    opacity: 1;
+    font-family: Poppins;
+    font-weight: 500;
+    font-style: normal;
+    font-size: 12px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-transform: capitalize;
+    color: #354052A6;
+    white-space: nowrap;
+    border: none;
   }
 
   .preview-section__content {

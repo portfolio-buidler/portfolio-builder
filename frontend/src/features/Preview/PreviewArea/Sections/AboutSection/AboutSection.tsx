@@ -28,6 +28,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
 }) => {
   const sectionRef = React.useRef<HTMLElement>(null)
   const [editableContent, setEditableContent] = React.useState('')
+  const MAX_CHARACTERS = 500
 
   // Extract text content from ReactNode for editing
   React.useEffect(() => {
@@ -79,12 +80,15 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
   }
 
   /**
-   * Handle textarea content changes
+   * Handle textarea content changes with character limit
    */
   const handleTextChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newContent = event.target.value
-    setEditableContent(newContent)
-    onContentChange?.(newContent)
+    // Enforce character limit
+    if (newContent.length <= MAX_CHARACTERS) {
+      setEditableContent(newContent)
+      onContentChange?.(newContent)
+    }
   }
 
   /**
@@ -106,6 +110,8 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
       complete={complete}
       isEditing={isEditing}
       editableContent={editableContent}
+      characterCount={editableContent.length}
+      maxCharacters={MAX_CHARACTERS}
       onSectionDoubleClick={handleSectionDoubleClick}
       onTextChange={handleTextChange}
       onTextareaRef={handleTextareaRef}
