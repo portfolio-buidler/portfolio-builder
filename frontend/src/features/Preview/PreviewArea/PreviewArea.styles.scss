@@ -329,13 +329,6 @@
   gap: 0.5rem;
   color: var(--color-fg-default);
 
-  /* When a required section is incomplete we can optionally adjust the
-   * appearance to draw attention. This rule lightens the border colour
-   * when data-complete is false. */
-  &[data-complete='false'] {
-    border-color: var(--Colors-Red, #FF3B30);
-  }
-
   &__title {
     font-family: var(--font-family-base);
     font-size: var(--font-size-lg);
@@ -439,53 +432,7 @@
 
 
 /* Gradient backgrounds for individual cards (grouped for DRYness) */
-
-.preview-section--about {
-  height: 156px;
-  /* angle: 0deg; Not a real CSS property */
-  opacity: 1;
-  border-radius: 15px;
-  background: var(--glass-bg-accent);
-  box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
-  padding: 6px;
-  position: relative;
-
-  .preview-section__title-container {
-    width: 802px;
-    height: 22px;
-    gap: 2px;
-    /* angle: 0deg; Not a real CSS property */
-    opacity: 1;
-    display: flex;
-    align-items: center;
-    padding-left: 10px;
-    padding-top: 8px;
-  }
-
-  .preview-section__title {
-    font-family: Poppins;
-    font-weight: 500;
-    font-style: Medium;
-    font-size: 20px;
-    line-height: 100%;
-    letter-spacing: 0%;
-    text-transform: capitalize;
-  }
-
-  .preview-section__content {
-    height: 120px;
-    margin-top: 1px;
-    /* angle: 0deg; Not a real CSS property */
-    opacity: 1;
-    border-radius: 12px;
-    background: #FFFEFF66;
-    padding: 0.5rem;
-    margin-left: 0;
-    margin-right: 0;
-    overflow: auto;
-    box-sizing: border-box;
-  }
-}
+/* Note: .preview-section--about styles are now in AboutSection.styles.scss */
 
 .preview-section--education,
 .preview-section--skills,
