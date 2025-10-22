@@ -16,7 +16,7 @@ export interface AboutSectionViewProps {
   complete?: boolean
   isEditing?: boolean
   editableContent: string
-  onSectionClick: () => void
+  onSectionDoubleClick: () => void
   onTextChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void
   onTextareaRef: (textarea: HTMLTextAreaElement | null) => void
 }

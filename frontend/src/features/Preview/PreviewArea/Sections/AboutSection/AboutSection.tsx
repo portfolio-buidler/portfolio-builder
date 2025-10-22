@@ -7,13 +7,13 @@ import type { AboutSectionProps } from './AboutSection.types'
  * Manages edit/view mode state and content editing logic.
  * 
  * Edit Mode Behavior:
- * - Triggered by clicking anywhere on the section
+ * - Triggered by double-clicking anywhere on the section
  * - Content becomes editable via textarea
  * - Section expands vertically to fit content (no height limit)
  * - Exit by clicking outside the section
  * 
  * View Mode Behavior:
- * - Static content display
+ * - Static content display with placeholder when empty
  * - Fixed height (120px content area)
  * - Scrollable overflow if content exceeds height
  */
@@ -70,9 +70,9 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
   }, [isEditing, onEditEnd])
 
   /**
-   * Handle section click to enter edit mode
+   * Handle section double-click to enter edit mode
    */
-  const handleSectionClick = () => {
+  const handleSectionDoubleClick = () => {
     if (!isEditing) {
       onEditStart?.()
     }
@@ -106,7 +106,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
       complete={complete}
       isEditing={isEditing}
       editableContent={editableContent}
-      onSectionClick={handleSectionClick}
+      onSectionDoubleClick={handleSectionDoubleClick}
       onTextChange={handleTextChange}
       onTextareaRef={handleTextareaRef}
     />

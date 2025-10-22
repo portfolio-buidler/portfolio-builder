@@ -5,6 +5,9 @@ import './AboutSection.styles.scss'
 /**
  * Presentational component for the About section.
  * Renders view mode or edit mode based on isEditing prop.
+ * 
+ * View Mode: Displays content or placeholder when empty
+ * Edit Mode: Shows textarea with editable content
  */
 export const AboutSectionView = React.forwardRef<HTMLElement, AboutSectionViewProps>(
   (
@@ -14,7 +17,7 @@ export const AboutSectionView = React.forwardRef<HTMLElement, AboutSectionViewPr
       complete,
       isEditing,
       editableContent,
-      onSectionClick,
+      onSectionDoubleClick,
       onTextChange,
       onTextareaRef,
     },
@@ -26,7 +29,7 @@ export const AboutSectionView = React.forwardRef<HTMLElement, AboutSectionViewPr
         className="preview-section preview-section--about"
         data-complete={complete ?? true}
         data-editing={isEditing ?? false}
-        onClick={onSectionClick}
+        onDoubleClick={isEditing ? undefined : onSectionDoubleClick}
       >
         <div className="preview-section__title-container">
           <h3 className="preview-section__title">{title}</h3>
@@ -40,9 +43,14 @@ export const AboutSectionView = React.forwardRef<HTMLElement, AboutSectionViewPr
               onChange={onTextChange}
               autoFocus
               onClick={(e) => e.stopPropagation()}
+              placeholder="Write a short summary about yourself, your background, interests, and what drives you professionally."
             />
-          ) : (
+          ) : editableContent.trim() ? (
             content
+          ) : (
+            <p className="preview-section__placeholder">
+              Write a short summary about yourself, your background, interests, and what drives you professionally.
+            </p>
           )}
         </div>
       </section>
