@@ -25,27 +25,16 @@ const PreviewArea: React.FC = () => {
     {
       id: 'about',
       title: 'About Me',
-      content: (
-        <p>
-          I’m a full‑stack developer from <strong>Israel</strong> passionate
-          about building beautiful and performant web applications.
-        </p>
-      ),
+      content: '',
       required: true,
-      complete: true,
+      complete: false,
     },
     {
       id: 'education',
       title: 'Education',
-      content: `B.Sc. in Computer Science
-Tel Aviv University
-2017–2020
-
-- Specialized in software engineering, algorithms and system design
-- Completed projects in distributed systems and AI applications
-- Active member of the university's programming club, participating in hackathons and coding competitions`,
+      content: '',
       required: true,
-      complete: true,
+      complete: false,
     },
     {
       id: 'skills',

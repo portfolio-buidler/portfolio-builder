@@ -33,7 +33,7 @@ export const EducationSectionView = React.forwardRef<HTMLElement, EducationSecti
         data-complete={complete ?? true}
         data-expanded={isExpanded ?? false}
         data-editing={isEditing ?? false}
-        onDoubleClick={onSectionClick}
+        onDoubleClick={isEditing ? undefined : onSectionClick}
       >
         <div className="preview-section__title-container">
           <h3 className="preview-section__title">{title}</h3>
@@ -48,9 +48,9 @@ export const EducationSectionView = React.forwardRef<HTMLElement, EducationSecti
               onKeyDown={onKeyDown}
               autoFocus
               onClick={(e) => e.stopPropagation()}
-              placeholder="Degree&#10;University&#10;Years&#10;&#10;- Achievement 1&#10;- Achievement 2"
+              placeholder="Add your degree, university name, and graduation years."
             />
-          ) : (
+          ) : content.trim() ? (
             <div className="education__parsed-content">
               <p className="education__degree">{parsedContent.degree}</p>
               <p className="education__university">{parsedContent.university}</p>
@@ -63,6 +63,10 @@ export const EducationSectionView = React.forwardRef<HTMLElement, EducationSecti
                 </ul>
               )}
             </div>
+          ) : (
+            <p className="education__placeholder">
+              Add your degree, university name, and graduation years.
+            </p>
           )}
         </div>
         <button

@@ -10,23 +10,20 @@
  */
 
 .education-section {
-  /* Education's own dimensions with About-matching padding for content width consistency */
-  height: auto;
-  min-height: 200px;
+  /* Fixed dimensions */
+  width: 826px;
+  height: 156px;
   opacity: 1;
   border-radius: 15px;
   background: var(--glass-bg-accent);
-  box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
   padding: 6px; /* Issue #3 fix: Match About section padding for consistent content width */
   position: relative;
-  cursor: pointer;
+  cursor: default; /* No pointer cursor - only toggle is clickable */
   overflow: hidden; /* CRITICAL: Hide overflow when collapsed */
   transition: height 0.3s ease, box-shadow 200ms ease;
+  border: none; /* Override base .preview-section border */
+  box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset; /* Match About section shadows */
 
-  /* Removed green border on hover - Issue #1 fixed */
-  &:hover:not([data-editing='true']) {
-    box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
-  }
 
   /* Expanded state (toggle clicked) */
   &[data-expanded='true'] {
@@ -43,10 +40,12 @@
   /* Edit mode - Issue #2 fixed (no green border) */
   &[data-editing='true'] {
     cursor: default;
+    height: auto; /* Allow expansion in edit mode */
 
     .education__content {
-      background: #FFFEFF66; /* Visible light box in edit mode */
+      background: #FFFEFF66; /* White layer visible in edit mode (like About section) */
       overflow: visible;
+      height: auto; /* Match textarea height */
     }
 
     /* Hide toggle button in edit mode */
@@ -82,10 +81,9 @@
 
 /* Content area - width properties copied from About section */
 .education__content {
-  /* HEIGHT - Education's own values (NOT from About) */
-  height: auto;
-  min-height: 150px;
-
+  /* Fixed height to prevent jumping between states */
+  height: 100%; /* Fill available space in parent */
+  
   /* WIDTH - COPIED FROM ABOUT SECTION */
   /* The About section's .preview-section__content has these horizontal properties: */
   padding: 0.5rem;
@@ -94,36 +92,16 @@
   /* No explicit width/max-width in About, so inherits from parent */
 
   /* Other styling */
-  margin-top: 1px;
+  margin-top: 0.5px;
   opacity: 1;
   border-radius: 12px;
   background: transparent; /* Hidden in view mode */
   box-sizing: border-box;
   overflow: hidden; /* CRITICAL: Truncate when collapsed */
-  transition: height 0.3s ease;
+  transition: none; /* Remove transition to prevent jumping */
 }
 
-/* Parsed content styling (view mode) */
-.education__parsed-content {
-  font-family: var(--font-family-base, 'Poppins', sans-serif);
-  font-size: var(--font-size-md);
-  line-height: var(--line-height-normal);
-  color: var(--color-fg-default);
-}
-
-.education__degree {
-  font-weight: 700;
-  margin-bottom: 0.25rem;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-.education__university,
-.education__years {
-  margin-bottom: 0.25rem;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
+/* Parsed content styling (view mode) - removed text formatting rules except bullets */
 
 .education__bullets {
   margin: 0.5rem 0 0 1.25rem;
@@ -137,32 +115,50 @@
   }
 }
 
-/* Textarea styling (edit mode) */
+/* Placeholder styling for view mode (when content is empty) */
+.education__placeholder {
+  font-family: Poppins;
+  font-weight: 500;
+  font-style: normal;
+  font-size: 12px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-transform: capitalize;
+  color: #354052A6;
+  margin: 0;
+  padding: 0;
+}
+
+/* Textarea styling (edit mode) - matching About section */
 .education__textarea {
   width: 100%;
-  height: auto;
+  height: 100%; /* Match content height */
   min-height: 8rem;
   resize: none;
+  background: transparent;
+  border: none;
   font-family: var(--font-family-base, 'Poppins', sans-serif);
   font-size: var(--font-size-md);
   line-height: var(--line-height-normal);
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  padding: 0.5rem;
   color: var(--color-fg-default);
-  white-space: pre-wrap;
-  overflow: hidden; /* Auto-expand instead of scrolling */
+  padding: 0.5rem;
   box-sizing: border-box;
+  overflow: hidden; /* Auto-expand instead of scrolling */
 
   &:focus {
     outline: none;
-    border-color: rgba(52, 199, 89, 0.4);
   }
 
   &::placeholder {
-    color: var(--color-fg-muted);
-    opacity: 0.6;
+    font-family: Poppins;
+    font-weight: 500;
+    font-style: normal;
+    font-size: 12px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-transform: capitalize;
+    color: #354052A6;
+    opacity: 1; /* Override default opacity */
   }
 }
 
@@ -202,8 +198,8 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--brand-500);
-    outline-offset: 2px;
+    outline: none;
+    outline-offset: none;
   }
 
   /* SVG icon as background image (matching project pattern) */
