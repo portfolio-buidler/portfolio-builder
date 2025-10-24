@@ -1,5 +1,5 @@
 import backgroundImage from '../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6c8.jpg'
-import { PreviewView } from './Preview.view'
+import { PreviewView } from './preview.view.tsx'
 import type { PreviewViewProps } from './Preview.types'
 
 import PreviewArea from './PreviewArea/PreviewArea';

@@ -1,32 +1,23 @@
 /*
- * Education Section specific styles.
- * Handles view/edit mode transitions, toggle expand/collapse, and content parsing display.
- * 
- * Note: This file uses CSS custom properties (--var-name) which are
- * defined globally, so no token imports are needed.
- * 
- * IMPORTANT: Content area width properties are copied from AboutSection to ensure
- * visual consistency, while height and vertical spacing are Education-specific.
+ * Education Section Styles
+ * Handles view/edit mode transitions and toggle expand/collapse functionality
  */
 
 .education-section {
-  /* Fixed dimensions */
   height: 156px;
-  opacity: 1;
   border-radius: 15px;
   background: var(--glass-bg-accent);
-  padding: 6px; /* Issue #3 fix: Match About section padding for consistent content width */
+  padding: 1rem 1.5rem;
   position: relative;
-  cursor: default; /* No pointer cursor - only toggle is clickable */
-  overflow: hidden; /* CRITICAL: Hide overflow when collapsed */
+  overflow: hidden;
   transition: height 0.3s ease, box-shadow 200ms ease;
-  border: none; /* Override base .preview-section border */
-  box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset; /* Match About section shadows */
+  border: none;
+  box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
 
 
-  /* Expanded state (toggle clicked) */
+  /* Expanded state */
   &[data-expanded='true'] {
-    height: auto; /* Expand to show all content */
+    height: auto;
     overflow: visible;
 
     .education__content {
@@ -36,72 +27,40 @@
     }
   }
 
-  /* Edit mode - Issue #2 fixed (no green border) */
+  /* Edit mode */
   &[data-editing='true'] {
-    cursor: default;
-    height: auto; /* Allow expansion in edit mode */
+    height: auto;
 
     .education__content {
-      background: #FFFEFF66; /* White layer visible in edit mode (like About section) */
+      background: #FFFEFF66;
       overflow: visible;
-      height: auto; /* Match textarea height */
+      height: auto;
     }
 
-    /* Hide toggle button in edit mode */
     .preview-section__toggle {
       display: none;
     }
   }
 
   .preview-section__title-container {
-    width: 100%;
-    height: 22px;
-    gap: 2px;
-    opacity: 1;
-    display: flex;
-    align-items: center;
-    padding-left: 10px;
-    padding-top: 8px;
+    position: relative;
+    padding: 0;
     margin-bottom: 0.5rem;
   }
-
-  .preview-section__title {
-    font-family: var(--font-family-base, 'Poppins', sans-serif);
-    font-weight: 500;
-    font-style: normal;
-    font-size: 20px;
-    line-height: 100%;
-    letter-spacing: 0%;
-    text-transform: capitalize;
-    color: var(--title-color);
-    margin: 0;
-  }
 }
 
-/* Content area - width properties copied from About section */
+/* Content area */
 .education__content {
-  /* Fixed height to prevent jumping between states */
-  height: 100%; /* Fill available space in parent */
-  
-  /* WIDTH - COPIED FROM ABOUT SECTION */
-  /* The About section's .preview-section__content has these horizontal properties: */
+  height: 100%;
   padding: 0.5rem;
-  margin-left: 0;
-  margin-right: 0;
-  /* No explicit width/max-width in About, so inherits from parent */
-
-  /* Other styling */
-  margin-top: 0.5px;
-  opacity: 1;
+  margin: 0.5px 0 0;
   border-radius: 12px;
-  background: transparent; /* Hidden in view mode */
+  background: transparent;
   box-sizing: border-box;
-  overflow: hidden; /* CRITICAL: Truncate when collapsed */
-  transition: none; /* Remove transition to prevent jumping */
+  overflow: hidden;
 }
 
-/* Parsed content styling (view mode) - removed text formatting rules except bullets */
-
+/* Parsed content elements */
 .education__bullets {
   margin: 0.5rem 0 0 1.25rem;
   padding: 0;
@@ -114,24 +73,21 @@
   }
 }
 
-/* Placeholder styling for view mode (when content is empty) */
 .education__placeholder {
   font-family: Poppins;
   font-weight: 500;
-  font-style: normal;
   font-size: 12px;
   line-height: 100%;
-  letter-spacing: 0%;
   text-transform: capitalize;
   color: #354052A6;
   margin: 0;
   padding: 0;
 }
 
-/* Textarea styling (edit mode) - matching About section */
+/* Textarea (edit mode) */
 .education__textarea {
   width: 100%;
-  height: 100%; /* Match content height */
+  height: 100%;
   min-height: 8rem;
   resize: none;
   background: transparent;
@@ -142,7 +98,7 @@
   color: var(--color-fg-default);
   padding: 0.5rem;
   box-sizing: border-box;
-  overflow: hidden; /* Auto-expand instead of scrolling */
+  overflow: hidden;
 
   &:focus {
     outline: none;
@@ -151,28 +107,21 @@
   &::placeholder {
     font-family: Poppins;
     font-weight: 500;
-    font-style: normal;
     font-size: 12px;
     line-height: 100%;
-    letter-spacing: 0%;
     text-transform: capitalize;
     color: #354052A6;
-    opacity: 1; /* Override default opacity */
+    opacity: 1;
   }
 }
 
-/* Toggle button - SVG icon with specific styling - Issue #4 fixed */
+/* Toggle button */
 .preview-section__toggle {
-  /* Position - bottom right corner */
   position: absolute;
   bottom: 0.75rem;
   right: 1rem;
-
-  /* Dimensions - adjusted for proper SVG display */
   width: 14px;
   height: 8px;
-
-  /* Behavior */
   border: none;
   background: transparent;
   cursor: pointer;
@@ -182,12 +131,8 @@
   justify-content: center;
   transition: transform 0.3s ease, opacity 150ms ease;
   z-index: 10;
-  opacity: 1;
-
-  /* Rotation - collapsed state (rotated 90deg from original) */
   transform: rotate(0deg);
 
-  /* Expanded state - rotate 180deg from collapsed */
   &[aria-expanded='true'] {
     transform: rotate(180deg);
   }
@@ -197,11 +142,10 @@
   }
 
   &:focus-visible {
-    outline: none;
-    outline-offset: none;
+    outline: 2px solid var(--color-primary, #4A90E2);
+    outline-offset: 2px;
   }
 
-  /* SVG icon as background image (matching project pattern) */
   &::before {
     content: '';
     display: block;

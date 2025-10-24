@@ -49,7 +49,7 @@ export const EducationSection: React.FC<EducationSectionProps> = ({
    * Line 3: Years
    * Lines 4+: Bullet points (starting with -, •, *, or 1.)
    */
-  const parseContent = (text: string): ParsedEducationContent => {
+  const parseContent = React.useCallback((text: string): ParsedEducationContent => {
     const lines = text.split('\n').map((line) => line.trim())
     const degree = lines[0] || ''
     const university = lines[1] || ''
@@ -58,30 +58,16 @@ export const EducationSection: React.FC<EducationSectionProps> = ({
     // Find bullet points (skip first 3 lines + empty line)
     const bulletPoints = lines
       .slice(4)
-      .filter((line) => line.length > 0)
-      .filter((line) => /^[•\-*]|\d+\./.test(line))
+      .filter((line) => line.length > 0 && /^[•\-*]|\d+\./.test(line))
       .map((line) => line.replace(/^[•\-*]\s*|\d+\.\s*/, '').trim())
 
     return { degree, university, years, bulletPoints }
-  }
+  }, [])
 
-  // Extract text content from ReactNode for editing
+  // Initialize editable content from prop
   React.useEffect(() => {
-    if (typeof content === 'string') {
-      setEditableContent(content)
-    } else if (React.isValidElement(content)) {
-      // Extract text from JSX
-      const extractText = (node: React.ReactNode): string => {
-        if (typeof node === 'string') return node
-        if (typeof node === 'number') return String(node)
-        if (Array.isArray(node)) return node.map(extractText).join('')
-        if (React.isValidElement(node)) {
-          return extractText(node.props.children)
-        }
-        return ''
-      }
-      setEditableContent(extractText(content))
-    }
+    const contentString = typeof content === 'string' ? content : ''
+    setEditableContent(contentString)
   }, [content])
 
   /**
@@ -124,23 +110,22 @@ export const EducationSection: React.FC<EducationSectionProps> = ({
   }, [isEditing, onEditEnd])
 
   /**
-   * Handle section double-click to enter edit mode
-   */
-  const handleSectionClick = () => {
-    if (!isEditing) {
-      onEditStart?.()
-    }
-  }
-
-  /**
    * Handle textarea content changes
    */
   const handleContentChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newContent = event.target.value
     setEditableContent(newContent)
     onContentChange?.(newContent)
-    // Adjust height after state update
     setTimeout(adjustTextareaHeight, 0)
+  }
+
+  /**
+   * Handle section double-click to enter edit mode
+   */
+  const handleSectionClick = () => {
+    if (!isEditing) {
+      onEditStart?.()
+    }
   }
 
   /**
@@ -186,12 +171,9 @@ export const EducationSection: React.FC<EducationSectionProps> = ({
   /**
    * Callback ref for textarea - stores element and triggers height adjustment
    */
-  const handleTextareaRef = (textarea: HTMLTextAreaElement | null) => {
+  const handleTextareaRef = React.useCallback((textarea: HTMLTextAreaElement | null) => {
     setTextareaElement(textarea)
-    if (textarea && isEditing) {
-      adjustTextareaHeight()
-    }
-  }
+  }, [])
 
   return (
     <EducationSectionView

@@ -1,16 +1,11 @@
 /*
- * About Section specific styles.
- * Handles view/edit mode transitions and content area behavior.
- * 
- * Note: This file uses CSS custom properties (--var-name) which are
- * defined globally, so no token imports are needed.
+ * About Section Styles
+ * Handles view/edit mode transitions and content area behavior
  */
 
 .preview-section--about {
-  /* View Mode (default) */
-  height: auto; /* Dynamic height - maintains expanded size */
-  min-height: 156px; /* Initial minimum height */
-  opacity: 1;
+  height: auto;
+  min-height: 156px;
   border-radius: 15px;
   background: var(--glass-bg-accent);
   box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
@@ -19,108 +14,78 @@
   cursor: pointer;
   transition: box-shadow 200ms ease;
 
-  &:hover:not([data-editing='true']) {
-    box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
-  }
-
-  /* Edit Mode */
+  /* Edit mode */
   &[data-editing='true'] {
     cursor: default;
-    /* Removed green border box-shadow - keeping only inset shadows */
-    // box-shadow: 1px 1px 2px 0px inset, -3px -3px 3px 0px #DDDDDD26 inset;
     
     .preview-section__content {
-      height: auto; /* Remove fixed height */
-      min-height: 120px; /* Maintain minimum content height */
-      overflow: visible; /* No scrolling in edit mode */
-      background: #FFFEFF66; /* Visible background in edit mode */
+      height: auto;
+      min-height: 120px;
+      overflow: visible;
+      background: #FFFEFF66;
     }
   }
 
   .preview-section__title-container {
-    width: 100%;
-    max-width: 802px;
-    height: 22px;
-    gap: 2px;
-    opacity: 1;
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Position title left, counter right */
-    padding-left: 10px;
-    padding-right: 10px; /* Add right padding for counter */
-    padding-top: 8px;
+    justify-content: space-between;
+    max-width: 802px;
+    height: 22px;
+    padding: 8px 10px 0;
+    gap: 2px;
   }
 
   .preview-section__title {
     font-family: var(--font-family-base, 'Poppins', sans-serif);
     font-weight: 500;
-    font-style: normal;
     font-size: 20px;
     line-height: 100%;
-    letter-spacing: 0%;
     text-transform: capitalize;
     color: var(--title-color);
     margin: 0;
   }
 
-  /* Character counter - positioned to the right of title */
-  .preview-section__char-counter {
-    width: 37px;
-    height: 8px;
-    opacity: 1;
+  .preview-section__char-counter,
+  .preview-section__placeholder {
     font-family: Poppins;
     font-weight: 500;
-    font-style: normal;
     font-size: 12px;
     line-height: 100%;
-    letter-spacing: 0%;
     text-transform: capitalize;
     color: #354052A6;
+  }
+
+  .preview-section__char-counter {
     white-space: nowrap;
-    border: none;
+  }
+
+  .preview-section__placeholder {
+    margin: 0;
+    padding: 0;
   }
 
   .preview-section__content {
-    /* View Mode content area - no visible background */
-    height: auto; /* Dynamic height - maintains expanded size */
-    min-height: 120px; /* Initial minimum height */
+    height: auto;
+    min-height: 120px;
     margin-top: 1px;
-    opacity: 1;
     border-radius: 12px;
-    background: transparent; /* Hidden in view mode */
+    background: transparent;
     padding: 0.5rem;
-    margin-left: 0;
-    margin-right: 0;
-    overflow: auto; /* Scrollable if content exceeds container */
+    overflow: auto;
     box-sizing: border-box;
 
-    /* Nested paragraph styling */
     p:not(.preview-section__placeholder) {
       margin: 0;
       font-family: var(--font-family-base, 'Poppins', sans-serif);
       font-size: var(--font-size-md);
       line-height: var(--line-height-normal);
       color: var(--color-fg-default);
-      white-space: pre-wrap; /* Preserve line breaks and spaces */
-      word-wrap: break-word; /* Prevent overflow on long words */
+      white-space: pre-wrap;
+      word-wrap: break-word;
     }
   }
 
-  /* Placeholder styling for view mode (when content is empty) */
-  .preview-section__placeholder {
-    font-family: Poppins;
-    font-weight: 500;
-    font-style: normal;
-    font-size: 12px;
-    line-height: 100%;
-    letter-spacing: 0%;
-    text-transform: capitalize;
-    color: #354052A6;
-    margin: 0;
-    padding: 0;
-  }
-
-  /* Textarea for edit mode */
   .preview-section__textarea {
     width: 100%;
     min-height: 120px;
@@ -131,11 +96,10 @@
     font-size: var(--font-size-md);
     line-height: var(--line-height-normal);
     color: var(--color-fg-default);
-    resize: none; /* Disable manual resize */
-    overflow: hidden; /* Auto-expand instead of scrolling */
-    padding: 0.5rem; /* Match parent content padding */
-    margin: -0.5rem; /* Offset parent padding to maintain alignment */
-    outline: none;
+    resize: none;
+    overflow: hidden;
+    padding: 0.5rem;
+    margin: -0.5rem;
     box-sizing: border-box;
 
     &:focus {
@@ -145,17 +109,14 @@
     &::placeholder {
       font-family: Poppins;
       font-weight: 500;
-      font-style: normal;
       font-size: 12px;
       line-height: 100%;
-      letter-spacing: 0%;
       text-transform: capitalize;
       color: #354052A6;
-      opacity: 1; /* Override default opacity */
     }
   }
 
-  /* Custom scrollbar for view mode content */
+  /* Custom scrollbar */
   .preview-section__content::-webkit-scrollbar {
     width: 4px;
   }
@@ -169,9 +130,9 @@
     background: rgba(0, 0, 0, 0.2);
     border-radius: 2px;
     transition: background-color 200ms ease;
-  }
 
-  .preview-section__content::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.35);
+    &:hover {
+      background: rgba(0, 0, 0, 0.35);
+    }
   }
 }

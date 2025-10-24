@@ -85,6 +85,7 @@
     /* leading-trim: cap-height; Not a real CSS property */
   }
 
+
   &__subtitle {
     font-family: var(--font-family-base);
     font-size: var(--font-size-sm);
@@ -329,11 +330,36 @@
   gap: 0.5rem;
   color: var(--color-fg-default);
 
-  &__title {
-    font-family: var(--font-family-base);
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-bold);
-    line-height: var(--line-height-tight);
+  /* Title container - aligns title and help icon horizontally */
+  &__title-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  /* Help icon - aligned with title on the right */
+  &__help-icon {
+    width: 18px;
+    height: 18px;
+    opacity: 1;
+    cursor: pointer;
+    transition: opacity 200ms ease;
+    flex-shrink: 0; /* Prevent icon from shrinking */
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
+    &__title {
+    font-family: var(--font-family-base, 'Poppins', sans-serif);
+    font-weight: 500;
+    font-style: normal;
+    font-size: 20px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-transform: capitalize;
     color: var(--title-color);
     margin: 0;
   }

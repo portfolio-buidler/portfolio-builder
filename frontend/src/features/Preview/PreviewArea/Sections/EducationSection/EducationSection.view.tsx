@@ -1,6 +1,7 @@
 import React from 'react'
 import type { EducationSectionViewProps } from './EducationSection.types'
 import './EducationSection.styles.scss'
+import questionMarkIcon from '../../../../../assets/icons/PreviewPage/question-mark.svg'
 
 /**
  * Presentational component for the Education section.
@@ -37,6 +38,11 @@ export const EducationSectionView = React.forwardRef<HTMLElement, EducationSecti
       >
         <div className="preview-section__title-container">
           <h3 className="preview-section__title">{title}</h3>
+          <img 
+            src={questionMarkIcon} 
+            alt="Help" 
+            className="preview-section__help-icon"
+          />
         </div>
         <div className="education__content">
           {isEditing ? (

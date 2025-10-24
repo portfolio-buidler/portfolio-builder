@@ -4,18 +4,10 @@ import type { AboutSectionProps } from './AboutSection.types'
 
 /**
  * Smart container component for the About section.
- * Manages edit/view mode state and content editing logic.
+ * Manages edit/view mode state and content editing with character limit.
  * 
- * Edit Mode Behavior:
- * - Triggered by double-clicking anywhere on the section
- * - Content becomes editable via textarea
- * - Section expands vertically to fit content (no height limit)
- * - Exit by clicking outside the section
- * 
- * View Mode Behavior:
- * - Static content display with placeholder when empty
- * - Fixed height (120px content area)
- * - Scrollable overflow if content exceeds height
+ * Edit Mode: Double-click to edit, auto-expanding textarea, exits on outside click
+ * View Mode: Static content display with scrollable overflow
  */
 export const AboutSection: React.FC<AboutSectionProps> = ({
   title,
@@ -28,26 +20,34 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
 }) => {
   const sectionRef = React.useRef<HTMLElement>(null)
   const [editableContent, setEditableContent] = React.useState('')
+  const previousEditingRef = React.useRef(isEditing)
   const MAX_CHARACTERS = 500
 
-  // Extract text content from ReactNode for editing
-  React.useEffect(() => {
-    if (typeof content === 'string') {
-      setEditableContent(content)
-    } else if (React.isValidElement(content)) {
-      // Extract text from JSX
-      const extractText = (node: React.ReactNode): string => {
-        if (typeof node === 'string') return node
-        if (typeof node === 'number') return String(node)
-        if (Array.isArray(node)) return node.map(extractText).join('')
-        if (React.isValidElement(node)) {
-          return extractText(node.props.children)
-        }
-        return ''
-      }
-      setEditableContent(extractText(content))
+  /**
+   * Extract text content from ReactNode (string or JSX)
+   */
+  const extractTextContent = React.useCallback((node: React.ReactNode): string => {
+    if (typeof node === 'string') return node
+    if (typeof node === 'number') return String(node)
+    if (Array.isArray(node)) return node.map(extractTextContent).join('')
+    if (React.isValidElement(node)) {
+      return extractTextContent(node.props.children)
     }
-  }, [content])
+    return ''
+  }, [])
+
+  // Initialize editable content only when transitioning to edit mode
+  React.useEffect(() => {
+    const wasNotEditing = !previousEditingRef.current
+    const isNowEditing = isEditing
+
+    if (wasNotEditing && isNowEditing) {
+      const contentString = extractTextContent(content)
+      setEditableContent(contentString)
+    }
+
+    previousEditingRef.current = isEditing
+  }, [isEditing, content, extractTextContent])
 
   // Handle click outside to exit edit mode
   React.useEffect(() => {
@@ -59,7 +59,6 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
       }
     }
 
-    // Add listener with a small delay to avoid immediate trigger
     const timeoutId = setTimeout(() => {
       document.addEventListener('mousedown', handleClickOutside)
     }, 100)
@@ -71,6 +70,17 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
   }, [isEditing, onEditEnd])
 
   /**
+   * Handle textarea content changes with character limit
+   */
+  const handleTextChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newContent = event.target.value
+    if (newContent.length <= MAX_CHARACTERS) {
+      setEditableContent(newContent)
+      onContentChange?.(newContent)
+    }
+  }
+
+  /**
    * Handle section double-click to enter edit mode
    */
   const handleSectionDoubleClick = () => {
@@ -80,23 +90,10 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
   }
 
   /**
-   * Handle textarea content changes with character limit
-   */
-  const handleTextChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newContent = event.target.value
-    // Enforce character limit
-    if (newContent.length <= MAX_CHARACTERS) {
-      setEditableContent(newContent)
-      onContentChange?.(newContent)
-    }
-  }
-
-  /**
    * Auto-resize textarea to fit content
    */
   const handleTextareaRef = (textarea: HTMLTextAreaElement | null) => {
     if (textarea && isEditing) {
-      // Reset height to auto to get the correct scrollHeight
       textarea.style.height = 'auto'
       textarea.style.height = `${textarea.scrollHeight}px`
     }
