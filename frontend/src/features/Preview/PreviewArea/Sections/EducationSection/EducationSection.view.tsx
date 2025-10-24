@@ -73,7 +73,7 @@ export const EducationSectionView = React.forwardRef<HTMLElement, EducationSecti
             <p className="education__placeholder">
               Add your degree, university name, and graduation years.
             </p>
-          )}
+          )} 
         </div>
         <button
           type="button"
