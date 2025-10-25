@@ -1,44 +1,45 @@
 import type { ReactNode } from 'react'
 
-/**
- * Parsed education content structure.
- * Content is parsed from raw string format into structured data.
- */
-export interface ParsedEducationContent {
+/** A single bullet line under an education entry. */
+export interface EducationBullet {
+  text: string
+}
+
+/** A single education entry. */
+export interface EducationEntry {
   degree: string
   university: string
   years: string
-  bulletPoints: string[]
+  bullets: EducationBullet[]
 }
 
-/**
- * Props for the Education section smart container.
- */
+/** Container props */
 export interface EducationSectionProps {
-  title: string
-  content: ReactNode
+  title?: string
+  content?: string
   complete?: boolean
-  isExpanded?: boolean
-  onToggle?: () => void
   isEditing?: boolean
+  isExpanded?: boolean
+  onToggleExpanded?: (next: boolean) => void
   onEditStart?: () => void
-  onEditEnd?: () => void
-  onContentChange?: (content: string) => void
+  onEditEnd?: (payload: { content: string; entries: EducationEntry[]; savedExpandedHeight: number }) => void
+  onContentChange?: (next: string) => void
+  className?: string
 }
 
-/**
- * Props for the Education section presentational view.
- */
+/** View props */
 export interface EducationSectionViewProps {
-  title: string
-  content: string
-  parsedContent: ParsedEducationContent
-  complete?: boolean
-  isExpanded?: boolean
-  onToggle?: () => void
-  isEditing?: boolean
-  onSectionClick: () => void
-  onContentChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void
-  onTextareaRef: (textarea: HTMLTextAreaElement | null) => void
-  onKeyDown: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void
+  title?: string
+  isEditing: boolean
+  isExpanded: boolean
+  savedExpandedHeight: number
+  onEnterEdit: () => void
+  onToggle: () => void
+  editValue: string
+  onEditChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
+  onEditKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void
+  contentRef: React.RefObject<HTMLDivElement>
+  textareaRef: React.RefObject<HTMLTextAreaElement>
+  entries: EducationEntry[]
+  children?: ReactNode
 }

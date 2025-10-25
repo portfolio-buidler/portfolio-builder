@@ -1,3 +1,21 @@
+/**
+ * PreviewArea.view.tsx
+ * 
+ * Presentational component for the CV preview area.
+ * Follows Logic-View-Style separation pattern.
+ * 
+ * Architecture:
+ * - Pure view layer - no business logic
+ * - Receives all data and callbacks as props
+ * - Renders sections in specified layout
+ * - Manages scroll indicator positioning
+ * 
+ * Layout:
+ * - Header: Back button + title + instructions
+ * - Content: Scrollable area with sections
+ * - Footer: Undo/Redo + Next button
+ */
+
 import React from 'react'
 import type { PreviewAreaViewProps } from './PreviewArea.types'
 import './PreviewArea.styles.scss'
@@ -9,13 +27,6 @@ import {
   ExperienceSection,
 } from './Sections'
 
-/**
- * Stateless presentational component for the preview area. This component
- * takes a list of sections along with navigation callbacks and renders
- * them according to the glass dark mode design guidelines. All layout
- * related classes are defined in the accompanying SCSS file. See
- * PreviewArea.styles.scss for the styling rules.
- */
 export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
   sections,
   onPageBack,
@@ -35,12 +46,21 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
 }) => {
   const contentRef = React.useRef<HTMLDivElement>(null)
 
-  // Extract specific sections by id for layout
+  /* ========================================================================
+     SECTION DATA EXTRACTION
+     ======================================================================== */
+
   const about = sections.find((s) => s.id === 'about')
   const education = sections.find((s) => s.id === 'education')
   const skills = sections.find((s) => s.id === 'skills')
   const communication = sections.find((s) => s.id === 'communication')
   const experience = sections.find((s) => s.id === 'experience')
+
+  /* ========================================================================
+     SCROLL INDICATOR LOGIC
+     Updates CSS custom properties to position the scroll indicator line
+     between the About section (top anchor) and Experience section (bottom)
+     ======================================================================== */
 
   React.useEffect(() => {
     const contentElement = contentRef.current
@@ -55,37 +75,30 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
       const lineHeight = 296
       const maxTravel = clientHeight - lineHeight
 
-      // Find about and experience sections
       const aboutEl = getSectionEl('about')
       const experienceEl = getSectionEl('experience')
-      
+
+      // Fallback to center if sections not found
       if (!aboutEl || !experienceEl) {
-        // Fallback to center if sections not found
         contentElement.style.setProperty('--scroll-indicator-top', '50%')
         contentElement.style.setProperty('--scroll-indicator-transform', 'translateY(-50%)')
         return
       }
 
-      // Get offsets relative to scroll container
       const aboutTop = aboutEl.offsetTop
       const experienceBottom = experienceEl.offsetTop + experienceEl.offsetHeight
-      
-      // Indicator should start when about is at top, end when experience bottom is at viewport bottom
       const scrollStart = aboutTop
       const scrollEnd = experienceBottom - clientHeight
       const scrollableRange = scrollEnd - scrollStart
 
-      // If not enough content to scroll between anchors, center the line
+      // Center the line if not enough scrollable content
       if (scrollableRange <= 0) {
         contentElement.style.setProperty('--scroll-indicator-top', '50%')
         contentElement.style.setProperty('--scroll-indicator-transform', 'translateY(-50%)')
         return
       }
 
-      // Calculate scroll progress between the two anchors
-      // When scrollTop < scrollStart: indicator at 0%
-      // When scrollTop >= scrollEnd: indicator at 100%
-      // In between: linear interpolation
+      // Calculate scroll progress (0 = at start, 1 = at end)
       let scrollProgress = 0
       if (scrollTop <= scrollStart) {
         scrollProgress = 0
@@ -101,17 +114,21 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
       contentElement.style.setProperty('--scroll-indicator-transform', 'translateY(0)')
     }
 
-    // Initial position
     handleScroll()
-
     contentElement.addEventListener('scroll', handleScroll)
     return () => contentElement.removeEventListener('scroll', handleScroll)
   }, [sections])
 
+  /* ========================================================================
+     RENDER
+     ======================================================================== */
+
   return (
     <div className="preview-area">
-      {/* Header with back arrow and instructional text */}
-      <div className="preview-area__header">
+      {/* ====================================================================
+          HEADER
+          ==================================================================== */}
+      <header className="preview-area__header">
         <button
           type="button"
           className="preview-area__back"
@@ -123,14 +140,18 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
         <div className="preview-area__intro">
           <h2 className="preview-area__title">Preview</h2>
           <p className="preview-area__subtitle">
-            Please complete all required fields before continuing (not included work experience).<br />
+            Please complete all required fields before continuing (not included work experience).
+            <br />
             You won't be able to move to the next step until everything is filled out.
           </p>
         </div>
-      </div>
+      </header>
 
-      {/* Content area containing the cards. This element is scrollable */}
+      {/* ====================================================================
+          CONTENT (Scrollable)
+          ==================================================================== */}
       <div className="preview-area__content" ref={contentRef}>
+        {/* About Section (editable) */}
         {about && (
           <AboutSection
             title={about.title}
@@ -142,20 +163,23 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
             onContentChange={(content: string) => onSectionContentChange('about', content)}
           />
         )}
+
+        {/* Education Section (editable + collapsible) */}
         {education && (
           <EducationSection
             title={education.title}
-            content={education.content}
+            content={typeof education.content === 'string' ? education.content : ''}
             complete={education.complete}
             isExpanded={isEducationExpanded}
-            onToggle={onToggleEducation}
+            onToggleExpanded={onToggleEducation}
             isEditing={editingSectionId === 'education'}
             onEditStart={() => onEditSectionStart('education')}
             onEditEnd={onEditSectionEnd}
             onContentChange={(content: string) => onSectionContentChange('education', content)}
           />
         )}
-        {/* Row containing skills and communication side by side */}
+
+        {/* Skills + Communication Row (side by side) */}
         <div className="preview-area__row">
           {skills && (
             <SkillsSection
@@ -173,6 +197,8 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
             />
           )}
         </div>
+
+        {/* Experience Section */}
         {experience && (
           <ExperienceSection
             title={experience.title}
@@ -182,9 +208,12 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
         )}
       </div>
 
-      {/* Footer navigation bar with undo/redo and next */}
-      <div className="preview-area__footer">
+      {/* ====================================================================
+          FOOTER (Navigation)
+          ==================================================================== */}
+      <footer className="preview-area__footer">
         <div className="preview-area__controls">
+          {/* Undo/Redo History Controls */}
           <div className="preview-area__history">
             <button
               type="button"
@@ -192,7 +221,7 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
               onClick={onUndo}
               disabled={!undoAvailable}
               aria-disabled={!undoAvailable || undefined}
-              aria-label="Undo"
+              aria-label="Undo last change"
             />
             <button
               type="button"
@@ -200,25 +229,34 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
               onClick={onRedo}
               disabled={!redoAvailable}
               aria-disabled={!redoAvailable || undefined}
-              aria-label="Redo"
+              aria-label="Redo last change"
             />
           </div>
+
+          {/* Next Button */}
           <button
             type="button"
             className="preview-area__next"
             onClick={isNextEnabled ? onNext : undefined}
             disabled={!isNextEnabled}
             aria-disabled={!isNextEnabled || undefined}
+            aria-label="Proceed to next step"
           >
             <span className="preview-area__next-text">Next</span>
             <span className="preview-area__next-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M9 6L15 12L9 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path
+                  d="M9 6L15 12L9 18"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </span>
           </button>
         </div>
-      </div>
+      </footer>
     </div>
   )
 }

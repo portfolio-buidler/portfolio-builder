@@ -1,183 +1,282 @@
 /*
- * Education Section Styles
- * Handles view/edit mode transitions and toggle expand/collapse functionality
+ * EducationSection.styles.scss
+ * 
+ * Education section component styles following Logic-View-Style separation.
+ * Implements expand/collapse functionality with smooth transitions and edit mode.
+ * 
+ * Architecture:
+ * - Uses BEM naming (education-section, education__content, education__textarea)
+ * - State-driven via data attributes (data-expanded, data-editing)
+ * - Design tokens for spacing, typography, colors
+ * - Layer management via z-index for proper stacking
+ * 
+ * States:
+ * - Collapsed: Content height limited to 110px with overflow hidden
+ * - Expanded: Full content visible with dynamic height
+ * - Editing: Textarea active, toggle hidden, auto-sizing enabled
  */
 
+@use '../../../../../styles/tokens/colors' as colors;
+@use '../../../../../styles/tokens/spacing' as spacing;
+@use '../../../../../styles/tokens/typography' as typography;
+@use '../../../../../styles/tokens/radii' as radii;
+
+/* ==========================================================================
+   CONSTANTS
+   ========================================================================== */
+
+$collapsed-height: 110px;
+$min-section-height: 156px;
+$content-min-height: 110px;
+$toggle-size: 14px 8px;
+$transition-duration: 0.3s;
+
+/* ==========================================================================
+   SECTION CONTAINER
+   ========================================================================== */
+
 .education-section {
-  height: auto;
-  min-height: 156px;
+  /* Layout */
+  position: relative;
+  min-height: $min-section-height;
+  padding: 6px;
+  overflow: hidden;
+
+  /* Visual */
   border-radius: 15px;
   background: var(--glass-bg-accent);
-  padding: 6px;
-  position: relative;
-  overflow: hidden;
-  transition: height 0.3s ease, box-shadow 200ms ease;
   border: none;
-  box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
+  box-shadow: 
+    1px 1px 2px 0px rgba(255, 255, 255, 0.3) inset,
+    -3px -3px 3px 0px rgba(221, 221, 221, 0.15) inset;
 
-  /* Expanded state */
+  /* Animation */
+  transition: height $transition-duration ease, box-shadow 200ms ease;
+
+  /* ========================================================================
+     STATE: COLLAPSED (default)
+     ======================================================================== */
+
+  &[data-expanded='false'] {
+    .education__content {
+      max-height: $collapsed-height;
+      overflow: hidden;
+    }
+
+    .preview-section__toggle::before {
+      transform: rotate(0deg);
+    }
+  }
+
+  /* ========================================================================
+     STATE: EXPANDED
+     ======================================================================== */
+
   &[data-expanded='true'] {
     cursor: default;
 
     .education__content {
-      height: auto;
-      min-height: 120px;
       max-height: none;
       overflow: visible;
     }
+
+    .preview-section__toggle::before {
+      transform: rotate(180deg);
+    }
   }
 
-  /* Edit mode */
-  &[data-editing='true'] {
-    height: auto;
+  /* ========================================================================
+     STATE: EDITING
+     ======================================================================== */
 
+  &[data-editing='true'] {
     .education__content {
-      background: #FFFEFF66;
+      background: rgba(255, 254, 255, 0.4);
       overflow: visible;
-      height: auto;
-      min-height: 120px;
+      max-height: none;
     }
 
     .preview-section__toggle {
       display: none;
     }
   }
-
-  .preview-section__title-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    height: 22px;
-    padding: 8px 10px 0 10px;
-    gap: 8px;
-    position: relative;
-  }
 }
 
-/* Help Icon - aligned with title horizontally, above toggle vertically */
+/* ==========================================================================
+   HEADER / TITLE CONTAINER
+   ========================================================================== */
+
+.preview-section__title-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 22px;
+  padding: var(--space-2) 10px 0 10px;
+  gap: var(--space-2);
+  position: relative;
+}
+
 .preview-section__help-icon {
   width: 16px;
   height: 16px;
+  margin-left: auto;
+  margin-right: 32px;
   cursor: pointer;
+  opacity: 1;
   transition: opacity 150ms ease;
-  margin-left: auto; // Push to the right
-  margin-right: 32px; // Align with toggle button's right edge (1rem - 10px padding = ~6px, adjust as needed)
-  
+  flex-shrink: 0;
+
   &:hover {
     opacity: 0.7;
   }
 }
 
-/* Content area */
+/* ==========================================================================
+   CONTENT AREA (View Mode)
+   ========================================================================== */
+
 .education__content {
-  height: 100%;
-  padding: 0.5rem;
+  /* Layout */
+  position: relative;
+  min-height: $content-min-height;
+  padding: var(--space-2);
   margin: 0.5px 0 0;
+  box-sizing: border-box;
+  z-index: 1;
+
+  /* Visual */
   border-radius: 12px;
   background: transparent;
-  box-sizing: border-box;
-  overflow: hidden;
-  position: relative;
-  z-index: 1; /* Base layer */
+
+  /* Animation */
+  transition: 
+    max-height $transition-duration ease,
+    overflow $transition-duration ease,
+    background 200ms ease;
 }
 
-/* Parsed content elements */
+/* Free text display (preserves line breaks and formatting) */
+.education__free-text {
+  font-family: var(--font-family-base, 'Poppins', sans-serif);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
+  color: var(--title-color);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+}
+
+/* Placeholder text when empty */
+.education__placeholder {
+  font-family: var(--font-family-base, 'Poppins', sans-serif);
+  font-weight: var(--font-weight-medium);
+  font-size: 12px;
+  line-height: 100%;
+  text-transform: capitalize;
+  color: rgba(53, 64, 82, 0.65);
+  margin: 0;
+  padding: 0;
+}
+
+/* Bullet lists (legacy - kept for backwards compatibility) */
 .education__bullets {
-  margin: 0.5rem 0 0 1.25rem;
+  margin: var(--space-2) 0 0 1.25rem;
   padding: 0;
   list-style-type: disc;
 
   li {
-    margin-bottom: 0.25rem;
+    margin-bottom: var(--space-1);
     white-space: pre-wrap;
     word-wrap: break-word;
   }
 }
 
-.education__placeholder {
-  font-family: Poppins;
-  font-weight: 500;
-  font-size: 12px;
-  line-height: 100%;
-  text-transform: capitalize;
-  color: #354052A6;
-  margin: 0;
-  padding: 0;
-}
+/* ==========================================================================
+   TEXTAREA (Edit Mode)
+   ========================================================================== */
 
-/* Textarea (edit mode) */
 .education__textarea {
+  /* Layout */
   width: 100%;
-  height: 100%;
-  min-height: 110px;
+  min-height: $content-min-height;
+  padding: var(--space-2);
+  box-sizing: border-box;
   resize: none;
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+
+  /* Visual */
   background: transparent;
   border: none;
   font-family: var(--font-family-base, 'Poppins', sans-serif);
   font-size: var(--font-size-md);
   line-height: var(--line-height-normal);
-  color: var(--color-fg-default);
-  padding: 0.5rem;
-  box-sizing: border-box;
-  overflow: hidden;
-  position: relative;
-  z-index: 2; /* Above content, below toggle */
+  color: var(--title-color);
 
   &:focus {
     outline: none;
   }
 
   &::placeholder {
-    font-family: Poppins;
-    font-weight: 500;
+    font-family: var(--font-family-base, 'Poppins', sans-serif);
+    font-weight: var(--font-weight-medium);
     font-size: 12px;
     line-height: 100%;
     text-transform: capitalize;
-    color: #354052A6;
+    color: rgba(53, 64, 82, 0.65);
     opacity: 1;
   }
 }
 
-/* Toggle button */
+/* ==========================================================================
+   TOGGLE BUTTON (Expand/Collapse)
+   ========================================================================== */
+
 .preview-section__toggle {
+  /* Layout */
   position: absolute;
-  bottom: 0.75rem;
-  right: 0.5rem;
-  width: 14px;
-  height: 8px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
+  bottom: var(--space-3);
+  right: var(--space-2);
+  width: nth($toggle-size, 1);
+  height: nth($toggle-size, 2);
   margin-right: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.3s ease, opacity 150ms ease;
-  z-index: 100; /* Top layer - always above content and textarea */
-  transform: rotate(0deg);
+  z-index: 100;
 
-  &[aria-expanded='true'] {
-    transform: rotate(180deg);
-  }
+  /* Visual */
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  opacity: 1;
+
+  /* Animation */
+  transition: opacity 150ms ease;
+  will-change: transform;
 
   &:hover {
     opacity: 0.7;
   }
 
   &:focus-visible {
-    outline: 2px solid var(--color-primary, #4A90E2);
+    outline: 2px solid var(--brand-500, #34C759);
     outline-offset: 2px;
   }
 
+  /* Arrow icon (SVG embedded as data URI) */
   &::before {
     content: '';
     display: block;
-    width: 14px;
-    height: 8px;
+    width: nth($toggle-size, 1);
+    height: nth($toggle-size, 2);
     background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M13 1L7 7L1 1" stroke="%23354052" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/%3E%3C/svg%3E');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
+    transition: transform $transition-duration ease;
+    transform-origin: center;
   }
 }

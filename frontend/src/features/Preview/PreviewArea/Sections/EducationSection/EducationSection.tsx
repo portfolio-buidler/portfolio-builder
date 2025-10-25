@@ -1,194 +1,242 @@
 import React from 'react'
-import { EducationSectionView } from './EducationSection.view'
-import type { EducationSectionProps, ParsedEducationContent } from './EducationSection.types'
+import EducationSectionView from './EducationSection.view'
+import type { EducationEntry, EducationSectionProps } from './EducationSection.types'
 
-/**
- * Smart container component for the Education section.
- * Manages edit/view mode state, content parsing, and toggle expand/collapse.
- * 
- * Content Format (raw string):
- * - Line 1: Degree
- * - Line 2: University
- * - Line 3: Years
- * - Line 4: Empty separator
- * - Lines 5+: Bullet points (starting with -, •, *, or 1.)
- * 
- * Edit Mode Behavior:
- * - Triggered by double-clicking on the section body
- * - Toggle button becomes invisible during edit mode
- * - Content becomes editable via single textarea
- * - Textarea auto-grows as content increases
- * - Exit by clicking outside the section
- * 
- * View Mode Behavior:
- * - Parsed content display (degree, university, years, bullets)
- * - Toggle button controls vertical expansion
- * - Click toggle → expands/collapses (does NOT enter edit mode)
- */
+/** Split entries by blank line. */
+function splitEntries(raw: string): string[] {
+  return raw
+    .split(/\r?\n\s*\r?\n/) // two line breaks with optional whitespace
+    .map(s => s.trim())
+    .filter(Boolean)
+}
+
+/** Parse a single entry: first line "Degree – University – (years)"; bullets after. */
+function parseEntry(block: string): EducationEntry {
+  const lines = block.split(/\r?\n/)
+  const first = (lines[0] || '').trim()
+
+  // split on en dash or hyphen surrounded by spaces
+  const dashSep = first.split(/\s+[–-]\s+/)
+  let degree = ''
+  let university = ''
+  let years = ''
+
+  if (dashSep.length >= 2) {
+    degree = dashSep[0]?.trim() ?? ''
+    const rest = dashSep.slice(1).join(' - ').trim()
+    const yearsMatch = rest.match(/\(([^)]+)\)\s*$/)
+    if (yearsMatch) {
+      years = yearsMatch[1].trim()
+      university = rest.replace(/\([^)]+\)\s*$/, '').trim()
+    } else {
+      university = rest
+    }
+  } else {
+    // fallback if user typed without dashes
+    const yearsMatch = first.match(/\(([^)]+)\)\s*$/)
+    if (yearsMatch) {
+      years = yearsMatch[1].trim()
+      degree = first.replace(/\([^)]+\)\s*$/, '').trim()
+    } else {
+      degree = first
+    }
+  }
+
+  const bullets = lines
+    .slice(1)
+    .map(l => l.trim())
+    .filter(l => l.length > 0)
+    .filter(l => /^[•\-*]\s+/.test(l) || /^\d+\.\s+/.test(l))
+    .map(l => l.replace(/^[•\-*]\s+|\d+\.\s+/, '').trim())
+    .map(text => ({ text }))
+
+  return { degree, university, years, bullets }
+}
+
+/** Parse all entries from raw text. */
+function parseAll(raw: string): EducationEntry[] {
+  return splitEntries(raw).map(parseEntry)
+}
+
+const COLLAPSED_MAX_HEIGHT_CSS = 110 // documented in your SCSS; we don't override this
+
 export const EducationSection: React.FC<EducationSectionProps> = ({
   title,
   content,
-  complete,
-  isExpanded,
-  onToggle,
-  isEditing,
+  isEditing: isEditingProp,
+  isExpanded: isExpandedProp,
+  onToggleExpanded,
   onEditStart,
   onEditEnd,
   onContentChange,
 }) => {
   const sectionRef = React.useRef<HTMLElement>(null)
-  const [textareaElement, setTextareaElement] = React.useState<HTMLTextAreaElement | null>(null)
-  const [editableContent, setEditableContent] = React.useState('')
+  const contentRef = React.useRef<HTMLDivElement>(null)
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null)
+
+  // uncontrolled fallbacks
+  const [editingLocal, setEditingLocal] = React.useState<boolean>(!!isEditingProp)
+  const isEditing = typeof isEditingProp === 'boolean' ? isEditingProp : editingLocal
+
+  const [expandedLocal, setExpandedLocal] = React.useState<boolean>(!!isExpandedProp)
+  const isExpanded = typeof isExpandedProp === 'boolean' ? isExpandedProp : expandedLocal
+
+  const [editValue, setEditValue] = React.useState<string>(content ?? '')
+  React.useEffect(() => { if (typeof content === 'string') setEditValue(content) }, [content])
+
+  const [entries, setEntries] = React.useState<EducationEntry[]>(() => parseAll(editValue))
 
   /**
-   * Parse education content from raw string into structured data.
-   * 
-   * Format:
-   * Line 1: Degree
-   * Line 2: University
-   * Line 3: Years
-   * Lines 4+: Bullet points (starting with -, •, *, or 1.)
+   * The last saved expanded height. We set this only when exiting edit mode,
+   * per your requirement, and reuse it for expanding in view mode.
    */
-  const parseContent = React.useCallback((text: string): ParsedEducationContent => {
-    const lines = text.split('\n').map((line) => line.trim())
-    const degree = lines[0] || ''
-    const university = lines[1] || ''
-    const years = lines[2] || ''
+  const [savedExpandedHeight, setSavedExpandedHeight] = React.useState<number>(0)
 
-    // Find bullet points (skip first 3 lines + empty line)
-    const bulletPoints = lines
-      .slice(4)
-      .filter((line) => line.length > 0 && /^[•\-*]|\d+\./.test(line))
-      .map((line) => line.replace(/^[•\-*]\s*|\d+\.\s*/, '').trim())
-
-    return { degree, university, years, bulletPoints }
+  /** Auto-size textarea as you type; also lets the section grow naturally in edit mode. */
+  const autosizeTextarea = React.useCallback(() => {
+    const el = textareaRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
   }, [])
 
-  // Initialize editable content from prop
-  React.useEffect(() => {
-    const contentString = typeof content === 'string' ? content : ''
-    setEditableContent(contentString)
-  }, [content])
+  React.useLayoutEffect(() => {
+    if (isEditing) autosizeTextarea()
+  }, [isEditing, editValue, autosizeTextarea])
+
+  /** Double-click enters edit mode. */
+  const handleEnterEdit = React.useCallback(() => {
+    if (typeof isEditingProp !== 'boolean') setEditingLocal(true)
+    onEditStart?.()
+  }, [isEditingProp, onEditStart])
 
   /**
-   * Auto-resize textarea to fit content.
-   * Sets height to 'auto' first to get correct scrollHeight, then applies it.
+   * Clicking outside exits edit mode and saves:
+   *  - raw content
+   *  - parsed entries
+   *  - measured expanded height for future toggles (from the edit-mode layout)
    */
-  const adjustTextareaHeight = React.useCallback(() => {
-    if (textareaElement) {
-      textareaElement.style.height = 'auto'
-      textareaElement.style.height = `${textareaElement.scrollHeight}px`
-    }
-  }, [textareaElement])
-
-  // Adjust textarea height when entering edit mode or content changes
-  React.useEffect(() => {
-    if (isEditing && textareaElement) {
-      adjustTextareaHeight()
-    }
-  }, [isEditing, textareaElement, adjustTextareaHeight])
-
-  // Handle click outside to exit edit mode
   React.useEffect(() => {
     if (!isEditing) return
+    const onDown = (ev: MouseEvent) => {
+      const root = sectionRef.current
+      if (!root) return
+      if (ev.target instanceof Node && root.contains(ev.target)) return
 
-    const handleClickOutside = (event: MouseEvent) => {
-      if (sectionRef.current && !sectionRef.current.contains(event.target as Node)) {
-        onEditEnd?.()
-      }
+      // finalize save on outside click
+      const parsed = parseAll(editValue)
+      setEntries(parsed)
+
+      // capture the height of the content box (textarea height in edit mode)
+      const el = contentRef.current
+      const height = el ? el.scrollHeight : 0
+      setSavedExpandedHeight(Math.max(height, COLLAPSED_MAX_HEIGHT_CSS))
+
+      if (typeof isEditingProp !== 'boolean') setEditingLocal(false)
+      onEditEnd?.({ content: editValue, entries: parsed, savedExpandedHeight: height })
     }
 
-    // Add listener with a small delay to avoid immediate trigger
-    const timeoutId = setTimeout(() => {
-      document.addEventListener('mousedown', handleClickOutside)
-    }, 100)
+    // small delay to avoid immediate capture from the double-click release
+    const t = setTimeout(() => {
+      document.addEventListener('mousedown', onDown, true)
+    }, 80)
 
     return () => {
-      clearTimeout(timeoutId)
-      document.removeEventListener('mousedown', handleClickOutside)
+      clearTimeout(t)
+      document.removeEventListener('mousedown', onDown, true)
     }
-  }, [isEditing, onEditEnd])
+  }, [isEditing, editValue, isEditingProp, onEditEnd])
 
   /**
-   * Handle textarea content changes
+   * If the user expands without editing first, ensure we still capture a usable
+   * height from the rendered content so the section can grow beyond the
+   * collapsed max-height.
+   * 
+   * FIXED: We temporarily remove max-height constraint to get true scrollHeight.
    */
-  const handleContentChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newContent = event.target.value
-    setEditableContent(newContent)
-    onContentChange?.(newContent)
-    setTimeout(adjustTextareaHeight, 0)
-  }
+  React.useEffect(() => {
+    if (isEditing) return
+    if (!isExpanded) return
+    const el = contentRef.current
+    if (!el) return
+    
+    // Temporarily remove max-height constraint to measure true height
+    const originalMaxHeight = el.style.maxHeight
+    const originalOverflow = el.style.overflow
+    el.style.maxHeight = 'none'
+    el.style.overflow = 'visible'
+    
+    // Force reflow to ensure styles are applied
+    el.offsetHeight
+    
+    const measured = el.scrollHeight
+    
+    // Restore original styles
+    el.style.maxHeight = originalMaxHeight
+    el.style.overflow = originalOverflow
+    
+    if (measured <= 0) return
+    const nextHeight = Math.max(measured, COLLAPSED_MAX_HEIGHT_CSS)
+    if (nextHeight === savedExpandedHeight) return
+    setSavedExpandedHeight(nextHeight)
+  }, [isEditing, isExpanded, savedExpandedHeight])
 
-  /**
-   * Handle section double-click to enter edit mode
-   */
-  const handleSectionClick = () => {
-    if (!isEditing) {
-      onEditStart?.()
-    }
-  }
+  /** Toggle expand/collapse in view mode using saved height from the last edit session. */
+  const handleToggle = React.useCallback(() => {
+    if (isEditing) return
+    const next = !isExpanded
+    if (typeof isExpandedProp !== 'boolean') setExpandedLocal(next)
+    onToggleExpanded?.(next)
+  }, [isEditing, isExpanded, isExpandedProp, onToggleExpanded])
 
-  /**
-   * Handle Enter key in textarea - auto-add bullet if on a bullet line
-   */
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      const textarea = event.currentTarget
-      const cursorPosition = textarea.selectionStart
-      const textBeforeCursor = editableContent.substring(0, cursorPosition)
-      const currentLineStart = textBeforeCursor.lastIndexOf('\n') + 1
-      const currentLine = textBeforeCursor.substring(currentLineStart)
+  /** Editing input handlers */
+  const onEditChange = React.useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const v = e.target.value
+    setEditValue(v)
+    onContentChange?.(v)
+    // nudge autosize
+    setTimeout(autosizeTextarea, 0)
+  }, [onContentChange, autosizeTextarea])
 
-      // Check if current line starts with a bullet
-      const bulletMatch = currentLine.match(/^(\s*)([-•*]|\d+\.)\s/)
-      if (bulletMatch) {
-        event.preventDefault()
-        const indent = bulletMatch[1]
-        const bullet = bulletMatch[2]
-
-        // Auto-add bullet on new line
-        const newContent =
-          editableContent.substring(0, cursorPosition) +
-          '\n' +
-          indent +
-          bullet +
-          ' ' +
-          editableContent.substring(cursorPosition)
-
-        setEditableContent(newContent)
-        onContentChange?.(newContent)
-
-        // Move cursor after new bullet
-        setTimeout(() => {
-          const newCursorPos = cursorPosition + indent.length + bullet.length + 2
-          textarea.setSelectionRange(newCursorPos, newCursorPos)
-          adjustTextareaHeight()
-        }, 0)
-      }
-    }
-  }
-
-  /**
-   * Callback ref for textarea - stores element and triggers height adjustment
-   */
-  const handleTextareaRef = React.useCallback((textarea: HTMLTextAreaElement | null) => {
-    setTextareaElement(textarea)
-  }, [])
+  /** Auto-bullet continuation */
+  const onEditKeyDown = React.useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key !== 'Enter' || e.shiftKey) return
+    const ta = e.currentTarget
+    const cursor = ta.selectionStart
+    const before = editValue.slice(0, cursor)
+    const lineStart = before.lastIndexOf('\n') + 1
+    const line = before.slice(lineStart)
+    const m = line.match(/^(\s*)([-•*]|\d+\.)\s/)
+    if (!m) return
+    e.preventDefault()
+    const indent = m[1]
+    const bullet = m[2]
+    const insertion = `\n${indent}${bullet} `
+    const next = editValue.slice(0, cursor) + insertion + editValue.slice(cursor)
+    setEditValue(next)
+    onContentChange?.(next)
+    setTimeout(() => {
+      const pos = cursor + insertion.length
+      ta.setSelectionRange(pos, pos)
+      autosizeTextarea()
+    }, 0)
+  }, [editValue, onContentChange, autosizeTextarea])
 
   return (
     <EducationSectionView
       ref={sectionRef}
       title={title}
-      content={editableContent}
-      parsedContent={parseContent(editableContent)}
-      complete={complete}
-      isExpanded={isExpanded}
-      onToggle={onToggle}
       isEditing={isEditing}
-      onSectionClick={handleSectionClick}
-      onContentChange={handleContentChange}
-      onTextareaRef={handleTextareaRef}
-      onKeyDown={handleKeyDown}
+      isExpanded={isExpanded}
+      savedExpandedHeight={savedExpandedHeight}
+      onEnterEdit={handleEnterEdit}
+      onToggle={handleToggle}
+      editValue={editValue}
+      onEditChange={onEditChange}
+      onEditKeyDown={onEditKeyDown}
+      contentRef={contentRef}
+      textareaRef={textareaRef}
+      entries={entries}
     />
   )
 }
