@@ -17,34 +17,40 @@
   max-width: min(868px, 100%); /* Never exceed parent width */
   height: 100%;
   padding-right: 1rem;
+  padding-left: 2.5rem; /* Add left padding for back button positioning */
   margin-inline: auto;
-  border: #fff 1px solid;
+  // border: #fff 1px solid;
   box-sizing: border-box; /* Include border in width calculation */
+  position: relative; /* For absolute positioning of back button */
 
   /* Header containing the back button and instructional text */
   &__header {
     display: flex;
-    align-items: center;
+    align-items: center; /* Center align items vertically */
     gap: 1rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
     flex-shrink: 0;
+    position: relative; /* For back button positioning */
   }
 
   &__back {
-    /* Circle button for navigating back */
+    /* Circle button for navigating back - positioned outside left border */
+    position: absolute;
+    left: -3rem; /* Move further left, outside the border */
+    top: 5px; /* Align with top of header */
     width: 2rem;
     height: 2rem;
     min-width: 2rem;
     border-radius: 50%;
     border: none;
     padding: 0;
-    font-size: 1.25rem;
+    font-size: 2rem;
     line-height: 1;
     font-weight: var(--font-weight-bold);
     color: var(--title-color);
-    background-color: var(--glass-bg-accent);
-    backdrop-filter: blur(var(--blur-md, 12px));
-    box-shadow: var(--shadow-glass-inset);
+    background-color: transparent;
+    backdrop-filter: none;
+    box-shadow: none;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -52,26 +58,26 @@
     transition: background-color 200ms ease, color 200ms ease;
 
     &:hover {
-      background-color: var(--glass-bg-accent-active);
+      background-color: transparent;
     }
 
     &:focus-visible {
       outline: none;
-      box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.4);
+      box-shadow: none;
     }
   }
 
   &__intro {
     display: flex;
     flex-direction: row;
-    align-items: flex-start;
-    gap: 2rem;
+    align-items: center;
+    gap: 1rem;
     text-align: left;
   }
 
   &__title {
     width: 163px;
-    height: 28px;
+    height: 38px;
     /* angle: 0deg; Not a real CSS property */
     opacity: 1;
     font-family: var(--font-family-base, 'Poppins', sans-serif);
