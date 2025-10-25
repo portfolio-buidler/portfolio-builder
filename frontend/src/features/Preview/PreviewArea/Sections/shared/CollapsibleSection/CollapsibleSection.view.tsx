@@ -1,20 +1,40 @@
+/**
+ * CollapsibleSection.view.tsx
+ * 
+ * Pure presentational component for collapsible sections.
+ * Follows Logic-View-Style separation pattern.
+ * 
+ * Architecture:
+ * - NO business logic, NO state, NO effects
+ * - Only receives data via props
+ * - Pure JSX rendering with CSS classes
+ * - All styling in CollapsibleSection.styles.scss
+ * 
+ * Layout:
+ * - Title with help icon
+ * - Collapsible content area
+ * - Toggle button (chevron that rotates)
+ */
+
 import React from 'react'
-import type { EducationSectionViewProps } from './EducationSection.types'
-import './EducationSection.styles.scss'
-import questionMarkIcon from '../../../../../assets/icons/PreviewPage/question-mark.svg'
+import type { CollapsibleSectionViewProps } from './CollapsibleSection.types'
+import './CollapsibleSection.styles.scss'
+import questionMarkIcon from '../../../../../../assets/icons/PreviewPage/question-mark.svg'
 
 /**
- * This view component respects your SCSS completely.
+ * This view component respects SCSS completely.
  * We only set inline maxHeight when:
  *   - NOT editing
  *   - Expanded
  * to animate toward the saved numeric height.
  * Collapsed state is 100% CSS-driven (max-height: 110px).
  */
-export const EducationSectionView = React.forwardRef<HTMLElement, EducationSectionViewProps>(
+export const CollapsibleSectionView = React.forwardRef<HTMLElement, CollapsibleSectionViewProps>(
   (
     {
       title,
+      className,
+      fieldLabels,
       isEditing,
       isExpanded,
       savedExpandedHeight,
@@ -41,17 +61,21 @@ export const EducationSectionView = React.forwardRef<HTMLElement, EducationSecti
       return {}
     }, [isEditing, isExpanded, savedExpandedHeight])
 
+    // Generate placeholder text based on field labels
+    const placeholderText = `Line 1: ${fieldLabels.field1} – ${fieldLabels.field2} – (${fieldLabels.years})\nLines 2+: - • * or 1.\n\nSeparate entries with a blank line.`
+    const emptyPlaceholder = `Double-click to add ${title.toLowerCase()}. First line: ${fieldLabels.field1} – ${fieldLabels.field2} – (${fieldLabels.years}). Then bullets. Separate entries with a blank line.`
+
     return (
       <section
         ref={ref}
-        className="preview-section preview-section--education education-section"
+        className={`preview-section collapsible-section ${className}`}
         data-expanded={isExpanded}
         data-editing={isEditing}
         onDoubleClick={isEditing ? undefined : onEnterEdit}
-        aria-label="Education section"
+        aria-label={`${title} section`}
       >
         <div className="preview-section__title-container">
-          <h3 className="preview-section__title">{title ?? 'Education'}</h3>
+          <h3 className="preview-section__title">{title}</h3>
           <img
             src={questionMarkIcon}
             alt="Help"
@@ -61,25 +85,25 @@ export const EducationSectionView = React.forwardRef<HTMLElement, EducationSecti
 
         <div
           ref={contentRef}
-          className="education__content"
+          className="collapsible-section__content"
           style={contentStyle}
         >
           {isEditing ? (
             <textarea
               ref={textareaRef}
-              className="education__textarea"
+              className="collapsible-section__textarea"
               value={editValue}
               onChange={onEditChange}
               onKeyDown={onEditKeyDown}
-              placeholder={`Line 1: Degree – University – (years)\nLines 2+: - • * or 1.\n\nSeparate entries with a blank line.`}
+              placeholder={placeholderText}
               autoFocus
               onClick={(e) => e.stopPropagation()}
             />
           ) : editValue.trim() ? (
-             <div className="education__free-text">{editValue}</div>
+            <div className="collapsible-section__free-text">{editValue}</div>
           ) : (
-            <p className="education__placeholder">
-              Double-click to add your education. First line: Degree – University – (years). Then bullets. Separate entries with a blank line.
+            <p className="collapsible-section__placeholder">
+              {emptyPlaceholder}
             </p>
           )}
         </div>
@@ -88,7 +112,7 @@ export const EducationSectionView = React.forwardRef<HTMLElement, EducationSecti
           type="button"
           className="preview-section__toggle"
           onClick={(e) => { e.stopPropagation(); if (!isEditing) onToggle() }}
-          aria-label={isExpanded ? 'Collapse education' : 'Expand education'}
+          aria-label={isExpanded ? `Collapse ${title.toLowerCase()}` : `Expand ${title.toLowerCase()}`}
           aria-expanded={isExpanded}
         />
       </section>
@@ -96,5 +120,5 @@ export const EducationSectionView = React.forwardRef<HTMLElement, EducationSecti
   }
 )
 
-EducationSectionView.displayName = 'EducationSectionView'
-export default EducationSectionView
+CollapsibleSectionView.displayName = 'CollapsibleSectionView'
+export default CollapsibleSectionView

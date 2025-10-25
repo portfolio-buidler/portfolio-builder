@@ -1,2 +1,7 @@
-export * from './ExperienceSection.view'
-export * from './ExperienceSection.types'
+/**
+ * ExperienceSection - Collapsible experience section component
+ */
+
+export { ExperienceSection, default } from './ExperienceSection'
+export type { ExperienceSectionProps } from './ExperienceSection'
+

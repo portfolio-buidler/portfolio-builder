@@ -25,6 +25,7 @@ import {
   SkillsSection,
   CommunicationSection,
   ExperienceSection,
+  ProjectsSection,
 } from './Sections'
 
 export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
@@ -55,6 +56,7 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
   const skills = sections.find((s) => s.id === 'skills')
   const communication = sections.find((s) => s.id === 'communication')
   const experience = sections.find((s) => s.id === 'experience')
+  const projects = sections.find((s) => s.id === 'projects')
 
   /* ========================================================================
      SCROLL INDICATOR LOGIC
@@ -202,8 +204,17 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
         {experience && (
           <ExperienceSection
             title={experience.title}
-            content={experience.content}
+            content={typeof experience.content === 'string' ? experience.content : ''}
             complete={experience.complete}
+          />
+        )}
+
+        {/* Projects Section */}
+        {projects && (
+          <ProjectsSection
+            title={projects.title}
+            content={typeof projects.content === 'string' ? projects.content : ''}
+            complete={projects.complete}
           />
         )}
       </div>

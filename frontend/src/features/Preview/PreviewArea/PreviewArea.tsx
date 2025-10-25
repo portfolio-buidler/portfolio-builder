@@ -100,6 +100,13 @@ const PreviewArea: React.FC = () => {
       required: false,
       complete: true,
     },
+    {
+      id: 'projects',
+      title: 'Projects',
+      content: '',
+      required: false,
+      complete: false,
+    },
   ]
 
   /* ========================================================================
