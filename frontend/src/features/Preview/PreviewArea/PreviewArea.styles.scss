@@ -17,7 +17,7 @@
   max-width: min(868px, 100%); /* Never exceed parent width */
   height: 100%;
   padding-right: 1rem;
-  padding-left: 2.5rem; /* Add left padding for back button positioning */
+  padding-left: 0; /* Remove left padding to center content */
   margin-inline: auto;
   // border: #fff 1px solid;
   box-sizing: border-box; /* Include border in width calculation */
