@@ -1,21 +1,3 @@
-/**
- * PreviewArea.view.tsx
- * 
- * Presentational component for the CV preview area.
- * Follows Logic-View-Style separation pattern.
- * 
- * Architecture:
- * - Pure view layer - no business logic
- * - Receives all data and callbacks as props
- * - Renders sections in specified layout
- * - Manages scroll indicator positioning
- * 
- * Layout:
- * - Header: Back button + title + instructions
- * - Content: Scrollable area with sections
- * - Footer: Undo/Redo + Next button
- */
-
 import React from 'react'
 import type { PreviewAreaViewProps } from './PreviewArea.types'
 import './PreviewArea.styles.scss'
@@ -59,66 +41,109 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
   const projects = sections.find((s) => s.id === 'projects')
 
   /* ========================================================================
-     SCROLL INDICATOR LOGIC
-     Updates CSS custom properties to position the scroll indicator line
-     between the About section (top anchor) and Experience section (bottom)
-     ======================================================================== */
+    SCROLL INDICATOR LOGIC
+    Updates CSS custom properties to position the scroll indicator line
+    between the About section (top anchor) and Projects section (bottom)
+    (fallback to Experience if Projects is missing)
+    
+    Note: The actual scrolling happens on the parent preview__body container,
+    not on preview-area__content. We need to access the parent scroll.
+    ======================================================================== */
 
   React.useEffect(() => {
     const contentElement = contentRef.current
     if (!contentElement) return
 
+    // The scroll happens on the parent container (preview__body)
+    const scrollContainer = contentElement.closest('.preview__body') as HTMLElement | null
+    if (!scrollContainer) return
+
     const getSectionEl = (sectionClass: string): HTMLElement | null =>
       contentElement.querySelector(`.preview-section--${sectionClass}`) as HTMLElement | null
 
     const handleScroll = () => {
-      const scrollTop = contentElement.scrollTop
-      const clientHeight = contentElement.clientHeight
-      const lineHeight = 296
-      const maxTravel = clientHeight - lineHeight
-
       const aboutEl = getSectionEl('about')
+      // Prefer projects as the bottom anchor; fall back to experience if needed
+      const projectsEl = getSectionEl('projects')
       const experienceEl = getSectionEl('experience')
+      const bottomAnchorEl = projectsEl || experienceEl
 
-      // Fallback to center if sections not found
-      if (!aboutEl || !experienceEl) {
-        contentElement.style.setProperty('--scroll-indicator-top', '50%')
-        contentElement.style.setProperty('--scroll-indicator-transform', 'translateY(-50%)')
+      // Hide indicator if sections not found
+      if (!aboutEl || !bottomAnchorEl) {
+        scrollContainer.style.setProperty('--scroll-indicator-opacity', '0')
         return
       }
 
-      const aboutTop = aboutEl.offsetTop
-      const experienceBottom = experienceEl.offsetTop + experienceEl.offsetHeight
-      const scrollStart = aboutTop
-      const scrollEnd = experienceBottom - clientHeight
-      const scrollableRange = scrollEnd - scrollStart
+      const lineHeight = 296
+      const containerRect = scrollContainer.getBoundingClientRect()
+      const aboutRect = aboutEl.getBoundingClientRect()
+      const bottomAnchorRect = bottomAnchorEl.getBoundingClientRect()
 
-      // Center the line if not enough scrollable content
-      if (scrollableRange <= 0) {
-        contentElement.style.setProperty('--scroll-indicator-top', '50%')
-        contentElement.style.setProperty('--scroll-indicator-transform', 'translateY(-50%)')
-        return
-      }
+      // Calculate when the About section reaches the top of the viewport
+      const aboutTopInView = aboutRect.top
+      // Calculate when the bottom anchor's bottom reaches the bottom of viewport
+      const bottomAnchorBottomInView = bottomAnchorRect.bottom
 
-      // Calculate scroll progress (0 = at start, 1 = at end)
+      // Determine the scrollable range in viewport coordinates
+      // Start: when About section top aligns with container top
+      // End: when bottom anchor bottom aligns with container bottom
+      const scrollStart = containerRect.top
+      const scrollEnd = containerRect.bottom
+      const viewportRange = scrollEnd - scrollStart - lineHeight
+
+      // Calculate scroll progress based on the About section's position
+      // When About is at container top: progress = 0
+      // When bottom anchor bottom is at container bottom: progress = 1
       let scrollProgress = 0
-      if (scrollTop <= scrollStart) {
+
+      if (aboutTopInView >= scrollStart) {
+        // About section hasn't reached the top yet
         scrollProgress = 0
-      } else if (scrollTop >= scrollEnd) {
+      } else if (bottomAnchorBottomInView <= scrollEnd) {
+        // Bottom anchor has passed the bottom
         scrollProgress = 1
       } else {
-        scrollProgress = (scrollTop - scrollStart) / scrollableRange
+        // Calculate progress based on how far we've scrolled between start and end
+        const totalScrollableContent = bottomAnchorBottomInView - aboutTopInView - lineHeight
+        const scrolled = scrollStart - aboutTopInView
+        scrollProgress = Math.max(0, Math.min(1, scrolled / totalScrollableContent))
       }
 
-      const topPosition = scrollProgress * maxTravel
+      // Calculate the indicator position in the viewport
+      // It should move from containerRect.top to containerRect.bottom - lineHeight
+      const indicatorTop = scrollStart + (scrollProgress * viewportRange)
 
-      contentElement.style.setProperty('--scroll-indicator-top', `${topPosition}px`)
-      contentElement.style.setProperty('--scroll-indicator-transform', 'translateY(0)')
+      // Show indicator only when we're in the scrollable range
+      const shouldShow = aboutTopInView < scrollStart && bottomAnchorBottomInView > scrollEnd
+      
+      scrollContainer.style.setProperty('--scroll-indicator-top', `${indicatorTop}px`)
+      scrollContainer.style.setProperty('--scroll-indicator-opacity', shouldShow ? '1' : '0')
     }
 
-    handleScroll()
-    contentElement.addEventListener('scroll', handleScroll)
-    return () => contentElement.removeEventListener('scroll', handleScroll)
+    // Initial calculation with delay to ensure DOM is ready
+    const initialTimeout = setTimeout(handleScroll, 100)
+    
+    // Listen to scroll events on the parent container
+    scrollContainer.addEventListener('scroll', handleScroll)
+    
+    // Recalculate on window resize
+    window.addEventListener('resize', handleScroll)
+    
+    // Observe DOM mutations to recalculate when content changes
+    const observer = new MutationObserver(handleScroll)
+    observer.observe(contentElement, { 
+      childList: true, 
+      subtree: true, 
+      attributes: true,
+      attributeFilter: ['data-editing', 'data-complete']
+    })
+    
+    return () => {
+      clearTimeout(initialTimeout)
+      scrollContainer.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', handleScroll)
+      observer.disconnect()
+    }
   }, [sections])
 
   /* ========================================================================

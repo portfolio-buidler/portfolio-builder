@@ -1,34 +1,8 @@
-/**
- * CollapsibleSection.view.tsx
- * 
- * Pure presentational component for collapsible sections.
- * Follows Logic-View-Style separation pattern.
- * 
- * Architecture:
- * - NO business logic, NO state, NO effects
- * - Only receives data via props
- * - Pure JSX rendering with CSS classes
- * - All styling in CollapsibleSection.styles.scss
- * 
- * Layout:
- * - Title with help icon
- * - Collapsible content area
- * - Toggle button (chevron that rotates)
- */
-
 import React from 'react'
 import type { CollapsibleSectionViewProps } from './CollapsibleSection.types'
 import './CollapsibleSection.styles.scss'
 import questionMarkIcon from '../../../../../../assets/icons/PreviewPage/question-mark.svg'
 
-/**
- * This view component respects SCSS completely.
- * We only set inline maxHeight when:
- *   - NOT editing
- *   - Expanded
- * to animate toward the saved numeric height.
- * Collapsed state is 100% CSS-driven (max-height: 110px).
- */
 export const CollapsibleSectionView = React.forwardRef<HTMLElement, CollapsibleSectionViewProps>(
   (
     {
