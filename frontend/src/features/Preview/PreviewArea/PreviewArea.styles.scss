@@ -454,11 +454,11 @@
   &__label {
     /* Label specific styling as per requirements */
     width: auto;
-    height: 22px;
+    height: 12px;
     font-family: Poppins, sans-serif;
     font-weight: 500;
     font-size: 14px;
-    line-height: 22px;
+    line-height: 12px;
     letter-spacing: 0%;
     color: var(--Text-black, #354052);
     opacity: 1;
@@ -494,12 +494,12 @@
   &__label {
     /* Label specific styling as per requirements */
     width: auto;
-    height: 22px;
+    height: 12px;
     font-family: Poppins, sans-serif;
     white-space: nowrap;
     font-weight: 500;
     font-size: 14px;
-    line-height: 22px;
+    line-height: 12px;
     letter-spacing: 0%;
     color: var(--Text-black, #354052);
     opacity: 1;
@@ -527,13 +527,13 @@
   justify-content: center;
   gap: 6px;
   height: 22px;
-  padding: 6px 12px;
-  border-radius: 10px;
+  padding: 0px 8px;
+  border-radius: 6px;
   background: #9B4D4E33;
   box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
   font-family: Poppins, sans-serif;
   font-weight: 400;
-  font-size: 12px;
+  font-size: 10px;  
   line-height: 1;
   color: var(--title-color);
   white-space: nowrap;
@@ -562,24 +562,18 @@
     }
   }
 
-  /* Selected state for delete mode */
-  &--selected {
-    outline: 2px solid var(--brand-500);
-    outline-offset: 2px;
-  }
-
   /* Remove button (appears on double-click) */
   &__remove {
     position: absolute;
-    top: -6px;
-    right: -6px;
-    width: 16px;
-    height: 16px;
+    top: -4px;
+    right: -4px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    background: var(--brand-500);
+    background: var(--glass-bg-accent-focus);
     color: #fff;
     border: none;
-    font-size: 14px;
+    font-size: 10px;
     line-height: 1;
     display: flex;
     align-items: center;
@@ -590,11 +584,11 @@
     font-weight: 600;
 
     &:hover {
-      background: var(--brand-600);
+      background: var(--glass-bg-accent-hover);
     }
 
     &:active {
-      background: var(--brand-700);
+      background: var(--glass-bg-accent-active);
     }
   }
 }
@@ -610,7 +604,7 @@
   align-items: center;
   gap: 6px;
   height: 22px;
-  padding: 6px 12px;
+  padding: 0px 8px;
   border-radius: 10px;
   background: #9B4D4E33;
   box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
@@ -628,24 +622,18 @@
     background: rgba(155, 77, 78, 0.25);
   }
 
-  /* Selected state for delete mode */
-  &--selected {
-    outline: 2px solid var(--brand-500);
-    outline-offset: 2px;
-  }
-
   /* Remove button (appears on double-click) */
   &__remove {
     position: absolute;
     top: -6px;
     right: -6px;
-    width: 16px;
-    height: 16px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
-    background: var(--brand-500);
+    background: var(--glass-bg-accent-focus);
     color: #fff;
     border: none;
-    font-size: 14px;
+    font-size: 12px;
     line-height: 1;
     display: flex;
     align-items: center;
@@ -656,11 +644,11 @@
     font-weight: 600;
 
     &:hover {
-      background: var(--brand-600);
+      background: var(--glass-bg-accent-hover);
     }
 
     &:active {
-      background: var(--brand-700);
+      background: var(--glass-bg-accent-active);
     }
   }
 }
