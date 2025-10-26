@@ -161,14 +161,14 @@ const PreviewArea: React.FC = () => {
   const handleAddLanguage = React.useCallback(() => {
     setSkillsData((prev) => ({
       ...prev,
-      languages: [...prev.languages, 'New Language'],
+      languages: [...prev.languages, ''],
     }))
   }, [])
 
   const handleAddTechnology = React.useCallback(() => {
     setSkillsData((prev) => ({
       ...prev,
-      technologies: [...prev.technologies, 'New Technology'],
+      technologies: [...prev.technologies, ''],
     }))
   }, [])
 
@@ -186,6 +186,20 @@ const PreviewArea: React.FC = () => {
     }))
   }, [])
 
+  const handleChangeLanguage = React.useCallback((index: number, value: string) => {
+    setSkillsData((prev) => ({
+      ...prev,
+      languages: prev.languages.map((lang, i) => (i === index ? value : lang)),
+    }))
+  }, [])
+
+  const handleChangeTechnology = React.useCallback((index: number, value: string) => {
+    setSkillsData((prev) => ({
+      ...prev,
+      technologies: prev.technologies.map((tech, i) => (i === index ? value : tech)),
+    }))
+  }, [])
+
 
   /* ========================================================================
      COMMUNICATION SECTION HANDLERS
@@ -194,21 +208,21 @@ const PreviewArea: React.FC = () => {
   const handleAddMobile = React.useCallback(() => {
     setCommunicationData((prev) => ({
       ...prev,
-      mobile: '+972 ',
+      mobile: '',
     }))
   }, [])
 
   const handleAddEmail = React.useCallback(() => {
     setCommunicationData((prev) => ({
       ...prev,
-      email: 'email@example.com',
+      email: '',
     }))
   }, [])
 
   const handleAddLink = React.useCallback(() => {
     setCommunicationData((prev) => ({
       ...prev,
-      links: [...prev.links, 'New Link'],
+      links: [...prev.links, ''],
     }))
   }, [])
 
@@ -230,6 +244,27 @@ const PreviewArea: React.FC = () => {
     setCommunicationData((prev) => ({
       ...prev,
       links: prev.links.filter((_, i) => i !== index),
+    }))
+  }, [])
+
+  const handleChangeMobile = React.useCallback((value: string) => {
+    setCommunicationData((prev) => ({
+      ...prev,
+      mobile: value,
+    }))
+  }, [])
+
+  const handleChangeEmail = React.useCallback((value: string) => {
+    setCommunicationData((prev) => ({
+      ...prev,
+      email: value,
+    }))
+  }, [])
+
+  const handleChangeLink = React.useCallback((index: number, value: string) => {
+    setCommunicationData((prev) => ({
+      ...prev,
+      links: prev.links.map((link, i) => (i === index ? value : link)),
     }))
   }, [])
 
@@ -298,6 +333,8 @@ const PreviewArea: React.FC = () => {
       onAddTechnology={handleAddTechnology}
       onRemoveLanguage={handleRemoveLanguage}
       onRemoveTechnology={handleRemoveTechnology}
+      onChangeLanguage={handleChangeLanguage}
+      onChangeTechnology={handleChangeTechnology}
       isSkillsComplete={isSkillsComplete}
       communicationData={communicationData}
       onAddMobile={handleAddMobile}
@@ -306,6 +343,9 @@ const PreviewArea: React.FC = () => {
       onRemoveMobile={handleRemoveMobile}
       onRemoveEmail={handleRemoveEmail}
       onRemoveLink={handleRemoveLink}
+      onChangeMobile={handleChangeMobile}
+      onChangeEmail={handleChangeEmail}
+      onChangeLink={handleChangeLink}
       isCommunicationComplete={isCommunicationComplete}
     />
   )

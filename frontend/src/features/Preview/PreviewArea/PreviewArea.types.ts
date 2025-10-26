@@ -63,12 +63,14 @@ export interface PreviewAreaViewProps {
   onEditSectionEnd: () => void
   onSectionContentChange: (sectionId: string, content: string) => void
 
-    // Skills section specific
+  // Skills section specific
   skillsData: SkillsData
   onAddLanguage: () => void
   onAddTechnology: () => void
   onRemoveLanguage: (index: number) => void
   onRemoveTechnology: (index: number) => void
+  onChangeLanguage: (index: number, value: string) => void
+  onChangeTechnology: (index: number, value: string) => void
   isSkillsComplete: boolean
   
   // Communication section specific
@@ -79,5 +81,8 @@ export interface PreviewAreaViewProps {
   onRemoveMobile: () => void
   onRemoveEmail: () => void
   onRemoveLink: (index: number) => void
+  onChangeMobile: (value: string) => void
+  onChangeEmail: (value: string) => void
+  onChangeLink: (index: number, value: string) => void
   isCommunicationComplete: boolean
 }

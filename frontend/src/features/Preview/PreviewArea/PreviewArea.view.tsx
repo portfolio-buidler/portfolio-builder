@@ -30,6 +30,8 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
   onAddTechnology,
   onRemoveLanguage,
   onRemoveTechnology,
+  onChangeLanguage,
+  onChangeTechnology,
   isSkillsComplete,
   communicationData,
   onAddMobile,
@@ -38,6 +40,9 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
   onRemoveMobile,
   onRemoveEmail,
   onRemoveLink,
+  onChangeMobile,
+  onChangeEmail,
+  onChangeLink,
   isCommunicationComplete,
 }) => {
   const contentRef = React.useRef<HTMLDivElement>(null)
@@ -231,6 +236,8 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
               onAddTechnology={onAddTechnology}
               onRemoveLanguage={onRemoveLanguage}
               onRemoveTechnology={onRemoveTechnology}
+              onChangeLanguage={onChangeLanguage}
+              onChangeTechnology={onChangeTechnology}
             />
           )}
           {communication && (
@@ -246,6 +253,9 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
               onRemoveMobile={onRemoveMobile}
               onRemoveEmail={onRemoveEmail}
               onRemoveLink={onRemoveLink}
+              onChangeMobile={onChangeMobile}
+              onChangeEmail={onChangeEmail}
+              onChangeLink={onChangeLink}
             />
           )}
         </div>
