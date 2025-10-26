@@ -142,7 +142,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 20px;
+    gap: var(--space-5);
     width: 326px;
     height: 60px;
     border-radius: 15px;
@@ -157,10 +157,10 @@
     justify-content: center;
     width: 90px;
     height: 30px;
-    gap: 12px;
+    gap: var(--space-3);
     border-radius: 15px;
   background: var(--glass-bg-accent);
-    box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
+    box-shadow: var(--shadow-glass-inset);
     opacity: 1;
   }
 
@@ -310,7 +310,7 @@
   background-color: var(--glass-bg-accent);
   border: 1px solid var(--border-overlay-30);
   /* Updated shadows per spec: two inset shadows; keep blur */
-  box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
+  box-shadow: var(--shadow-glass-inset);
   backdrop-filter: blur(var(--blur-md, 12px));
   display: flex;
   flex-direction: column;
@@ -443,8 +443,8 @@
   &__row {
     display: flex;
     align-items: baseline;
-    gap: 5px;
-    margin-bottom: 12px;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
 
     &:last-child {
       margin-bottom: 0;
@@ -469,7 +469,7 @@
   &__items {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
+    gap: var(--space-2);
     flex: 1;
   }
 }
@@ -482,7 +482,7 @@
   &__row {
     display: flex;
     align-items: baseline;
-    gap: 5px;
+    gap: var(--space-2);
     flex-wrap: wrap;
     margin-block: 0.35rem;
 
@@ -510,7 +510,7 @@
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 5px;
+    gap: var(--space-2);
     min-width: 10ch;
   }
 }
@@ -529,8 +529,8 @@
   height: 22px;
   padding: 0px 8px;
   border-radius: 6px;
-  background: #9B4D4E33;
-  box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
+  background: var(--glass-bg-accent);
+  box-shadow: var(--shadow-glass-inset);
   font-family: Poppins, sans-serif;
   font-weight: 400;
   font-size: 10px;  
@@ -543,7 +543,7 @@
   border: none;
 
   &:hover {
-    background: rgba(155, 77, 78, 0.25);
+    background: var(--glass-bg-accent-hover);
   }
 
   /* Add button variant */
@@ -609,8 +609,8 @@
   height: 22px;
   padding: 0px 8px;
   border-radius: 10px;
-  background: #9B4D4E33;
-  box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
+  background: var(--glass-bg-accent);
+  box-shadow: var(--shadow-glass-inset);
   font-family: Poppins, sans-serif;
   font-weight: 400;
   font-size: 12px;
@@ -622,7 +622,7 @@
   transition: background 150ms ease;
 
   &:hover {
-    background: rgba(155, 77, 78, 0.25);
+    background: var(--glass-bg-accent-hover);
   }
 
   /* Remove button (appears on double-click) */

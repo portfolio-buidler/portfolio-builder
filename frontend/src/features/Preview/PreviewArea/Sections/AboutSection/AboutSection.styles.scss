@@ -8,7 +8,7 @@
   min-height: 156px;
   border-radius: 15px;
   background: var(--glass-bg-accent);
-  box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
+  box-shadow: var(--shadow-glass-inset);
   padding: 6px;
   position: relative;
   cursor: pointer;

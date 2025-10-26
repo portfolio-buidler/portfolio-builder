@@ -1,7 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PreviewAreaView } from './PreviewArea.view'
-import type { PreviewSection } from './PreviewArea.types'
+import type { PreviewSection, SkillsData, CommunicationData } from './PreviewArea.types'
 
 const PreviewArea: React.FC = () => {
   const navigate = useNavigate()
