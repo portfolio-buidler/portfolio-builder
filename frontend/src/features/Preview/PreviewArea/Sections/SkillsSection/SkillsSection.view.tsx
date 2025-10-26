@@ -98,7 +98,7 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
   }
 
   React.useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = () => {
       if (editingItem) {
         handleSave()
       }

@@ -116,7 +116,7 @@ export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
   }
 
   React.useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = () => {
       if (editingItem) {
         handleSave()
       }
