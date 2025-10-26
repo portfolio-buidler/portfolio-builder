@@ -6,6 +6,18 @@ import type { PreviewSection } from './PreviewArea.types'
 const PreviewArea: React.FC = () => {
   const navigate = useNavigate()
 
+  const initialSkillsData: SkillsData = {
+    languages: [],
+    technologies: [],
+  }
+
+  const initialCommunicationData: CommunicationData = {
+    mobile: null,
+    email: null,
+    links: [],
+  }
+
+
   const initialSections: PreviewSection[] = [
     {
       id: 'about',
@@ -24,61 +36,14 @@ const PreviewArea: React.FC = () => {
     {
       id: 'skills',
       title: 'Skills',
-      content: (
-        <div className="preview-skills">
-          <p>
-            <strong>Languages:</strong>{' '}
-            {['Hebrew', 'English'].map((lang) => (
-              <span key={lang} className="preview-tag">
-                {lang}
-              </span>
-            ))}
-          </p>
-          <p>
-            <strong>Technologies:</strong>{' '}
-            {[
-              'React.js',
-              'Next.js',
-              'TypeScript',
-              'Redux',
-              'TailwindCSS',
-              'Node.js',
-              'Express',
-              'MongoDB',
-              'PostgreSQL',
-              'Firebase',
-            ].map((tech) => (
-              <span key={tech} className="preview-tag">
-                {tech}
-              </span>
-            ))}
-          </p>
-        </div>
-      ),
+      content: null,
       required: true,
       complete: true,
     },
     {
       id: 'communication',
       title: 'Communication',
-      content: (
-        <div className="preview-communication">
-          <p>
-            <strong>Mobile:</strong> <span className="preview-field">+972 8887657</span>
-          </p>
-          <p>
-            <strong>Email:</strong> <span className="preview-field">yoadmadmonoj@gmail.com</span>
-          </p>
-          <p>
-            <strong>Links:</strong>{' '}
-            {['GitHub', 'LinkedIn', 'Instagram'].map((link) => (
-              <span key={link} className="preview-tag">
-                {link}
-              </span>
-            ))}
-          </p>
-        </div>
-      ),
+      content: null,
       required: true,
       complete: true,
     },
@@ -117,6 +82,10 @@ const PreviewArea: React.FC = () => {
   const [history, setHistory] = React.useState<PreviewSection[][]>([initialSections])
   const [historyIndex, setHistoryIndex] = React.useState(0)
 
+    // Skills and Communication data
+  const [skillsData, setSkillsData] = React.useState<SkillsData>(initialSkillsData)
+  const [communicationData, setCommunicationData] = React.useState<CommunicationData>(initialCommunicationData)
+
   // Education section expand/collapse state
   const [educationExpanded, setEducationExpanded] = React.useState(false)
 
@@ -130,7 +99,24 @@ const PreviewArea: React.FC = () => {
   const currentSections = history[historyIndex]
   const undoAvailable = historyIndex > 0
   const redoAvailable = historyIndex < history.length - 1
-  const isNextEnabled = currentSections.filter((s) => s.required).every((s) => s.complete)
+
+  // Check if skills section is complete
+  const isSkillsComplete = skillsData.languages.length > 0 || skillsData.technologies.length > 0
+
+  // Check if communication section is complete
+  const isCommunicationComplete = 
+    communicationData.mobile !== null || 
+    communicationData.email !== null || 
+    communicationData.links.length > 0
+
+  // Check if all required sections are complete
+  const isNextEnabled = React.useMemo(() => {
+    const sectionsComplete = currentSections
+      .filter((s) => s.required && s.id !== 'skills' && s.id !== 'communication')
+      .every((s) => s.complete)
+    
+    return sectionsComplete && isSkillsComplete && isCommunicationComplete
+  }, [currentSections, isSkillsComplete, isCommunicationComplete])
 
   /* ========================================================================
      NAVIGATION HANDLERS
@@ -168,28 +154,84 @@ const PreviewArea: React.FC = () => {
     setEducationExpanded((prev) => !prev)
   }, [])
 
+    /* ========================================================================
+     SKILLS SECTION HANDLERS
+     ======================================================================== */
+
+  const handleAddLanguage = React.useCallback(() => {
+    setSkillsData((prev) => ({
+      ...prev,
+      languages: [...prev.languages, 'New Language'],
+    }))
+  }, [])
+
+  const handleAddTechnology = React.useCallback(() => {
+    setSkillsData((prev) => ({
+      ...prev,
+      technologies: [...prev.technologies, 'New Technology'],
+    }))
+  }, [])
+
+  const handleRemoveLanguage = React.useCallback((index: number) => {
+    setSkillsData((prev) => ({
+      ...prev,
+      languages: prev.languages.filter((_, i) => i !== index),
+    }))
+  }, [])
+
+  const handleRemoveTechnology = React.useCallback((index: number) => {
+    setSkillsData((prev) => ({
+      ...prev,
+      technologies: prev.technologies.filter((_, i) => i !== index),
+    }))
+  }, [])
+
+
   /* ========================================================================
      COMMUNICATION SECTION HANDLERS
      ======================================================================== */
 
+  const handleAddMobile = React.useCallback(() => {
+    setCommunicationData((prev) => ({
+      ...prev,
+      mobile: '+972 ',
+    }))
+  }, [])
+
+  const handleAddEmail = React.useCallback(() => {
+    setCommunicationData((prev) => ({
+      ...prev,
+      email: 'email@example.com',
+    }))
+  }, [])
+
   const handleAddLink = React.useCallback(() => {
-    const updated = currentSections.map((section) => {
-      if (section.id !== 'communication') return section
-      return {
-        ...section,
-        content: (
-          <div>
-            {section.content}
-            <span className="preview-tag">New Link</span>
-          </div>
-        ),
-      }
-    })
-    const newHistory = history.slice(0, historyIndex + 1)
-    newHistory.push(updated)
-    setHistory(newHistory)
-    setHistoryIndex(newHistory.length - 1)
-  }, [currentSections, history, historyIndex])
+    setCommunicationData((prev) => ({
+      ...prev,
+      links: [...prev.links, 'New Link'],
+    }))
+  }, [])
+
+  const handleRemoveMobile = React.useCallback(() => {
+    setCommunicationData((prev) => ({
+      ...prev,
+      mobile: null,
+    }))
+  }, [])
+
+  const handleRemoveEmail = React.useCallback(() => {
+    setCommunicationData((prev) => ({
+      ...prev,
+      email: null,
+    }))
+  }, [])
+
+  const handleRemoveLink = React.useCallback((index: number) => {
+    setCommunicationData((prev) => ({
+      ...prev,
+      links: prev.links.filter((_, i) => i !== index),
+    }))
+  }, [])
 
   /* ========================================================================
      EDIT MODE HANDLERS
@@ -247,11 +289,24 @@ const PreviewArea: React.FC = () => {
       isNextEnabled={isNextEnabled}
       onToggleEducation={handleToggleEducation}
       isEducationExpanded={educationExpanded}
-      onAddLink={handleAddLink}
       editingSectionId={editingSectionId}
       onEditSectionStart={handleEditSectionStart}
       onEditSectionEnd={handleEditSectionEnd}
       onSectionContentChange={handleSectionContentChange}
+      skillsData={skillsData}
+      onAddLanguage={handleAddLanguage}
+      onAddTechnology={handleAddTechnology}
+      onRemoveLanguage={handleRemoveLanguage}
+      onRemoveTechnology={handleRemoveTechnology}
+      isSkillsComplete={isSkillsComplete}
+      communicationData={communicationData}
+      onAddMobile={handleAddMobile}
+      onAddEmail={handleAddEmail}
+      onAddLink={handleAddLink}
+      onRemoveMobile={handleRemoveMobile}
+      onRemoveEmail={handleRemoveEmail}
+      onRemoveLink={handleRemoveLink}
+      isCommunicationComplete={isCommunicationComplete}
     />
   )
 }

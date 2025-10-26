@@ -400,38 +400,6 @@
       color: var(--brand-500);
     }
   }
-
-  /* Button for adding a new link in the communication card. Positioned
-   * below the content and styled similarly to a pill. */
-  &__add-link {
-    margin-top: 0.5rem;
-    margin-left: auto;
-    width: 1.75rem;
-    height: 1.75rem;
-    border-radius: 50%;
-    border: none;
-    padding: 0;
-    font-family: var(--font-family-base);
-    font-size: var(--font-size-lg);
-    color: var(--title-color);
-    background-color: var(--glass-bg-accent);
-    backdrop-filter: blur(var(--blur-md, 12px));
-    box-shadow: var(--shadow-glass-inset);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background-color 200ms ease;
-
-    &:hover {
-      background-color: var(--glass-bg-accent-active);
-    }
-
-    &:focus-visible {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.4);
-    }
-  }
 }
 
 /* Modifiers for specific preview sections. These classes allow you to
@@ -467,30 +435,233 @@
   right: 1rem;
 }
 
-/* Generic tag styling for languages, technologies and communication links. */
-.preview-tag {
-  display: inline-block;
-  background-color: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--radius-lg, 0.75rem);
-  padding: 0.2rem 0.5rem;
-  margin: 0 0.25rem 0.25rem 0;
-  font-size: var(--font-size-sm);
-  line-height: 1;
-  color: var(--title-color);
-  white-space: nowrap;
+/* ============================================================================
+   SKILLS SECTION SPECIFIC STYLES
+   ============================================================================ */
+
+.preview-skills {
+  &__row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__label {
+    /* Label specific styling as per requirements */
+    width: 71px;
+    height: 22px;
+    font-family: Poppins, sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 22px;
+    letter-spacing: 0%;
+    color: var(--Text-black, #354052);
+    opacity: 1;
+    flex-shrink: 0;
+  }
+
+  &__items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    flex: 1;
+  }
 }
 
-/* Input‑like field styling for communication details (mobile/email). */
-.preview-field {
-  display: inline-block;
-  background-color: var(--glass-bg-accent);
-  border: 1px solid var(--border-overlay-30);
-  border-radius: var(--radius-lg, 0.75rem);
-  padding: 0.2rem 0.5rem;
-  margin-left: 0.25rem;
-  font-size: var(--font-size-sm);
+/* ============================================================================
+   COMMUNICATION SECTION SPECIFIC STYLES
+   ============================================================================ */
+
+.preview-communication {
+  &__row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-block: 0.35rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__label {
+    /* Label specific styling as per requirements */
+    width: 71px;
+    height: 22px;
+    font-family: Poppins, sans-serif;
+    white-space: nowrap;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 22px;
+    letter-spacing: 0%;
+    color: var(--Text-black, #354052);
+    opacity: 1;
+    flex-shrink: 0;
+  }
+
+  &__items {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    min-width: 10ch;
+  }
+}
+
+/* ============================================================================
+   TAG STYLING (for languages, technologies, and links)
+   ============================================================================ */
+
+.preview-tag {
+  /* Glass Dark Mode styling as per requirements */
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 22px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: #9B4D4E33;
+  box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
+  font-family: Poppins, sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 10px;
   color: var(--title-color);
+  white-space: nowrap;
+  opacity: 1;
+  cursor: pointer;
+  transition: background 150ms ease, transform 150ms ease;
+  border: none;
+
+  &:hover {
+    background: rgba(155, 77, 78, 0.25);
+  }
+
+  /* Add button variant */
+  &--add {
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    
+    &:hover {
+      background: rgba(155, 77, 78, 0.35);
+      transform: scale(1.05);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  /* Selected state for delete mode */
+  &--selected {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 2px;
+  }
+
+  /* Remove button (appears on double-click) */
+  &__remove {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--brand-500);
+    color: #fff;
+    border: none;
+    font-size: 14px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 150ms ease;
+    padding: 0;
+    font-weight: 600;
+
+    &:hover {
+      background: var(--brand-600);
+    }
+
+    &:active {
+      background: var(--brand-700);
+    }
+  }
+}
+
+/* ============================================================================
+   FIELD STYLING (for mobile and email)
+   ============================================================================ */
+
+.preview-field {
+  /* Glass Dark Mode styling similar to tags */
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: #9B4D4E33;
+  box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
+  font-family: Poppins, sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 10px;
+  color: var(--title-color);
+  white-space: nowrap;
+  opacity: 1;
+  cursor: pointer;
+  transition: background 150ms ease;
+
+  &:hover {
+    background: rgba(155, 77, 78, 0.25);
+  }
+
+  /* Selected state for delete mode */
+  &--selected {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 2px;
+  }
+
+  /* Remove button (appears on double-click) */
+  &__remove {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--brand-500);
+    color: #fff;
+    border: none;
+    font-size: 14px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 150ms ease;
+    padding: 0;
+    font-weight: 600;
+
+    &:hover {
+      background: var(--brand-600);
+    }
+
+    &:active {
+      background: var(--brand-700);
+    }
+  }
 }
 
 /* Customize the vertical scrollbar on the content container to match

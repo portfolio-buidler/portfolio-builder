@@ -21,11 +21,24 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
   isNextEnabled,
   onToggleEducation,
   isEducationExpanded,
-  onAddLink,
   editingSectionId,
   onEditSectionStart,
   onEditSectionEnd,
   onSectionContentChange,
+  skillsData,
+  onAddLanguage,
+  onAddTechnology,
+  onRemoveLanguage,
+  onRemoveTechnology,
+  isSkillsComplete,
+  communicationData,
+  onAddMobile,
+  onAddEmail,
+  onAddLink,
+  onRemoveMobile,
+  onRemoveEmail,
+  onRemoveLink,
+  isCommunicationComplete,
 }) => {
   const contentRef = React.useRef<HTMLDivElement>(null)
 
@@ -211,16 +224,28 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
           {skills && (
             <SkillsSection
               title={skills.title}
-              content={skills.content}
-              complete={skills.complete}
+              complete={isSkillsComplete}
+              languages={skillsData.languages}
+              technologies={skillsData.technologies}
+              onAddLanguage={onAddLanguage}
+              onAddTechnology={onAddTechnology}
+              onRemoveLanguage={onRemoveLanguage}
+              onRemoveTechnology={onRemoveTechnology}
             />
           )}
           {communication && (
             <CommunicationSection
               title={communication.title}
-              content={communication.content}
-              complete={communication.complete}
+              complete={isCommunicationComplete}
+              mobile={communicationData.mobile}
+              email={communicationData.email}
+              links={communicationData.links}
+              onAddMobile={onAddMobile}
+              onAddEmail={onAddEmail}
               onAddLink={onAddLink}
+              onRemoveMobile={onRemoveMobile}
+              onRemoveEmail={onRemoveEmail}
+              onRemoveLink={onRemoveLink}
             />
           )}
         </div>
