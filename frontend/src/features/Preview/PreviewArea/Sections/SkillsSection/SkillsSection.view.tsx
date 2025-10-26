@@ -53,32 +53,45 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
         <div className="preview-skills__row">
           <span className="preview-skills__label">Languages:</span>
           <div className="preview-skills__items">
-            {languages.map((lang, index) => (
-              <span
-                key={`${lang}-${index}`}
-                className={`preview-tag ${selectedItem?.type === 'language' && selectedItem?.index === index ? 'preview-tag--selected' : ''}`}
-                onDoubleClick={(e) => { e.stopPropagation(); handleDoubleClick('language', index) }}
-              >
-                {lang}
-                {selectedItem?.type === 'language' && selectedItem?.index === index && (
-                  <button
-                    className="preview-tag__remove"
-                    onClick={(e) => { e.stopPropagation(); handleRemove() }}
-                    aria-label="Remove language"
+            {languages.length > 0 ? (
+              <>
+                {languages.map((lang, index) => (
+                  <span
+                    key={`${lang}-${index}`}
+                    className={`preview-tag ${selectedItem?.type === 'language' && selectedItem?.index === index ? 'preview-tag--selected' : ''}`}
+                    onDoubleClick={(e) => { e.stopPropagation(); handleDoubleClick('language', index) }}
                   >
-                    −
-                  </button>
-                )}
-              </span>
-            ))}
-            <button
-              type="button"
-              className="preview-tag preview-tag--add"
-              onClick={onAddLanguage}
-              aria-label="Add language"
-            >
-              +
-            </button>
+                    {lang}
+                    {selectedItem?.type === 'language' && selectedItem?.index === index && (
+                      <button
+                        className="preview-tag__remove"
+                        onClick={(e) => { e.stopPropagation(); handleRemove() }}
+                        aria-label="Remove language"
+                      >
+                        −
+                      </button>
+                    )}
+                  </span>
+                ))}
+                <button
+                  type="button"
+                  className="preview-tag preview-tag--add"
+                  onClick={onAddLanguage}
+                  aria-label="Add another language"
+                >
+                  +
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                className="preview-tag preview-tag--add"
+                onClick={onAddLanguage}
+                aria-label="Add language"
+              >
+                +
+              </button>
+            )}
           </div>
         </div>
 
@@ -86,26 +99,36 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
         <div className="preview-skills__row">
           <span className="preview-skills__label">Technologies:</span>
           <div className="preview-skills__items">
-            {technologies.map((tech, index) => (
-              <span
-                key={`${tech}-${index}`}
-                className={`preview-tag ${selectedItem?.type === 'technology' && selectedItem?.index === index ? 'preview-tag--selected' : ''}`}
-                onDoubleClick={(e) => { e.stopPropagation(); handleDoubleClick('technology', index) }}
-              >
-                {tech}
-                {selectedItem?.type === 'technology' && selectedItem?.index === index && (
-                  <button
-                    className="preview-tag__remove"
-                    onClick={(e) => { e.stopPropagation(); handleRemove() }}
-                    aria-label="Remove technology"
+            {technologies.length > 0 ? (
+              <>
+                {technologies.map((tech, index) => (
+                  <span
+                    key={`${tech}-${index}`}
+                    className={`preview-tag ${selectedItem?.type === 'technology' && selectedItem?.index === index ? 'preview-tag--selected' : ''}`}
+                    onDoubleClick={(e) => { e.stopPropagation(); handleDoubleClick('technology', index) }}
                   >
-                    −
-                  </button>
-                )}
-              </span>
-            ))}
-
-            {technologies.length === 0 ? (
+                    {tech}
+                    {selectedItem?.type === 'technology' && selectedItem?.index === index && (
+                      <button
+                        className="preview-tag__remove"
+                        onClick={(e) => { e.stopPropagation(); handleRemove() }}
+                        aria-label="Remove technology"
+                      >
+                        −
+                      </button>
+                    )}
+                  </span>
+                ))}
+                <button
+                  type="button"
+                  className="preview-tag preview-tag--add"
+                  onClick={onAddTechnology}
+                  aria-label="Add another technology"
+                >
+                  +
+                </button>
+              </>
+            ) : (
               <>
                 <button
                   type="button"
@@ -117,15 +140,6 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
                 </button>
                 <span className="preview-hint">Add your top skills</span>
               </>
-            ) : (
-              <button
-                type="button"
-                className="preview-tag preview-tag--add"
-                onClick={onAddTechnology}
-                aria-label="Add another technology"
-              >
-                +
-              </button>
             )}
           </div>
         </div>

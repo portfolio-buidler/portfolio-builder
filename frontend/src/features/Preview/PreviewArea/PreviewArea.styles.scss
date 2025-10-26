@@ -442,8 +442,8 @@
 .preview-skills {
   &__row {
     display: flex;
-    align-items: flex-start;
-    gap: 10px;
+    align-items: baseline;
+    gap: 5px;
     margin-bottom: 12px;
 
     &:last-child {
@@ -453,7 +453,7 @@
 
   &__label {
     /* Label specific styling as per requirements */
-    width: 71px;
+    width: auto;
     height: 22px;
     font-family: Poppins, sans-serif;
     font-weight: 500;
@@ -462,13 +462,14 @@
     letter-spacing: 0%;
     color: var(--Text-black, #354052);
     opacity: 1;
+    
     flex-shrink: 0;
   }
 
   &__items {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 5px;
     flex: 1;
   }
 }
@@ -481,7 +482,7 @@
   &__row {
     display: flex;
     align-items: baseline;
-    gap: 0.5rem;
+    gap: 5px;
     flex-wrap: wrap;
     margin-block: 0.35rem;
 
@@ -492,7 +493,7 @@
 
   &__label {
     /* Label specific styling as per requirements */
-    width: 71px;
+    width: auto;
     height: 22px;
     font-family: Poppins, sans-serif;
     white-space: nowrap;
@@ -509,7 +510,7 @@
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 5px;
     min-width: 10ch;
   }
 }
@@ -533,7 +534,7 @@
   font-family: Poppins, sans-serif;
   font-weight: 400;
   font-size: 12px;
-  line-height: 10px;
+  line-height: 1;
   color: var(--title-color);
   white-space: nowrap;
   opacity: 1;
@@ -548,7 +549,7 @@
   /* Add button variant */
   &--add {
     cursor: pointer;
-    font-size: 16px;
+    font-size: 12px;
     font-weight: 500;
     
     &:hover {
@@ -616,7 +617,7 @@
   font-family: Poppins, sans-serif;
   font-weight: 400;
   font-size: 12px;
-  line-height: 10px;
+  line-height: 1;
   color: var(--title-color);
   white-space: nowrap;
   opacity: 1;
@@ -684,4 +685,18 @@
 
 .preview-area__content::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.35);
+}
+
+/* ============================================================================
+   HINT TEXT STYLING (for empty state hints)
+   ============================================================================ */
+
+.preview-hint {
+  font-family: Poppins, sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 22px;
+  color: var(--color-fg-muted, #354052);
+  opacity: 0.6;
+  white-space: nowrap;
 }
