@@ -9,6 +9,7 @@ from app.core.db import get_db                       # ✅ Real dependency injec
 from app.db.models_resume import Resume
 from app.features.portfolios.schemas_draft import PortfolioDraftUpdate, PortfolioDraftOut
 from app.features.portfolios.service_draft import PortfolioDraftService
+from app.features.portfolios.service_publish import PortfolioPublishService
 
 
 # --- Simulated current user (header-based stub for local testing) ---
@@ -43,6 +44,30 @@ class DraftSeedRequest(BaseModel):
     """
     parsed_resume: dict[str, Any] | None = Field(default=None)
     resume_source_id: int | None = Field(default=None)
+
+
+# --- Request schema for publishing draft ---
+class PublishRequest(BaseModel):
+    """
+    Request model for publishing a portfolio draft.
+    
+    Attributes:
+        custom_slug: Optional custom slug for the portfolio URL.
+    """
+    custom_slug: str | None = Field(default=None, max_length=50, description="Custom URL slug")
+
+
+# --- Response schema for published portfolio ---
+class PublishedPortfolioResponse(BaseModel):
+    """
+    Response model for published portfolio.
+    """
+    id: int
+    slug: str
+    public_url: str
+    status: str
+    last_published_at: str
+    build_version: int
 
 
 @router.post("/seed", response_model=PortfolioDraftOut, status_code=status.HTTP_201_CREATED)
@@ -91,6 +116,47 @@ async def seed_draft(
     return PortfolioDraftService.to_out(draft)
 
 
+@router.post("/publish", response_model=PublishedPortfolioResponse, status_code=status.HTTP_201_CREATED)
+async def publish_draft(
+    payload: PublishRequest,
+    db: AsyncSession = Depends(get_db),
+    user: _User = Depends(get_current_user),
+):
+    """
+    Publish the active draft to a public portfolio site.
+    
+    - Validates draft completeness (about, contact, content sections)
+    - Generates unique URL slug
+    - Creates published site from draft data
+    - Archives previous published versions
+    - Returns public URL for sharing
+    """
+    try:
+        # Delegate to service layer for publishing logic
+        published_site = await PortfolioPublishService.publish_draft(
+            db=db,
+            user_id=user.id,
+            custom_slug=payload.custom_slug,
+        )
+        
+        # Generate public URL (in production, this would be your domain)
+        public_url = f"https://portfolio-builder.com/portfolio/{published_site.slug}"
+        
+        return PublishedPortfolioResponse(
+            id=published_site.id,
+            slug=published_site.slug,
+            public_url=public_url,
+            status=published_site.status,
+            last_published_at=published_site.last_published_at.isoformat(),
+            build_version=published_site.build_version,
+        )
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to publish portfolio")
+
+
 @router.patch("", response_model=PortfolioDraftOut, status_code=status.HTTP_200_OK)
 async def patch_draft(
     payload: PortfolioDraftUpdate,
@@ -115,4 +181,5 @@ async def patch_draft(
         patch=patch,
         bump_version=True,
     )
+    
     return PortfolioDraftService.to_out(draft)
