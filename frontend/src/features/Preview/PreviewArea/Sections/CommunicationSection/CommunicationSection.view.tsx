@@ -73,7 +73,7 @@ export const CommunicationSectionView: React.FC<CommunicationSectionViewProps> =
                           }}
                           aria-label="Remove mobile"
                         >
-                          ∓
+                          -
                         </button>
                       )}
                     </span>
@@ -132,7 +132,7 @@ export const CommunicationSectionView: React.FC<CommunicationSectionViewProps> =
                           }}
                           aria-label="Remove email"
                         >
-                          ∓
+                          -
                         </button>
                       )}
                     </span>
@@ -193,7 +193,7 @@ export const CommunicationSectionView: React.FC<CommunicationSectionViewProps> =
                           }}
                           aria-label="Remove link"
                         >
-                          ∓
+                          -
                         </button>
                       )}
                     </span>

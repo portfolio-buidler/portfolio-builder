@@ -79,7 +79,7 @@ export const SkillsSectionView: React.FC<SkillsSectionViewProps> = ({
                               }}
                               aria-label="Remove language"
                             >
-                              ∓
+                              -
                             </button>
                           )}
                         </span>
@@ -152,7 +152,7 @@ export const SkillsSectionView: React.FC<SkillsSectionViewProps> = ({
                               }}
                               aria-label="Remove technology"
                             >
-                              ∓
+                              -
                             </button>
                           )}
                         </span>

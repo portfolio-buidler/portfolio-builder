@@ -63,18 +63,7 @@ const PreviewArea: React.FC = () => {
     {
       id: 'experience',
       title: 'Work Experience',
-      content: (
-        <div>
-          <p>
-            <strong>Full‑Stack Developer — TechWave Solutions (2021—Present)</strong>
-          </p>
-          <ul>
-            <li>Designed and implemented a customer portal serving 10,000+ active users</li>
-            <li>Led transition from monolithic PHP to Node.js microservices architecture</li>
-            <li>Collaborated with UX/UI designers to craft responsive, accessible interfaces</li>
-          </ul>
-        </div>
-      ),
+      content: null,
       required: false,
       complete: true,
     },
