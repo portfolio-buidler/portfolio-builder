@@ -5,12 +5,6 @@ export interface EntryBullet {
   text: string
 }
 
-/**
- * Generic entry structure for Education, Experience, Projects.
- * - field1: Degree | Position | Project Name
- * - field2: University | Company | Technology/Role
- * - years: (date range)
- */
 export interface Entry {
   field1: string // primary field (e.g., Degree, Position, Project Name)
   field2: string // secondary field (e.g., University, Company, Technology)

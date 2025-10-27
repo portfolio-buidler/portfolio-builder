@@ -1,14 +1,3 @@
-/**
- * ProjectsSection.tsx
- * 
- * Projects section wrapper that uses the shared CollapsibleSection component.
- * Configures field labels specific to project entries.
- * 
- * Responsibilities:
- * - Configure field labels: "Project Name", "Technology", "dates"
- * - Pass through props to CollapsibleSection
- * - Apply projects-specific class name
- */
 
 import React from 'react'
 import { CollapsibleSection } from '../shared/CollapsibleSection'

@@ -1,21 +1,3 @@
-/**
- * CollapsibleSection.tsx
- * 
- * Generic collapsible section component for Education, Experience, Projects.
- * Follows Logic-View-Style separation pattern.
- * 
- * Responsibilities:
- * - Parse entries from string format: "Field1 – Field2 – (years)" with bullets
- * - Handle expand/collapse state
- * - Handle edit mode with auto-sizing textarea
- * - Auto-bullet continuation
- * - Capture expanded height for smooth animations
- * 
- * Architecture:
- * This is the LOGIC layer - handles data parsing, state, and callbacks.
- * All presentation/JSX belongs in CollapsibleSection.view.tsx
- */
-
 import React from 'react'
 import CollapsibleSectionView from './CollapsibleSection.view.tsx'
 import type { Entry, CollapsibleSectionProps } from './CollapsibleSection.types'
@@ -28,13 +10,6 @@ function splitEntries(raw: string): string[] {
     .filter(Boolean)
 }
 
-/**
- * Parse a single entry: first line "Field1 – Field2 – (years)"; bullets after.
- * Example formats:
- * - "BSc Computer Science – MIT – (2018-2022)"
- * - "Senior Developer – Google – (2020-2023)"
- * - "Portfolio Builder – React/TypeScript – (2025)"
- */
 function parseEntry(block: string): Entry {
   const lines = block.split(/\r?\n/)
   const first = (lines[0] || '').trim()
@@ -112,10 +87,6 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
 
   const [entries, setEntries] = React.useState<Entry[]>(() => parseAll(editValue))
 
-  /**
-   * The last saved expanded height. We set this only when exiting edit mode,
-   * and reuse it for expanding in view mode.
-   */
   const [savedExpandedHeight, setSavedExpandedHeight] = React.useState<number>(0)
 
   /** Auto-size textarea as you type; also lets the section grow naturally in edit mode. */
@@ -136,12 +107,6 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
     onEditStart?.()
   }, [isEditingProp, onEditStart])
 
-  /**
-   * Clicking outside exits edit mode and saves:
-   *  - raw content
-   *  - parsed entries
-   *  - measured expanded height for future toggles (from the edit-mode layout)
-   */
   React.useEffect(() => {
     if (!isEditing) return
     const onDown = (ev: MouseEvent) => {
@@ -173,13 +138,7 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
     }
   }, [isEditing, editValue, isEditingProp, onEditEnd])
 
-  /**
-   * If the user expands without editing first, ensure we still capture a usable
-   * height from the rendered content so the section can grow beyond the
-   * collapsed max-height.
-   * 
-   * Temporarily remove max-height constraint to get true scrollHeight.
-   */
+
   React.useEffect(() => {
     if (isEditing) return
     if (!isExpanded) return

@@ -1,15 +1,3 @@
-/**
- * EducationSection.tsx
- * 
- * Education section wrapper that uses the shared CollapsibleSection component.
- * Configures field labels specific to education entries.
- * 
- * Responsibilities:
- * - Configure field labels: "Degree", "University", "years"
- * - Pass through props to CollapsibleSection
- * - Apply education-specific class name
- */
-
 import React from 'react'
 import { CollapsibleSection } from '../shared/CollapsibleSection'
 import type { CollapsibleSectionProps } from '../shared/CollapsibleSection'

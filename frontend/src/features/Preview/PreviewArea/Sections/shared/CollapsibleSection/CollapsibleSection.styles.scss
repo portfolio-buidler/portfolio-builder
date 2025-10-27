@@ -1,25 +1,3 @@
-/**
- * CollapsibleSection.styles.scss
- * 
- * Shared styles for collapsible sections (Education, Experience, Projects).
- * Implements expand/collapse functionality with smooth transitions and edit mode.
- * 
- * Architecture:
- * - Uses BEM naming (collapsible-section, collapsible-section__content, etc.)
- * - State-driven via data attributes (data-expanded, data-editing)
- * - Design tokens for spacing, typography, colors
- * - Layer management via z-index for proper stacking
- * 
- * States:
- * - Collapsed: Content height limited to 110px with overflow hidden
- * - Expanded: Full content visible with dynamic height
- * - Editing: Textarea active, toggle hidden, auto-sizing enabled
- * 
- * Usage:
- * Import this file into Education, Experience, and Projects section components.
- * Each component adds its own specific class for customization if needed.
- */
-
 @use '../../../../../../styles/tokens/colors' as colors;
 @use '../../../../../../styles/tokens/spacing' as spacing;
 @use '../../../../../../styles/tokens/typography' as typography;
