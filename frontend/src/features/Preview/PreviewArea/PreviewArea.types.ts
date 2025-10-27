@@ -58,6 +58,14 @@ export interface PreviewAreaViewProps {
   onToggleEducation: () => void
   isEducationExpanded: boolean
   
+  // Skills section specific
+  onToggleSkills: () => void
+  isSkillsExpanded: boolean
+  
+  // Communication section specific
+  onToggleCommunication: () => void
+  isCommunicationExpanded: boolean
+  
   // Edit mode
   editingSectionId: string | null
   onEditSectionStart: (sectionId: string) => void

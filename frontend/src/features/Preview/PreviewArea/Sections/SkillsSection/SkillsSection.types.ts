@@ -16,6 +16,8 @@ export interface SkillsSectionProps {
   complete?: boolean
   skillsData: SkillsData
   onSkillsDataChange: (data: SkillsData) => void
+  isExpanded?: boolean
+  onToggleExpanded?: (next: boolean) => void
 }
 
 /**
@@ -40,4 +42,8 @@ export interface SkillsSectionViewProps {
   onEditValueChange: (value: string) => void
   onKeyDown: (e: React.KeyboardEvent) => void
   onRemove: () => void
+  
+  // Collapsible props
+  isExpanded?: boolean
+  onToggleExpanded?: () => void
 }

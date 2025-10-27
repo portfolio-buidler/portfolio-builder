@@ -17,6 +17,8 @@ export interface CommunicationSectionProps {
   complete?: boolean
   communicationData: CommunicationData
   onCommunicationDataChange: (data: CommunicationData) => void
+  isExpanded?: boolean
+  onToggleExpanded?: (next: boolean) => void
 }
 
 /**
@@ -43,4 +45,8 @@ export interface CommunicationSectionViewProps {
   onEditValueChange: (value: string) => void
   onKeyDown: (e: React.KeyboardEvent) => void
   onRemove: () => void
+  
+  // Collapsible props
+  isExpanded?: boolean
+  onToggleExpanded?: () => void
 }

@@ -1,6 +1,7 @@
 // CommunicationSection.view.tsx
 import React from 'react'
 import type { CommunicationSectionViewProps } from './CommunicationSection.types'
+import questionMarkIcon from '../../../../../assets/icons/PreviewPage/question-mark.svg'
 
 /**
  * Communication Section View Component (Pure Presentation)
@@ -24,14 +25,24 @@ export const CommunicationSectionView: React.FC<CommunicationSectionViewProps> =
   onDoubleClick,
   onEditValueChange,
   onKeyDown,
-  onRemove
+  onRemove,
+  isExpanded,
+  onToggleExpanded
 }) => {
   return (
     <section
       className="preview-section preview-section--communication"
       data-complete={complete}
+      data-expanded={isExpanded}
     >
-      <h3 className="preview-section__title">{title}</h3>
+      <div className="preview-section__title-container">
+        <h3 className="preview-section__title">{title}</h3>
+        <img
+          src={questionMarkIcon}
+          alt="Help"
+          className="preview-section__help-icon"
+        />
+      </div>
 
       <div className="preview-section__content">
         {/* Mobile Row */}
@@ -227,6 +238,14 @@ export const CommunicationSectionView: React.FC<CommunicationSectionViewProps> =
           </div>
         </div>
       </div>
+
+      <button
+        type="button"
+        className="preview-section__toggle"
+        onClick={(e) => { e.stopPropagation(); if (onToggleExpanded) onToggleExpanded() }}
+        aria-label={isExpanded ? `Collapse ${title.toLowerCase()}` : `Expand ${title.toLowerCase()}`}
+        aria-expanded={isExpanded}
+      />
     </section>
   )
 }

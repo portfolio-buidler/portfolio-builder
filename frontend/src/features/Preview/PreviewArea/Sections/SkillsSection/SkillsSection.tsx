@@ -18,7 +18,9 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
   title, 
   complete,
   skillsData,
-  onSkillsDataChange
+  onSkillsDataChange,
+  isExpanded,
+  onToggleExpanded
 }) => {
   /* ========================================================================
      LOCAL STATE - UI Concerns Only
@@ -238,6 +240,8 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
       onEditValueChange={setEditValue}
       onKeyDown={handleKeyDown}
       onRemove={handleRemove}
+      isExpanded={isExpanded}
+      onToggleExpanded={onToggleExpanded ? () => onToggleExpanded(!isExpanded) : undefined}
     />
   )
 }

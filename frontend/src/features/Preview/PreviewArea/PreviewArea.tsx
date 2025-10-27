@@ -92,6 +92,12 @@ const PreviewArea: React.FC = () => {
 
   // Education section expand/collapse state
   const [educationExpanded, setEducationExpanded] = React.useState(false)
+  
+  // Skills section expand/collapse state
+  const [skillsExpanded, setSkillsExpanded] = React.useState(false)
+  
+  // Communication section expand/collapse state
+  const [communicationExpanded, setCommunicationExpanded] = React.useState(false)
 
   // Edit mode tracking
   const [editingSectionId, setEditingSectionId] = React.useState<string | null>(null)
@@ -159,6 +165,22 @@ const PreviewArea: React.FC = () => {
   }, [])
 
   /* ========================================================================
+     SKILLS SECTION HANDLERS
+     ======================================================================== */
+
+  const handleToggleSkills = React.useCallback(() => {
+    setSkillsExpanded((prev) => !prev)
+  }, [])
+
+  /* ========================================================================
+     COMMUNICATION SECTION HANDLERS
+     ======================================================================== */
+
+  const handleToggleCommunication = React.useCallback(() => {
+    setCommunicationExpanded((prev) => !prev)
+  }, [])
+
+  /* ========================================================================
      EDIT MODE HANDLERS
      ======================================================================== */
 
@@ -214,6 +236,10 @@ const PreviewArea: React.FC = () => {
       isNextEnabled={isNextEnabled}
       onToggleEducation={handleToggleEducation}
       isEducationExpanded={educationExpanded}
+      onToggleSkills={handleToggleSkills}
+      isSkillsExpanded={skillsExpanded}
+      onToggleCommunication={handleToggleCommunication}
+      isCommunicationExpanded={communicationExpanded}
       editingSectionId={editingSectionId}
       onEditSectionStart={handleEditSectionStart}
       onEditSectionEnd={handleEditSectionEnd}

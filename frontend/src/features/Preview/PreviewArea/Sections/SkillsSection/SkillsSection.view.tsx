@@ -23,16 +23,23 @@ export const SkillsSectionView: React.FC<SkillsSectionViewProps> = ({
   onDoubleClick,
   onEditValueChange,
   onKeyDown,
-  onRemove
+  onRemove,
+  isExpanded,
+  onToggleExpanded
 }) => {
   return (
     <section
       className="preview-section preview-section--skills"
       data-complete={complete}
+      data-expanded={isExpanded}
     >
       <div className="preview-section__title-container">
         <h3 className="preview-section__title">{title}</h3>
-        <img src={questionMarkIcon} alt="Help" className="preview-section__help-icon" />
+        <img
+          src={questionMarkIcon}
+          alt="Help"
+          className="preview-section__help-icon"
+        />
       </div>
 
       <div className="preview-section__content">
@@ -185,6 +192,14 @@ export const SkillsSectionView: React.FC<SkillsSectionViewProps> = ({
           </div>
         </div>
       </div>
+
+      <button
+        type="button"
+        className="preview-section__toggle"
+        onClick={(e) => { e.stopPropagation(); if (onToggleExpanded) onToggleExpanded() }}
+        aria-label={isExpanded ? `Collapse ${title.toLowerCase()}` : `Expand ${title.toLowerCase()}`}
+        aria-expanded={isExpanded}
+      />
     </section>
   )
 }

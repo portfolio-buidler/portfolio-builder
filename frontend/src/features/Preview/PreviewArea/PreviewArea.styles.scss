@@ -369,6 +369,29 @@
     }
   }
 
+  /* Collapsed/expanded states for collapsible sections */
+  &[data-expanded='false'] {
+    .preview-section__content {
+      max-height: 110px;
+      overflow: hidden;
+    }
+
+    .preview-section__toggle::before {
+      transform: rotate(0deg);
+    }
+  }
+
+  &[data-expanded='true'] {
+    .preview-section__content {
+      max-height: none;
+      overflow: visible;
+    }
+
+    .preview-section__toggle::before {
+      transform: rotate(180deg);
+    }
+  }
+
   /* Header row used in cards that support collapsing. Aligns the
    * title with a toggle button on the right. */
   &__header {
@@ -398,6 +421,20 @@
     &:hover,
     &:focus-visible {
       color: var(--brand-500);
+    }
+
+    /* Arrow icon (SVG embedded as data URI) */
+    &::before {
+      content: '';
+      display: block;
+      width: 14px;
+      height: 8px;
+      background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M13 1L7 7L1 1" stroke="%23354052" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/%3E%3C/svg%3E');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      transition: transform 0.3s ease;
+      transform-origin: center;
     }
   }
 }
@@ -430,6 +467,30 @@
  * bottom right. This rule relies on the parent section being
  * relatively positioned (see .preview-section--education). */
 .preview-section--education .preview-section__toggle {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 1rem;
+}
+
+.preview-section--skills {
+  position: relative;
+}
+
+/* Position the collapse toggle within the skills card at the
+ * bottom right. */
+.preview-section--skills .preview-section__toggle {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 1rem;
+}
+
+.preview-section--communication {
+  position: relative;
+}
+
+/* Position the collapse toggle within the communication card at the
+ * bottom right. */
+.preview-section--communication .preview-section__toggle {
   position: absolute;
   bottom: 0.75rem;
   right: 1rem;

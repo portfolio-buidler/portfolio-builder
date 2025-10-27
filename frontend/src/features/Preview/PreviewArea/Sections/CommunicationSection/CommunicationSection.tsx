@@ -18,7 +18,9 @@ export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
   title,
   complete,
   communicationData,
-  onCommunicationDataChange
+  onCommunicationDataChange,
+  isExpanded,
+  onToggleExpanded
 }) => {
   /* ========================================================================
      LOCAL STATE - UI Concerns Only
@@ -277,6 +279,8 @@ export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
       onEditValueChange={setEditValue}
       onKeyDown={handleKeyDown}
       onRemove={handleRemove}
+      isExpanded={isExpanded}
+      onToggleExpanded={onToggleExpanded ? () => onToggleExpanded(!isExpanded) : undefined}
     />
   )
 }

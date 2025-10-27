@@ -28,6 +28,10 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
   isNextEnabled,
   onToggleEducation,
   isEducationExpanded,
+  onToggleSkills,
+  isSkillsExpanded,
+  onToggleCommunication,
+  isCommunicationExpanded,
   editingSectionId,
   onEditSectionStart,
   onEditSectionEnd,
@@ -218,6 +222,8 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
               complete={isSkillsComplete}
               skillsData={skillsData}
               onSkillsDataChange={onSkillsDataChange}
+              isExpanded={isSkillsExpanded}
+              onToggleExpanded={onToggleSkills}
             />
           )}
           {communication && (
@@ -226,6 +232,8 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
               complete={isCommunicationComplete}
               communicationData={communicationData}
               onCommunicationDataChange={onCommunicationDataChange}
+              isExpanded={isCommunicationExpanded}
+              onToggleExpanded={onToggleCommunication}
             />
           )}
         </div>
