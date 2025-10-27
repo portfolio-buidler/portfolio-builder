@@ -42,7 +42,7 @@ export const CollapsibleSectionView = React.forwardRef<HTMLElement, CollapsibleS
     if (lowerTitle === 'education') {
       placeholderText = 'Add your degree, university name, and graduation years.';
       emptyPlaceholder = 'Add your degree, university name, and graduation years.';
-    } else if (lowerTitle === 'experience') {
+    } else if (lowerTitle === 'work experience') {
       placeholderText = 'List your work experience, include your role, company, and main achievements.';
       emptyPlaceholder = 'List your work experience, include your role, company, and main achievements.';
     } else if (lowerTitle === 'projects') {
