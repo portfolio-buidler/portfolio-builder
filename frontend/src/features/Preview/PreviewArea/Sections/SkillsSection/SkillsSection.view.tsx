@@ -1,116 +1,30 @@
 // SkillsSection.view.tsx
 import React from 'react'
-import type { SkillsSectionProps } from './SkillsSection.types'
+import type { SkillsSectionViewProps } from './SkillsSection.types'
 import questionMarkIcon from '../../../../../assets/icons/PreviewPage/question-mark.svg'
 
-export const SkillsSection: React.FC<SkillsSectionProps> = ({ 
+/**
+ * Skills Section View Component (Pure Presentation)
+ * 
+ * Renders the Skills section UI with no business logic.
+ * All state and handlers are passed down from the container component.
+ */
+export const SkillsSectionView: React.FC<SkillsSectionViewProps> = ({ 
   title, 
   complete,
   languages,
   technologies,
+  selectedItem,
+  editingItem,
+  editValue,
+  inputRef,
   onAddLanguage,
   onAddTechnology,
-  onRemoveLanguage,
-  onRemoveTechnology,
-  onChangeLanguage,
-  onChangeTechnology
+  onDoubleClick,
+  onEditValueChange,
+  onKeyDown,
+  onRemove
 }) => {
-  const [selectedItem, setSelectedItem] = React.useState<{ type: 'language' | 'technology', index: number } | null>(null)
-  const [editingItem, setEditingItem] = React.useState<{ type: 'language' | 'technology', index: number } | null>(null)
-  const [editValue, setEditValue] = React.useState('')
-  const inputRef = React.useRef<HTMLInputElement>(null)
-
-  // Auto-edit when a new empty item is added
-  React.useEffect(() => {
-    const lastLangIndex = languages.length - 1
-    const lastTechIndex = technologies.length - 1
-
-    if (lastLangIndex >= 0 && languages[lastLangIndex] === '') {
-      setEditingItem({ type: 'language', index: lastLangIndex })
-      setEditValue('')
-    } else if (lastTechIndex >= 0 && technologies[lastTechIndex] === '') {
-      setEditingItem({ type: 'technology', index: lastTechIndex })
-      setEditValue('')
-    }
-  }, [languages.length, technologies.length])
-
-  // Focus input when editing starts
-  React.useEffect(() => {
-    if (editingItem && inputRef.current) {
-      inputRef.current.focus()
-    }
-  }, [editingItem])
-
-  const handleDoubleClick = (type: 'language' | 'technology', index: number) => {
-    // Only allow double-click on saved (non-empty) items
-    const value = type === 'language' ? languages[index] : technologies[index]
-    if (value.trim() !== '') {
-      setSelectedItem({ type, index })
-    }
-  }
-
-  const handleSave = () => {
-    if (editingItem && editValue.trim()) {
-      if (editingItem.type === 'language') {
-        onChangeLanguage(editingItem.index, editValue.trim())
-      } else {
-        onChangeTechnology(editingItem.index, editValue.trim())
-      }
-    } else if (editingItem && editValue.trim() === '') {
-      // Remove empty tag if user didn't type anything
-      if (editingItem.type === 'language') {
-        onRemoveLanguage(editingItem.index)
-      } else {
-        onRemoveTechnology(editingItem.index)
-      }
-    }
-    setEditingItem(null)
-    setEditValue('')
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      handleSave()
-    } else if (e.key === 'Escape') {
-      // Remove empty tag on escape
-      if (editingItem) {
-        if (editingItem.type === 'language') {
-          onRemoveLanguage(editingItem.index)
-        } else {
-          onRemoveTechnology(editingItem.index)
-        }
-      }
-      setEditingItem(null)
-      setEditValue('')
-    }
-  }
-
-  const handleRemove = () => {
-    if (selectedItem) {
-      if (selectedItem.type === 'language') {
-        onRemoveLanguage(selectedItem.index)
-      } else {
-        onRemoveTechnology(selectedItem.index)
-      }
-      setSelectedItem(null)
-    }
-  }
-
-  React.useEffect(() => {
-    const handleClickOutside = () => {
-      if (editingItem) {
-        handleSave()
-      }
-      setSelectedItem(null)
-    }
-    
-    if (editingItem || selectedItem) {
-      document.addEventListener('click', handleClickOutside)
-      return () => document.removeEventListener('click', handleClickOutside)
-    }
-  }, [editingItem, selectedItem, editValue])
-
   return (
     <section
       className="preview-section preview-section--skills"
@@ -122,7 +36,7 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
       </div>
 
       <div className="preview-section__content">
-        {/* Languages */}
+        {/* Languages Row */}
         <div className="preview-skills__row">
           <span className="preview-skills__label">Languages:</span>
           <div className="preview-skills__items">
@@ -136,8 +50,8 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
                         type="text"
                         className="preview-tag preview-tag--editing"
                         value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onKeyDown={handleKeyDown}
+                        onChange={(e) => onEditValueChange(e.target.value)}
+                        onKeyDown={onKeyDown}
                         onClick={(e) => e.stopPropagation()}
                         placeholder="Type here..."
                         aria-label="Edit language"
@@ -145,17 +59,27 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
                     ) : (
                       lang !== '' && (
                         <span
-                          className={`preview-tag ${selectedItem?.type === 'language' && selectedItem?.index === index ? 'preview-tag--selected' : ''}`}
-                          onDoubleClick={(e) => { e.stopPropagation(); handleDoubleClick('language', index) }}
+                          className={`preview-tag ${
+                            selectedItem?.type === 'language' && selectedItem?.index === index 
+                              ? 'preview-tag--selected' 
+                              : ''
+                          }`}
+                          onDoubleClick={(e) => { 
+                            e.stopPropagation()
+                            onDoubleClick('language', index)
+                          }}
                         >
                           {lang}
                           {selectedItem?.type === 'language' && selectedItem?.index === index && (
                             <button
                               className="preview-tag__remove"
-                              onClick={(e) => { e.stopPropagation(); handleRemove() }}
+                              onClick={(e) => { 
+                                e.stopPropagation()
+                                onRemove()
+                              }}
                               aria-label="Remove language"
                             >
-                              −
+                              ∓
                             </button>
                           )}
                         </span>
@@ -185,7 +109,7 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
           </div>
         </div>
 
-        {/* Technologies */}
+        {/* Technologies Row */}
         <div className="preview-skills__row">
           <span className="preview-skills__label">Technologies:</span>
           <div className="preview-skills__items">
@@ -199,8 +123,8 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
                         type="text"
                         className="preview-tag preview-tag--editing"
                         value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onKeyDown={handleKeyDown}
+                        onChange={(e) => onEditValueChange(e.target.value)}
+                        onKeyDown={onKeyDown}
                         onClick={(e) => e.stopPropagation()}
                         placeholder="Type here..."
                         aria-label="Edit technology"
@@ -208,17 +132,27 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
                     ) : (
                       tech !== '' && (
                         <span
-                          className={`preview-tag ${selectedItem?.type === 'technology' && selectedItem?.index === index ? 'preview-tag--selected' : ''}`}
-                          onDoubleClick={(e) => { e.stopPropagation(); handleDoubleClick('technology', index) }}
+                          className={`preview-tag ${
+                            selectedItem?.type === 'technology' && selectedItem?.index === index 
+                              ? 'preview-tag--selected' 
+                              : ''
+                          }`}
+                          onDoubleClick={(e) => { 
+                            e.stopPropagation()
+                            onDoubleClick('technology', index)
+                          }}
                         >
                           {tech}
                           {selectedItem?.type === 'technology' && selectedItem?.index === index && (
                             <button
                               className="preview-tag__remove"
-                              onClick={(e) => { e.stopPropagation(); handleRemove() }}
+                              onClick={(e) => { 
+                                e.stopPropagation()
+                                onRemove()
+                              }}
                               aria-label="Remove technology"
                             >
-                              −
+                              ∓
                             </button>
                           )}
                         </span>
@@ -255,4 +189,4 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
   )
 }
 
-export default SkillsSection
+export default SkillsSectionView

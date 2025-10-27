@@ -1,15 +1,22 @@
+// PreviewArea.view.tsx
 import React from 'react'
 import type { PreviewAreaViewProps } from './PreviewArea.types'
 import './PreviewArea.styles.scss'
 import {
   AboutSection,
   EducationSection,
-  SkillsSection,
-  CommunicationSection,
   ExperienceSection,
   ProjectsSection,
 } from './Sections'
+import { SkillsSection } from './Sections/SkillsSection/SkillsSection.tsx'
+import { CommunicationSection } from './Sections/CommunicationSection/CommunicationSection.tsx'
 
+/**
+ * PreviewArea View Component (Pure Presentation)
+ * 
+ * Renders the preview area UI including all sections, header, and footer.
+ * Manages scroll indicator positioning based on section positions.
+ */
 export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
   sections,
   onPageBack,
@@ -26,23 +33,10 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
   onEditSectionEnd,
   onSectionContentChange,
   skillsData,
-  onAddLanguage,
-  onAddTechnology,
-  onRemoveLanguage,
-  onRemoveTechnology,
-  onChangeLanguage,
-  onChangeTechnology,
+  onSkillsDataChange,
   isSkillsComplete,
   communicationData,
-  onAddMobile,
-  onAddEmail,
-  onAddLink,
-  onRemoveMobile,
-  onRemoveEmail,
-  onRemoveLink,
-  onChangeMobile,
-  onChangeEmail,
-  onChangeLink,
+  onCommunicationDataChange,
   isCommunicationComplete,
 }) => {
   const contentRef = React.useRef<HTMLDivElement>(null)
@@ -103,32 +97,24 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
       const bottomAnchorBottomInView = bottomAnchorRect.bottom
 
       // Determine the scrollable range in viewport coordinates
-      // Start: when About section top aligns with container top
-      // End: when bottom anchor bottom aligns with container bottom
       const scrollStart = containerRect.top
       const scrollEnd = containerRect.bottom
       const viewportRange = scrollEnd - scrollStart - lineHeight
 
-      // Calculate scroll progress based on the About section's position
-      // When About is at container top: progress = 0
-      // When bottom anchor bottom is at container bottom: progress = 1
+      // Calculate scroll progress
       let scrollProgress = 0
 
       if (aboutTopInView >= scrollStart) {
-        // About section hasn't reached the top yet
         scrollProgress = 0
       } else if (bottomAnchorBottomInView <= scrollEnd) {
-        // Bottom anchor has passed the bottom
         scrollProgress = 1
       } else {
-        // Calculate progress based on how far we've scrolled between start and end
         const totalScrollableContent = bottomAnchorBottomInView - aboutTopInView - lineHeight
         const scrolled = scrollStart - aboutTopInView
         scrollProgress = Math.max(0, Math.min(1, scrolled / totalScrollableContent))
       }
 
       // Calculate the indicator position in the viewport
-      // It should move from containerRect.top to containerRect.bottom - lineHeight
       const indicatorTop = scrollStart + (scrollProgress * viewportRange)
 
       // Show indicator only when we're in the scrollable range
@@ -230,32 +216,16 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
             <SkillsSection
               title={skills.title}
               complete={isSkillsComplete}
-              languages={skillsData.languages}
-              technologies={skillsData.technologies}
-              onAddLanguage={onAddLanguage}
-              onAddTechnology={onAddTechnology}
-              onRemoveLanguage={onRemoveLanguage}
-              onRemoveTechnology={onRemoveTechnology}
-              onChangeLanguage={onChangeLanguage}
-              onChangeTechnology={onChangeTechnology}
+              skillsData={skillsData}
+              onSkillsDataChange={onSkillsDataChange}
             />
           )}
           {communication && (
             <CommunicationSection
               title={communication.title}
               complete={isCommunicationComplete}
-              mobile={communicationData.mobile}
-              email={communicationData.email}
-              links={communicationData.links}
-              onAddMobile={onAddMobile}
-              onAddEmail={onAddEmail}
-              onAddLink={onAddLink}
-              onRemoveMobile={onRemoveMobile}
-              onRemoveEmail={onRemoveEmail}
-              onRemoveLink={onRemoveLink}
-              onChangeMobile={onChangeMobile}
-              onChangeEmail={onChangeEmail}
-              onChangeLink={onChangeLink}
+              communicationData={communicationData}
+              onCommunicationDataChange={onCommunicationDataChange}
             />
           )}
         </div>

@@ -35,9 +35,23 @@ export const CollapsibleSectionView = React.forwardRef<HTMLElement, CollapsibleS
       return {}
     }, [isEditing, isExpanded, savedExpandedHeight])
 
-    // Generate placeholder text based on field labels
-    const placeholderText = `Line 1: ${fieldLabels.field1} – ${fieldLabels.field2} – (${fieldLabels.years})\nLines 2+: - • * or 1.\n\nSeparate entries with a blank line.`
-    const emptyPlaceholder = `Double-click to add ${title.toLowerCase()}. First line: ${fieldLabels.field1} – ${fieldLabels.field2} – (${fieldLabels.years}). Then bullets. Separate entries with a blank line.`
+    // Custom default messages for each section
+    let placeholderText = '';
+    let emptyPlaceholder = '';
+    const lowerTitle = title?.toLowerCase() || '';
+    if (lowerTitle === 'education') {
+      placeholderText = 'Add your degree, university name, and graduation years.';
+      emptyPlaceholder = 'Add your degree, university name, and graduation years.';
+    } else if (lowerTitle === 'experience') {
+      placeholderText = 'List your work experience, include your role, company, and main achievements.';
+      emptyPlaceholder = 'List your work experience, include your role, company, and main achievements.';
+    } else if (lowerTitle === 'projects') {
+      placeholderText = 'Highlight projects that represent your skills and creativity.';
+      emptyPlaceholder = 'Highlight projects that represent your skills and creativity.';
+    } else {
+      placeholderText = `Line 1: ${fieldLabels.field1} – ${fieldLabels.field2} – (${fieldLabels.years})\nLines 2+: - • * or 1.\n\nSeparate entries with a blank line.`;
+      emptyPlaceholder = `Double-click to add ${title.toLowerCase()}. First line: ${fieldLabels.field1} – ${fieldLabels.field2} – (${fieldLabels.years}). Then bullets. Separate entries with a blank line.`;
+    }
 
     return (
       <section

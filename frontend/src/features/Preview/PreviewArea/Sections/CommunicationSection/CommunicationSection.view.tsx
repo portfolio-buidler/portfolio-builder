@@ -1,134 +1,31 @@
 // CommunicationSection.view.tsx
 import React from 'react'
-import type { CommunicationSectionProps } from './CommunicationSection.types'
+import type { CommunicationSectionViewProps } from './CommunicationSection.types'
 
-export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
+/**
+ * Communication Section View Component (Pure Presentation)
+ * 
+ * Renders the Communication section UI with no business logic.
+ * All state and handlers are passed down from the container component.
+ */
+export const CommunicationSectionView: React.FC<CommunicationSectionViewProps> = ({
   title,
   complete,
   mobile,
   email,
   links,
+  selectedItem,
+  editingItem,
+  editValue,
+  inputRef,
   onAddMobile,
   onAddEmail,
   onAddLink,
-  onRemoveMobile,
-  onRemoveEmail,
-  onRemoveLink,
-  onChangeMobile,
-  onChangeEmail,
-  onChangeLink,
+  onDoubleClick,
+  onEditValueChange,
+  onKeyDown,
+  onRemove
 }) => {
-  const [selectedItem, setSelectedItem] = React.useState<{ type: 'mobile' | 'email' | 'link', index?: number } | null>(null)
-  const [editingItem, setEditingItem] = React.useState<{ type: 'mobile' | 'email' | 'link', index?: number } | null>(null)
-  const [editValue, setEditValue] = React.useState('')
-  const inputRef = React.useRef<HTMLInputElement>(null)
-
-  // Auto-edit when a new empty field is added
-  React.useEffect(() => {
-    if (mobile === '') {
-      setEditingItem({ type: 'mobile' })
-      setEditValue('')
-    } else if (email === '') {
-      setEditingItem({ type: 'email' })
-      setEditValue('')
-    } else {
-      const lastLinkIndex = links.length - 1
-      if (lastLinkIndex >= 0 && links[lastLinkIndex] === '') {
-        setEditingItem({ type: 'link', index: lastLinkIndex })
-        setEditValue('')
-      }
-    }
-  }, [mobile, email, links.length])
-
-  // Focus input when editing starts
-  React.useEffect(() => {
-    if (editingItem && inputRef.current) {
-      inputRef.current.focus()
-    }
-  }, [editingItem])
-
-  const handleDoubleClick = (type: 'mobile' | 'email' | 'link', index?: number) => {
-    // Only allow double-click on saved (non-empty) items
-    let value = ''
-    if (type === 'mobile' && mobile) value = mobile
-    else if (type === 'email' && email) value = email
-    else if (type === 'link' && index !== undefined) value = links[index]
-    
-    if (value.trim() !== '') {
-      setSelectedItem({ type, index })
-    }
-  }
-
-  const handleSave = () => {
-    if (editingItem && editValue.trim()) {
-      if (editingItem.type === 'mobile') {
-        onChangeMobile(editValue.trim())
-      } else if (editingItem.type === 'email') {
-        onChangeEmail(editValue.trim())
-      } else if (editingItem.type === 'link' && editingItem.index !== undefined) {
-        onChangeLink(editingItem.index, editValue.trim())
-      }
-    } else if (editingItem && editValue.trim() === '') {
-      // Remove empty field if user didn't type anything
-      if (editingItem.type === 'mobile') {
-        onRemoveMobile()
-      } else if (editingItem.type === 'email') {
-        onRemoveEmail()
-      } else if (editingItem.type === 'link' && editingItem.index !== undefined) {
-        onRemoveLink(editingItem.index)
-      }
-    }
-    setEditingItem(null)
-    setEditValue('')
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      handleSave()
-    } else if (e.key === 'Escape') {
-      // Remove empty field on escape
-      if (editingItem) {
-        if (editingItem.type === 'mobile') {
-          onRemoveMobile()
-        } else if (editingItem.type === 'email') {
-          onRemoveEmail()
-        } else if (editingItem.type === 'link' && editingItem.index !== undefined) {
-          onRemoveLink(editingItem.index)
-        }
-      }
-      setEditingItem(null)
-      setEditValue('')
-    }
-  }
-
-  const handleRemove = () => {
-    if (selectedItem) {
-      if (selectedItem.type === 'mobile') {
-        onRemoveMobile()
-      } else if (selectedItem.type === 'email') {
-        onRemoveEmail()
-      } else if (selectedItem.type === 'link' && selectedItem.index !== undefined) {
-        onRemoveLink(selectedItem.index)
-      }
-      setSelectedItem(null)
-    }
-  }
-
-  React.useEffect(() => {
-    const handleClickOutside = () => {
-      if (editingItem) {
-        handleSave()
-      }
-      setSelectedItem(null)
-    }
-    
-    if (editingItem || selectedItem) {
-      document.addEventListener('click', handleClickOutside)
-      return () => document.removeEventListener('click', handleClickOutside)
-    }
-  }, [editingItem, selectedItem, editValue])
-
   return (
     <section
       className="preview-section preview-section--communication"
@@ -137,8 +34,7 @@ export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
       <h3 className="preview-section__title">{title}</h3>
 
       <div className="preview-section__content">
-
-        {/* Mobile */}
+        {/* Mobile Row */}
         <div className="preview-communication__row">
           <span className="preview-communication__label">Mobile:</span>
           <div className="preview-communication__items">
@@ -150,8 +46,8 @@ export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
                     type="text"
                     className="preview-field preview-field--editing"
                     value={editValue}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    onKeyDown={handleKeyDown}
+                    onChange={(e) => onEditValueChange(e.target.value)}
+                    onKeyDown={onKeyDown}
                     onClick={(e) => e.stopPropagation()}
                     placeholder="+972 | Type phone number..."
                     aria-label="Edit mobile number"
@@ -159,17 +55,25 @@ export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
                 ) : (
                   mobile !== '' && (
                     <span
-                      className={`preview-field ${selectedItem?.type === 'mobile' ? 'preview-field--selected' : ''}`}
-                      onDoubleClick={(e) => { e.stopPropagation(); handleDoubleClick('mobile') }}
+                      className={`preview-field ${
+                        selectedItem?.type === 'mobile' ? 'preview-field--selected' : ''
+                      }`}
+                      onDoubleClick={(e) => { 
+                        e.stopPropagation()
+                        onDoubleClick('mobile')
+                      }}
                     >
                       {mobile}
                       {selectedItem?.type === 'mobile' && (
                         <button
                           className="preview-field__remove"
-                          onClick={(e) => { e.stopPropagation(); handleRemove() }}
+                          onClick={(e) => { 
+                            e.stopPropagation()
+                            onRemove()
+                          }}
                           aria-label="Remove mobile"
                         >
-                          −
+                          ∓
                         </button>
                       )}
                     </span>
@@ -189,7 +93,7 @@ export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
           </div>
         </div>
 
-        {/* Email */}
+        {/* Email Row */}
         <div className="preview-communication__row">
           <span className="preview-communication__label">Email:</span>
           <div className="preview-communication__items">
@@ -201,8 +105,8 @@ export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
                     type="text"
                     className="preview-field preview-field--editing"
                     value={editValue}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    onKeyDown={handleKeyDown}
+                    onChange={(e) => onEditValueChange(e.target.value)}
+                    onKeyDown={onKeyDown}
                     onClick={(e) => e.stopPropagation()}
                     placeholder="Type email..."
                     aria-label="Edit email address"
@@ -210,17 +114,25 @@ export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
                 ) : (
                   email !== '' && (
                     <span
-                      className={`preview-field ${selectedItem?.type === 'email' ? 'preview-field--selected' : ''}`}
-                      onDoubleClick={(e) => { e.stopPropagation(); handleDoubleClick('email') }}
+                      className={`preview-field ${
+                        selectedItem?.type === 'email' ? 'preview-field--selected' : ''
+                      }`}
+                      onDoubleClick={(e) => { 
+                        e.stopPropagation()
+                        onDoubleClick('email')
+                      }}
                     >
                       {email}
                       {selectedItem?.type === 'email' && (
                         <button
                           className="preview-field__remove"
-                          onClick={(e) => { e.stopPropagation(); handleRemove() }}
+                          onClick={(e) => { 
+                            e.stopPropagation()
+                            onRemove()
+                          }}
                           aria-label="Remove email"
                         >
-                          −
+                          ∓
                         </button>
                       )}
                     </span>
@@ -240,7 +152,7 @@ export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
           </div>
         </div>
 
-        {/* Links */}
+        {/* Links Row */}
         <div className="preview-communication__row">
           <span className="preview-communication__label">Links:</span>
           <div className="preview-communication__items">
@@ -252,8 +164,8 @@ export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
                     type="text"
                     className="preview-tag preview-tag--editing"
                     value={editValue}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    onKeyDown={handleKeyDown}
+                    onChange={(e) => onEditValueChange(e.target.value)}
+                    onKeyDown={onKeyDown}
                     onClick={(e) => e.stopPropagation()}
                     placeholder="Type link..."
                     aria-label="Edit link"
@@ -261,17 +173,27 @@ export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
                 ) : (
                   link !== '' && (
                     <span
-                      className={`preview-tag ${selectedItem?.type === 'link' && selectedItem?.index === index ? 'preview-tag--selected' : ''}`}
-                      onDoubleClick={(e) => { e.stopPropagation(); handleDoubleClick('link', index) }}
+                      className={`preview-tag ${
+                        selectedItem?.type === 'link' && selectedItem?.index === index 
+                          ? 'preview-tag--selected' 
+                          : ''
+                      }`}
+                      onDoubleClick={(e) => { 
+                        e.stopPropagation()
+                        onDoubleClick('link', index)
+                      }}
                     >
                       {link}
                       {selectedItem?.type === 'link' && selectedItem?.index === index && (
                         <button
                           className="preview-tag__remove"
-                          onClick={(e) => { e.stopPropagation(); handleRemove() }}
+                          onClick={(e) => { 
+                            e.stopPropagation()
+                            onRemove()
+                          }}
                           aria-label="Remove link"
                         >
-                          −
+                          ∓
                         </button>
                       )}
                     </span>
@@ -309,4 +231,4 @@ export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
   )
 }
 
-export default CommunicationSection
+export default CommunicationSectionView
