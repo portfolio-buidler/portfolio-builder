@@ -339,7 +339,7 @@
     }
   }
 
-    &__title {
+  &__title {
     font-family: var(--font-family-base, 'Poppins', sans-serif);
     font-weight: 500;
     font-style: normal;
@@ -470,6 +470,7 @@
   position: absolute;
   bottom: 0.75rem;
   right: 1rem;
+  margin-right: 20px;
 }
 
 .preview-section--skills {
@@ -482,6 +483,7 @@
   position: absolute;
   bottom: 0.75rem;
   right: 1rem;
+  margin-right: 20px;
 }
 
 .preview-section--communication {
@@ -494,6 +496,13 @@
   position: absolute;
   bottom: 0.75rem;
   right: 1rem;
+  margin-right: 20px;
+}
+
+/* Align help icons in Skills and Communication sections to match Education section */
+.preview-section--skills .preview-section__help-icon,
+.preview-section--communication .preview-section__help-icon {
+  margin-right: 32px;
 }
 
 /* ============================================================================
