@@ -1,7 +1,7 @@
 // CommunicationSection.tsx
 import React from 'react'
 import { CommunicationSectionView } from './CommunicationSection.view'
-import type { CommunicationSectionProps, CommunicationData } from './CommunicationSection.types'
+import type { CommunicationSectionProps } from './CommunicationSection.types'
 
 /**
  * Communication Section Container Component

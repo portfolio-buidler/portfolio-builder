@@ -1,7 +1,7 @@
 // SkillsSection.tsx
 import React from 'react'
 import { SkillsSectionView } from './SkillsSection.view'
-import type { SkillsSectionProps, SkillsData } from './SkillsSection.types'
+import type { SkillsSectionProps } from './SkillsSection.types'
 
 /**
  * Skills Section Container Component
