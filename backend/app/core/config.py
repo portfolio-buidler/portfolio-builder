@@ -14,8 +14,7 @@ ALLOWED_ORIGINS: list[str] = [
 
 
 MAX_UPLOAD_SIZE: int = int(os.getenv("MAX_UPLOAD_SIZE", 5 * 1024 * 1024))  # 5 MB
-
-UPLOAD_DIR: Path = Path(os.getenv("UPLOAD_DIR", "/tmp/portfolio_uploads")).absolute()
+UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", "/app/uploads"))
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 # allow-list of MIME types

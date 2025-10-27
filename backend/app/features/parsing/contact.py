@@ -1,137 +1,153 @@
-import re
+from __future__ import annotations
+from typing import List, Optional, Dict
+import regex as re
+import phonenumbers
 
-# Email: allow multi-part TLDs and prevent trailing letters (e.g., '...@gmail.comLinkedIn')
-EMAIL_REGEX = r"[a-zA-Z0-9.\-+_]+@[a-zA-Z0-9.\-+_]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})*(?![A-Za-z])"
+EMAIL_RE = re.compile(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", re.I)
+# Capture standalone URLs; we'll also split concatenated sequences later
+URL_RE = re.compile(r"https?://\S+", re.I)
+PHONE_RE = re.compile(r"(?:\+?\d[\d\s\-().]{7,}\d)")
 
-# General phone numbers pattern (verbose in original code)
-PHONE_REGEX = (
-    r"(?x)"                      # verbose mode
-    r"(?<!\d)"                  # don't start mid-number
-    r"(?:\+?\d{1,3}[\s\-]?)?" # optional country code
-    r"(?:0[\s\-]?)?"            # optional trunk 0
-    r"(?:"                       # main number
-    r"  \d{2,3}[\s\-]?\d{3}[\s\-]?\d{4}"  # 2-3 + 3 + 4
-    r"| \d{2,3}[\s\-]?\d{7}"                # 2-3 + 7
-    r"| \d{8,10}"                              # or straight digits
-    r")"
-    r"(?!\d)"                   # don't end mid-number
-)
+def _format_phone(s: str | None, country="IL") -> Optional[str]:
+    if not s:
+        return None
+    try:
+        num = phonenumbers.parse(s, country)
+        if phonenumbers.is_valid_number(num):
+            return phonenumbers.format_number(num, phonenumbers.PhoneNumberFormat.E164)
+    except Exception:
+        return s
+    return s
 
+def _guess_name_from_header(lines: List[str]) -> Optional[str]:
+    """Try to extract a proper name from top header lines that mix contact chunks.
 
-def first_match(pattern: str, text: str) -> str | None:
-    # Try the main regex first
-    m = re.search(pattern, text)
-    if m:
-        return m.group(0)
-    
-    # Flexible phone regex: optional +country, optional 0, digits separated by space/dash
-    flexible_phone = re.compile(r"""
-        (?<!\d)                    # not preceded by a digit
-        (\+?\d{1,3}[\s\-]?)?       # optional country code
-        (0?[\s\-]?)?               # optional leading 0
-        (\d{2,3}[\s\-]?\d{3}[\s\-]?\d{3,4})  # main number
-        (?!\d)                      # not followed by a digit
-    """, re.VERBOSE)
-    
-    m = flexible_phone.search(text)
-    if m:
-        return re.sub(r"\D", "", m.group(0))  # return digits only
-    
-    # Fallback: find any 9–11 digit cluster
-    digit_cluster = re.findall(r"\d{9,11}", text)
-    if digit_cluster:
-        return digit_cluster[0]
-    
+    Heuristics:
+    - Split by common separators (|, -, •, comma)
+    - Choose the segment with 2–4 tokens, capitalized words, no digits/@
+    - Prefer the earliest such segment among first 3 lines
+    """
+    seps = re.compile(r"\s*[|•·\-–—,]\s*")
+    for ln in lines[:3]:
+        # Remove obvious labels like 'LinkedIn'/'GitHub' before splitting
+        ln_clean = re.sub(r"\b(LinkedIn|GitHub|Email|Phone)\b", "", ln, flags=re.I)
+        # Drop any URL segments first to avoid gluing
+        ln_clean = re.sub(URL_RE, " ", ln_clean)
+        parts = [p.strip() for p in seps.split(ln_clean) if p.strip()]
+        for p in parts:
+            if any(ch.isdigit() for ch in p) or "@" in p.lower():
+                continue
+            tokens = p.split()
+            # Avoid common role words
+            if re.search(r"\b(Developer|Engineer|Manager|Lead|Architect|Designer|Student)\b", p, re.I):
+                continue
+            if 2 <= len(tokens) <= 4 and sum(t[:1].isupper() for t in tokens) >= 2:
+                return p
     return None
 
 
+def _split_concatenated_urls(s: str) -> List[str]:
+    # Split sequences like "http://a...http://b..." into separate URLs
+    parts: List[str] = []
+    for m in re.finditer(r"https?://", s, flags=re.I):
+        parts.append(m.start())
+    if not parts:
+        return []
+    idxs = parts + [len(s)]
+    out: List[str] = []
+    for i in range(len(parts)):
+        out.append(s[idxs[i]:idxs[i+1]].strip())
+    return [x for x in out if x]
 
-def name_from_email(email: str | None) -> str | None:
-    if not email:
-        return None
-    local = email.split("@", 1)[0]
-    parts = re.split(r"[._\-+]+", local)
-    parts = [re.sub(r"\d+", "", p).strip() for p in parts]
-    parts = [p for p in parts if p]
-    if parts:
-        return " ".join(w.capitalize() for w in parts[:4])
-    return None
+def _sanitize_profile_url(u: str) -> str:
+    # Remove trailing tokens that aren't part of the URL (e.g., appended names without separators)
+    u = u.strip().rstrip(').,;')
+    # If there's an embedded whitespace (rare), cut at first whitespace
+    if re.search(r"\s", u):
+        u = u.split()[0]
+    return u
 
-def guess_name_from_preamble(preamble_text: str) -> str | None:
-    if not preamble_text:
-        return None
-    
-    # Split by newlines OR commas (in case text was already cleaned)
-    lines = re.split(r'[\n,]', preamble_text)
-    
-    candidates = []
-    
-    for ln in lines[:50]:
-        s = ln.strip()
-        if not s or len(s) < 5:
-            continue
-        
-        # Skip lines with email or phone
-        if re.search(EMAIL_REGEX, s) or re.search(PHONE_REGEX, s):
-            continue
-        
-        # Skip URLs and common non-name patterns
-        if re.search(r'(https?://|www\.|\.com|profile|portfolio|github|linkedin)', s, re.IGNORECASE):
-            continue
-        
-        # Skip common section headers
-        if re.match(r'^(profile|summary|objective|about|experience|education|skills|professional)', s, re.IGNORECASE):
-            continue
-        
-        # If line contains separators (| or -), extract all parts
-        if '|' in s or '–' in s or ' - ' in s:
-            parts = re.split(r'\s*[|\-–]\s*', s)
-            for part in parts:
-                part = part.strip()
-                if part:
-                    candidates.append(part)
+def parse_contacts(lines: List[str], country="IL") -> Dict[str, Optional[str]]:
+    top = "\n".join(lines[:12])
+    # Prefer the first clear email anywhere, but strip 'mailto:' if present in source text
+    full_text = "\n".join(lines)
+    email_match = (EMAIL_RE.search(top) or EMAIL_RE.search(full_text))
+    email_val = email_match.group(0) if email_match else None
+
+    # Robust phone extraction: use phonenumbers matcher on the top block first
+    phone_val: Optional[str] = None
+    try:
+        for m in phonenumbers.PhoneNumberMatcher(top.replace('|', ' '), country):
+            if phonenumbers.is_valid_number(m.number):
+                phone_val = phonenumbers.format_number(m.number, phonenumbers.PhoneNumberFormat.E164)
+                break
+        if not phone_val:
+            for m in phonenumbers.PhoneNumberMatcher(full_text.replace('|', ' '), country):
+                if phonenumbers.is_valid_number(m.number):
+                    phone_val = phonenumbers.format_number(m.number, phonenumbers.PhoneNumberFormat.E164)
+                    break
+    except Exception:
+        # fallback to previous regex if phonenumbers failed
+        phone_match = PHONE_RE.search(top)
+        phone_val = _format_phone(phone_match.group(0), country) if phone_match else None
+
+    raw = full_text
+    urls = URL_RE.findall(raw)
+    # Also handle glued URLs on the same line by splitting them
+    extra_urls: List[str] = []
+    for u in urls:
+        if "http" in u and u.count("http") > 1:
+            extra_urls.extend(_split_concatenated_urls(u))
+    if extra_urls:
+        urls.extend(extra_urls)
+    # Clean urls and strip trailing punctuation/artifacts; split glued ones
+    clean_urls: List[str] = []
+    for u in urls:
+        if "http" in u and u.count("http") > 1:
+            clean_urls.extend([p.strip().rstrip(').,;') for p in _split_concatenated_urls(u)])
         else:
-            candidates.append(s)
-    
-    # Now evaluate all candidates and pick the best one
-    for candidate in candidates:
-        # Skip if starts with special chars or numbers
-        if re.match(r'^[^\w\s]', candidate) or re.match(r'^\d', candidate):
+            clean_urls.append(_sanitize_profile_url(u))
+    # Dedup preserve order
+    seen: set[str] = set()
+    dedup_urls: List[str] = []
+    for u in clean_urls:
+        if u in seen:
             continue
-        
-        # Skip locations (common patterns)
-        if re.search(r'(city|state|country|israel|tel aviv|jerusalem|haifa|yavne)', candidate, re.IGNORECASE):
-            continue
-        
-        # Skip job titles (common patterns)
-        if re.search(r'(manager|engineer|developer|designer|analyst|consultant|director|specialist|coordinator)', candidate, re.IGNORECASE):
-            continue
-        
-        words = candidate.split()
-        
-        # Name should be 2-4 words
-        if not (2 <= len(words) <= 4):
-            continue
-        
-        # Name should be reasonable length
-        if not (5 <= len(candidate) <= 60):
-            continue
-        
-        # Each word should start with capital letter (proper name)
-        if not all(w[0].isupper() for w in words if w):
-            continue
-        
-        # Should be mostly alphabetic (allow spaces)
-        alpha_ratio = sum(c.isalpha() or c.isspace() for c in candidate) / len(candidate)
-        if alpha_ratio < 0.75:
-            continue
-        
-        # Should not be all caps (likely a header)
-        if candidate.isupper():
-            continue
-        
-        # This looks like a valid name!
-        return candidate
-    
-    return None
+        seen.add(u)
+        dedup_urls.append(u)
+    linkedin = next((u for u in dedup_urls if "linkedin.com" in u.lower()), None)
+    github = next((u for u in dedup_urls if "github.com" in u.lower()), None)
+    # Sometimes LinkedIn/GitHub get glued with extra tokens; trim after profile slug when obviously wrong
+    if linkedin and not re.match(r"https?://(www\.)?linkedin\.com/", linkedin, re.I):
+        # try to split at first occurrence of 'linkedin.com/'
+        m = re.search(r"https?://[^\s]*linkedin\.com/[^\s]*", linkedin, re.I)
+        if m:
+            linkedin = _sanitize_profile_url(m.group(0))
+    if github and not re.match(r"https?://(www\.)?github\.com/", github, re.I):
+        m = re.search(r"https?://[^\s]*github\.com/[^\s]*", github, re.I)
+        if m:
+            github = _sanitize_profile_url(m.group(0))
 
+    # name heuristic: prefer header split, then fallback to first capitalized line near top
+    disallow = {"skills","experience","projects","education","profile","summary","military","about"}
+    name = _guess_name_from_header(lines)
+    if not name:
+        for ln in lines[:6]:
+            t = ln.strip()
+            if not t or any(k in t.lower() for k in disallow):
+                continue
+            if EMAIL_RE.search(t) or PHONE_RE.search(t) or URL_RE.search(t):
+                continue
+            tokens = t.split()
+            # Avoid picking job titles as names by requiring at least 2 words and no trailing 'Developer/Engineer/Manager'
+            if 1 < len(tokens) <= 6 and sum(w[:1].isupper() for w in tokens) >= 2 and not re.search(r"\b(Developer|Engineer|Manager|Lead|Consultant|Architect|Designer|Student)\b", t, re.I):
+                name = t
+                break
+
+    return {
+        "name": name,
+        "email": email_val,
+        "phone": phone_val,
+        "linkedin": linkedin,
+        "github": github,
+    }

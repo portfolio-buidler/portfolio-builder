@@ -1,0 +1,121 @@
+@use '../../styles/tokens/colors';
+@use '../../styles/tokens/typography';
+@use '../../styles/tokens/spacing';
+@use '../../styles/tokens/radii';
+@use '../../styles/tokens/shadows';
+@use '../../styles/tokens/zindex';
+@use '../../styles/mixins/mq' as mq;
+
+
+
+ .preview {
+  min-height: 100svh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden; /* Prevent horizontal scrollbar */
+  width: 100%;
+
+  &::before {
+    content: '';
+    position: fixed;
+    /* Using inset avoids 100vw/100vh overflow issues that can trigger scrollbars */
+    inset: 0;
+    background-image: var(--preview-bg);
+    background-size: 100% 100%; /* stretch to fill the visual viewport */
+    background-position: center center; /* kept for consistency */
+    background-repeat: no-repeat;
+    z-index: 0;
+  }
+
+  &__title {
+    font-family: var(--font-family-base);
+    color: var(--title-color);
+    text-transform: capitalize;
+    letter-spacing: 2px;
+    line-height: var(--line-height-tight);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-3xl);
+    position: fixed;
+    top: 2rem;
+    left: 1.5rem;
+    margin: 0;
+    z-index: 2;
+  }
+
+  &__container {
+    overflow-y: visible;
+    overflow-x: hidden;
+    position: relative;
+    width: 100%;
+    max-width: 100%; /* Allow full width, child controls max-width */
+    margin-inline: auto;
+    padding: 2rem;
+    z-index: 1;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    width: 100%;
+    max-width: min(1200px, 100vw - 4rem); /* Responsive: never exceed viewport */
+    gap: var(--space-3);
+    margin-inline: auto;
+    margin-top: 127px;
+    padding: 0;
+    box-sizing: border-box;
+    /* Make the preview area frame invisible */
+    opacity: 1;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    z-index: var(--z-base);
+    /* Preview area itself will be scrollable */
+    max-height: calc(100vh - 127px - 4rem);
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    
+    /* Hide native scrollbar */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+    &::-webkit-scrollbar {
+      display: none; /* Chrome/Safari/Opera */
+    }
+
+    &__scroll-indicator {
+        position: absolute;
+        top: 0;
+        right: 8px;            /* adjust to match your “line 4” rail */
+        width: 2px;
+        height: 32px;          /* the indicator head length */
+        background: currentColor;
+        opacity: 0.9;
+        pointer-events: none;
+        /* will-change so the compositor handles it smoothly */
+        will-change: transform;
+    }
+    
+    /* Custom scrollbar using "Line 4" as scroll indicator (fixed in viewport) */
+    &::after {
+      content: '';
+      position: fixed; /* stay fixed to the viewport */
+      top: var(--scroll-indicator-top, 0px); /* viewport-relative Y */
+      /* Position directly on the right border of preview-area (868px max-width + padding) */
+      right: calc(50vw - min(434px, 50vw - 2rem) - 0.5rem);
+      width: 0;
+      height: 296px; /* line length */
+      border-right: 3px solid #00000066;
+      opacity: var(--scroll-indicator-opacity, 0); /* controlled from JS */
+      pointer-events: none;
+      transition: top 80ms ease-out, opacity 120ms ease;
+      z-index: 10;
+    }
+
+    /* Slight right padding so fixed indicator doesn't overlap content */
+    padding-right: 0.75rem;
+  }
+}

@@ -1,14 +1,20 @@
-import UploadCV from './features/UploadCV/UploadCV'
-import { ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+
+import { Routes, Route } from 'react-router-dom';
+import UploadCV from './features/UploadCV/UploadCV';
+import Preview from './features/Preview/Preview';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   return (
     <>
-      <UploadCV />
+      <Routes>
+        <Route path="/" element={<UploadCV />} />
+        <Route path="/preview" element={<Preview />} />
+      </Routes>
       <ToastContainer position="top-right" autoClose={3000} />
     </>
-  )
+  );
 }
 
-export default App
+export default App;

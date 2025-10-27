@@ -1,82 +1,103 @@
 from __future__ import annotations
 from typing import Optional
-from app.features.resumes.jsonb_models import ResumeParsedJSON
-from .normalizers import clean_text
-from .sections import split_sections
-from .contact import EMAIL_REGEX, PHONE_REGEX, first_match, name_from_email, guess_name_from_preamble
-from .skills import parse_skills, parse_skills_inline
-from .education import parse_education_entries
-import re
 
-class ParserCore:
-    def parse(self, raw_text: str) -> ResumeParsedJSON:
-        # --- Split sections from raw text (headers preserved) ---
-        sections = split_sections(raw_text)
+from .normalizers import normalize_text, heal_urls
+import regex as re
+from .sections import find_sections
+from .contact import parse_contacts
+from .skills import parse_skills
+from .education import parse_education
+from .experience import parse_experience as _parse_experience
+from .projects import parse_projects as _parse_projects
 
-        # --- Clean section content individually ---
-        for key in sections:
-            if sections[key]:
-                if key == "EDUCATION":
-                    # Keep newlines for parsing entries
-                    continue
-                sections[key] = clean_text(sections[key])
-        
-        
-        # --- Preamble and name ---
-        preamble = sections.get("__preamble__", "")
-        name: Optional[str] = guess_name_from_preamble(preamble)
-        if not name:
-            email = first_match(EMAIL_REGEX, raw_text)
-            name = name_from_email(email)
+def parse_cv_text(raw_text: str) -> dict:
+    text = heal_urls(normalize_text(raw_text))
+    sections, lines = find_sections(text)
+    contacts = parse_contacts(lines)
 
+    # Detect a likely title near the top to use as fallback role for experience (e.g., 'Full Stack Developer')
+    fallback_role: Optional[str] = None
+    for ln in lines[:5]:
+        t = ln.strip()
+        if not t:
+            continue
+        # Short title-like line without email/phone/url
+        if 3 <= len(t) <= 40 and not any(x in t.lower() for x in ("@","http","www","linkedin","github")):
+            # Avoid picking the person's name (already parsed) or section aliases
+            if t != (contacts.get("name") or "") and not any(t.lower().startswith(a) for a in ("summary","profile","about")):
+                # Heuristic: contains a role keyword
+                if re.search(r"\b(Developer|Engineer|Manager|Lead|Architect|Designer)\b", t, re.I):
+                    fallback_role = t
+                    break
 
+    # Extract languages from LANGUAGES section if present
+    languages = None
+    lang_section = sections.get("military_service", "")
+    if "LANGUAGES" in text.upper():
+        # Find LANGUAGES section in lines
+        lang_lines = [l for l in lines if l.strip().upper().startswith("LANGUAGES")]
+        if lang_lines:
+            idx = lines.index(lang_lines[0])
+            lang_block = []
+            for l in lines[idx+1:]:
+                if not l.strip():
+                    break
+                lang_block.append(l.strip())
+            # Split by comma
+            languages = [x.strip() for x in ",".join(lang_block).split(",") if x.strip()]
+    military_service = sections.get("military_service") or None
+    if military_service:
+        military_service = military_service.split("\n")[0].strip()
+    # Primary skills from sections
+    primary_skills = parse_skills(sections.get("skills", ""))
+    # Fallback: if no skills detected, try to find a line containing tools/technologies inline in the raw text
+    if not primary_skills:
+        # 1) Inline tools/technologies line
+        m = re.search(r"(?im)^(?:tools\s*&\s*technologies|technologies|tools)\s*[:\-]?\s*(.+)$", text)
+        if m:
+            primary_skills = parse_skills(m.group(1))
+        # 2) A 'Skills' heading with lines below
+        if not primary_skills:
+            # Find the 'Skills' line and collect subsequent non-empty lines until next heading or blank line
+            lines_iter = text.splitlines()
+            for idx, ln in enumerate(lines_iter):
+                if re.match(r"^\s*skills\s*:?\s*$", ln, flags=re.I):
+                    collected = []
+                    for l in lines_iter[idx+1: idx+8]:
+                        t = l.strip()
+                        if not t:
+                            break
+                        # stop if another section heading appears
+                        if any(t.lower().startswith(a) for a in (alias for aliases in find_sections.__globals__["SECTION_ALIASES"].values() for alias in aliases)):
+                            break
+                        collected.append(t)
+                    if collected:
+                        primary_skills = parse_skills(" ".join(collected))
+                    break
 
-        # --- About section ---
-        about = None
-        for key in ("SUMMARY", "OBJECTIVE", "ABOUT", "PROFILE"):
-            if key in sections and sections[key]:
-                about = clean_text(sections[key])  # commas instead of \n
-                break
+    parsed = {
+        "name": contacts["name"],
+        "email": contacts["email"],
+        "phone": contacts["phone"],
+        "linkedin": contacts["linkedin"],
+        "github": contacts["github"],
+        "about": (sections.get("about") or None),
+        "skills": primary_skills,
+        "education": parse_education(sections.get("education", "")),
+        "experience": _parse_experience(sections.get("experience", ""), fallback_role=fallback_role),
+        "projects": _parse_projects(sections.get("projects", "")),
+        "military_service": military_service,
+        "languages": languages,
+    }
 
-        # --- Experience section ---
-        exp_blocks = []
-        for key in ("EXPERIENCE", "WORK EXPERIENCE", "PROFESSIONAL EXPERIENCE"):
-            if key in sections and sections[key]:
-                exp_blocks.append(clean_text(sections[key]))  # commas instead of \n
-        experience = " ".join(exp_blocks) if exp_blocks else None
-
-        # --- Education section ---
-        education_raw = sections.get("EDUCATION") or None
-        education = clean_text(education_raw, replace_newlines=False) if education_raw else None
-        education_entries = parse_education_entries(sections) if education_raw else None
-
-        # --- Skills ---
-        skills = parse_skills(sections, raw_text)
-
-        # fallback: scan full raw text for skills-like lines if not found in sections
-        if not skills:
-            m = re.search(
-                r"(?im)^(skills|technical skills|tools & technologies|technologies|tech stack|stack)[:\-]?\s*(.+)$",
-                raw_text
-            )
-            if m:
-                skills_text = m.group(2)
-                sep_regex = re.compile(r"\s*(?:[,\|\u00B7\u2022/;\n])+\s*")
-                skills = [tok.strip() for tok in sep_regex.split(skills_text) if tok.strip()]
-
-
-        # --- Phone ---
-        phone = first_match(PHONE_REGEX, raw_text)
-        email = first_match(EMAIL_REGEX, raw_text)
-
-        # --- Return structured JSON ---
-        return ResumeParsedJSON(
-            name=name,
-            email=email,
-            phone=phone,
-            about=about,
-            experience=experience,
-            education=education,
-            education_entries=education_entries,
-            skills=skills
-        )
+    return {
+        "full_text": text,
+        "parsed": parsed,
+        "meta": {
+            "source_file": None,
+            "mime": None,
+            "pages": None,
+            "parse_status": "success",
+            "errors": []
+        }
+    }

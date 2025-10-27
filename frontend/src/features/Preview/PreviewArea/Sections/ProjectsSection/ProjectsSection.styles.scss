@@ -1,0 +1,15 @@
+/**
+ * ProjectsSection.styles.scss
+ * 
+ * Projects section specific styles.
+ * Imports shared collapsible section styles and adds projects-specific overrides if needed.
+ */
+
+@use '../shared/CollapsibleSection/CollapsibleSection.styles.scss';
+
+/* ==========================================================================
+   PROJECTS-SPECIFIC OVERRIDES
+   ========================================================================== */
+
+// Add projects-specific style overrides here if needed
+// Currently using all shared styles from CollapsibleSection

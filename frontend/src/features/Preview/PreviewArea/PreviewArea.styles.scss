@@ -1,0 +1,807 @@
+@use '../../../styles/mixins/mq' as mq;
+
+
+/*
+ * Styles for the preview area. These rules build upon the global design
+ * system tokens defined elsewhere in the application. Cards within the
+ * preview make heavy use of the glass dark mode aesthetic: blurred
+ * backgrounds, semi–transparent fills and subtle inset shadows. The
+ * navigation controls reuse the brand colours for a cohesive look.
+ */
+
+.preview-area {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  max-width: min(868px, 100%); /* Never exceed parent width */
+  height: 100%;
+  padding-right: 1rem;
+  padding-left: 0; /* Remove left padding to center content */
+  margin-inline: auto;
+  // border: #fff 1px solid;
+  box-sizing: border-box; /* Include border in width calculation */
+  position: relative; /* For absolute positioning of back button */
+
+  /* Header containing the back button and instructional text */
+  &__header {
+    display: flex;
+    align-items: center; /* Center align items vertically */
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    flex-shrink: 0;
+    position: relative; /* For back button positioning */
+  }
+
+  &__back {
+    /* Circle button for navigating back - positioned outside left border */
+    position: absolute;
+    left: -3rem; /* Move further left, outside the border */
+    top: 5px; /* Align with top of header */
+    width: 2rem;
+    height: 2rem;
+    min-width: 2rem;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    font-size: 2rem;
+    line-height: 1;
+    font-weight: var(--font-weight-bold);
+    color: var(--title-color);
+    background-color: transparent;
+    backdrop-filter: none;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 200ms ease, color 200ms ease;
+
+    &:hover {
+      background-color: transparent;
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: none;
+    }
+  }
+
+  &__intro {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    text-align: left;
+  }
+
+  &__title {
+    width: 163px;
+    height: 38px;
+    /* angle: 0deg; Not a real CSS property */
+    opacity: 1;
+    font-family: var(--font-family-base, 'Poppins', sans-serif);
+    font-weight: 700; /* Bold */
+    font-style: normal; /* 'Bold' is represented via font-weight */
+  font-size: var(--font-size-3xl);
+    line-height: 100%;
+    letter-spacing: 0;
+    text-transform: capitalize;
+  color: var(--title-color);
+    margin: 0;
+    white-space: nowrap;
+    /* leading-trim: cap-height; Not a real CSS property */
+  }
+
+
+  &__subtitle {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+    color: var(--color-fg-muted);
+    margin: 0;
+    max-width: 42rem;
+    flex: 1;
+  }
+
+  /* Scrollable content container. This replaces the old __sections. */
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding-right: 1.5rem;
+    flex: 1;
+    position: relative;
+    
+    /* No overflow here - parent preview__body handles scrolling */
+  }
+
+  /* Row layout for skills and communication sections. On narrow
+   * viewports the sections will stack; on larger screens they appear
+   * side by side. */
+  &__row {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    @include mq.mq(md) {
+      flex-direction: row;
+    }
+  }
+
+  /* Footer navigation bar containing undo/redo and next. */
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-shrink: 0;
+  }
+
+  /* Container for all controls */
+  &__controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    width: 326px;
+    height: 60px;
+    border-radius: 15px;
+  background: var(--glass-bg-accent);
+    opacity: 1;
+  }
+
+  /* History container styled as a pill with two buttons inside. */
+  &__history {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 90px;
+    height: 30px;
+    gap: 12px;
+    border-radius: 15px;
+  background: var(--glass-bg-accent);
+    box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
+    opacity: 1;
+  }
+
+  &__history-btn {
+    /* Button dimensions */
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    opacity: 1;
+    
+    /* Display & alignment */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* Behavior */
+    cursor: pointer;
+    transition: opacity 150ms ease;
+    position: relative;
+
+    /* SVG icons rendered as background images */
+    &::before {
+      content: '';
+      display: block;
+      width: 24px;
+      height: 24px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      transition: opacity 150ms ease;
+    }
+
+    /* Undo button - arrow-back-up.svg */
+    &--undo::before {
+      background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M9 14L5 10M5 10L9 6M5 10H16C17.0609 10 18.0783 10.4214 18.8284 11.1716C19.5786 11.9217 20 12.9391 20 14C20 15.0609 19.5786 16.0783 18.8284 16.8284C18.0783 17.5786 17.0609 18 16 18H15" stroke="%23354052" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/%3E%3C/svg%3E');
+    }
+
+    /* Redo button - arrow-forward-up.svg */
+    &--redo::before {
+      background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M15 14L19 10M19 10L15 6M19 10H8C6.93913 10 5.92172 10.4214 5.17157 11.1716C4.42143 11.9217 4 12.9391 4 14C4 15.0609 4.42143 16.0783 5.17157 16.8284C5.92172 17.5786 6.93913 18 8 18H9" stroke="%23354052" stroke-opacity="0.6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/%3E%3C/svg%3E');
+    }
+
+    &:hover:not(:disabled)::before {
+      opacity: 0.8;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(52, 199, 89, 0.4);
+      border-radius: 4px;
+    }
+  }
+
+  /* Next button in the footer. Reuses the brand colours. */
+  &__next {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 192px;
+    height: 44px;
+    gap: 10px;
+    padding: 22px 8px 22px 14px;
+    border-radius: 15px;
+    font-family: var(--font-family-base, 'Poppins', sans-serif);
+    font-size: 20px;
+    font-weight: 500;
+    background-color: var(--brand-500);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    opacity: 1;
+    transition: background-color 200ms ease;
+
+    &:hover:not(:disabled) {
+      background-color: var(--brand-600);
+    }
+
+    &:active:not(:disabled) {
+      background-color: var(--brand-700);
+    }
+
+    &:disabled,
+    &[aria-disabled='true'] {
+      background-color: var(--gray-500);
+      cursor: not-allowed;
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.4);
+    }
+  }
+
+  /* Next button text styling (BEM element as sibling, not nested). */
+  &__next-text {
+    display: inline-block;
+    width: 45px;
+    height: 14px;
+    /* angle: 0deg; Not a real CSS property */
+    opacity: 1;
+    font-family: var(--font-family-base, 'Poppins', sans-serif);
+    font-weight: 500;
+    font-style: normal;
+    font-size: 20px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: center;
+    vertical-align: middle;
+    text-transform: capitalize;
+    color: var(--color-fg-default);
+    border-radius: 6px;
+    padding-bottom: 8px;
+  }
+
+  &__next-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    /* angle: 0deg; Not a real CSS property */
+    opacity: 1;
+    
+    svg {
+      width: 24px;
+      height: 24px;
+      opacity: 1;
+      stroke: var(--White-Text, #FFFEFF);
+      stroke-width: 2px;
+      fill: none;
+    }
+  }
+}
+
+/* Individual section card styling */
+.preview-section {
+  border-radius: var(--radius-2xl);
+  padding: 1rem 1.5rem;
+  background-color: var(--glass-bg-accent);
+  border: 1px solid var(--border-overlay-30);
+  /* Updated shadows per spec: two inset shadows; keep blur */
+  box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
+  backdrop-filter: blur(var(--blur-md, 12px));
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: var(--color-fg-default);
+
+  /* Title container - aligns title and help icon horizontally */
+  &__title-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  /* Help icon - aligned with title on the right */
+  &__help-icon {
+    width: 18px;
+    height: 18px;
+    opacity: 1;
+    cursor: pointer;
+    transition: opacity 200ms ease;
+    flex-shrink: 0; /* Prevent icon from shrinking */
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
+  &__title {
+    font-family: var(--font-family-base, 'Poppins', sans-serif);
+    font-weight: 500;
+    font-style: normal;
+    font-size: 20px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-transform: capitalize;
+    color: var(--title-color);
+    margin: 0;
+  }
+
+  &__content {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-normal);
+    color: var(--color-fg-default);
+
+    /* Ensure nested lists display bullets properly */
+    ul {
+      margin: 0.5rem 0 0 1.25rem;
+      padding: 0;
+      list-style-type: disc;
+    }
+
+    li {
+      margin-bottom: 0.25rem;
+    }
+  }
+
+  /* Collapsed/expanded states for collapsible sections */
+  &[data-expanded='false'] {
+    .preview-section__content {
+      max-height: 110px;
+      overflow: hidden;
+    }
+
+    .preview-section__toggle::before {
+      transform: rotate(0deg);
+    }
+  }
+
+  &[data-expanded='true'] {
+    .preview-section__content {
+      max-height: none;
+      overflow: visible;
+    }
+
+    .preview-section__toggle::before {
+      transform: rotate(180deg);
+    }
+  }
+
+  /* Header row used in cards that support collapsing. Aligns the
+   * title with a toggle button on the right. */
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  /* Toggle button used in collapsible cards (e.g. education). */
+  &__toggle {
+    border: none;
+    background: transparent;
+    font-size: var(--font-size-lg);
+    color: var(--title-color);
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 200ms ease;
+
+    /* When placed within a card (e.g. education) this toggle will be
+     * positioned absolutely at the bottom right. See the modifier rule
+     * for preview-section--education below. */
+
+    &:hover,
+    &:focus-visible {
+      color: var(--brand-500);
+    }
+
+    /* Arrow icon (SVG embedded as data URI) */
+    &::before {
+      content: '';
+      display: block;
+      width: 14px;
+      height: 8px;
+      background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M13 1L7 7L1 1" stroke="%23354052" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/%3E%3C/svg%3E');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      transition: transform 0.3s ease;
+      transform-origin: center;
+    }
+  }
+}
+
+/* Modifiers for specific preview sections. These classes allow you to
+ * assign unique background gradients or sizing rules to certain cards. */
+// Modifier classes for side-by-side cards
+.preview-section--skills,
+.preview-section--communication {
+  /* Ensure side-by-side sections share available space */
+  flex: 1 1 0;
+}
+
+
+/* Gradient backgrounds for individual cards (grouped for DRYness) */
+/* Note: .preview-section--about styles are now in AboutSection.styles.scss */
+
+.preview-section--education,
+.preview-section--skills,
+.preview-section--communication,
+.preview-section--experience {
+  background: var(--glass-bg-accent);
+}
+
+.preview-section--education {
+  position: relative;
+}
+
+/* Position the collapse toggle within the education card at the
+ * bottom right. This rule relies on the parent section being
+ * relatively positioned (see .preview-section--education). */
+.preview-section--education .preview-section__toggle {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 1rem;
+  margin-right: 20px;
+}
+
+.preview-section--skills {
+  position: relative;
+}
+
+/* Position the collapse toggle within the skills card at the
+ * bottom right. */
+.preview-section--skills .preview-section__toggle {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 1rem;
+  margin-right: 20px;
+}
+
+.preview-section--communication {
+  position: relative;
+}
+
+/* Position the collapse toggle within the communication card at the
+ * bottom right. */
+.preview-section--communication .preview-section__toggle {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 1rem;
+  margin-right: 20px;
+}
+
+/* Align help icons in Skills and Communication sections to match Education section */
+.preview-section--skills .preview-section__help-icon,
+.preview-section--communication .preview-section__help-icon {
+  margin-right: 32px;
+}
+
+/* ============================================================================
+   SKILLS SECTION SPECIFIC STYLES
+   ============================================================================ */
+
+.preview-skills {
+  &__row {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    margin-bottom: 12px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__label {
+    /* Label specific styling as per requirements */
+    width: auto;
+    height: 12px;
+    font-family: Poppins, sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 12px;
+    letter-spacing: 0%;
+    color: var(--Text-black, #354052);
+    opacity: 1;
+    
+    flex-shrink: 0;
+  }
+
+  &__items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    flex: 1;
+  }
+}
+
+/* ============================================================================
+   COMMUNICATION SECTION SPECIFIC STYLES
+   ============================================================================ */
+
+.preview-communication {
+  &__row {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-block: 0.35rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__label {
+    /* Label specific styling as per requirements */
+    width: auto;
+    height: 12px;
+    font-family: Poppins, sans-serif;
+    white-space: nowrap;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 12px;
+    letter-spacing: 0%;
+    color: var(--Text-black, #354052);
+    opacity: 1;
+    flex-shrink: 0;
+  }
+
+  &__items {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    min-width: 10ch;
+  }
+}
+
+/* ============================================================================
+   TAG STYLING (for languages, technologies, and links)
+   ============================================================================ */
+
+.preview-tag {
+  /* Glass Dark Mode styling as per requirements */
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 22px;
+  padding: 0px 12px;
+  border-radius: 6px;
+  background: #9B4D4E33;
+  box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
+  font-family: Poppins, sans-serif;
+  font-weight: 400;
+  font-size: 12px;  
+  line-height: 1;
+  color: var(--title-color);
+  white-space: nowrap;
+  opacity: 1;
+  cursor: pointer;
+  transition: background 150ms ease, transform 150ms ease;
+  border: none;
+
+  &:hover {
+    background: rgba(155, 77, 78, 0.25);
+  }
+
+  /* Add button variant */
+  &--add {
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    height: 22px;
+    min-width: 34px;
+    border-radius: 10px;
+    
+    &:hover {
+      background: var(--glass-bg-accent-hover);
+      transform: scale(1.05);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  /* Remove button (appears on double-click) */
+  &__remove {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--glass-bg-accent-focus);
+    color: #fff;
+    border: none;
+    font-size: 10px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 150ms ease;
+    padding: 0;
+    font-weight: 600;
+
+    &:hover {
+      background: var(--glass-bg-accent-hover);
+    }
+
+    &:active {
+      background: var(--glass-bg-accent-active);
+    }
+  }
+}
+
+/* ============================================================================
+   FIELD STYLING (for mobile and email)
+   ============================================================================ */
+
+.preview-field {
+  /* Glass Dark Mode styling similar to tags */
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 22px;
+  padding: 0px 12px;
+  border-radius: 10px;
+  background: #9B4D4E33;
+  box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
+  font-family: Poppins, sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--title-color);
+  white-space: nowrap;
+  opacity: 1;
+  cursor: pointer;
+  transition: background 150ms ease;
+
+  &:hover {
+    background: rgba(155, 77, 78, 0.25);
+  }
+
+  /* Remove button (appears on double-click) */
+  &__remove {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--glass-bg-accent-focus);
+    color: #fff;
+    border: none;
+    font-size: 12px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 150ms ease;
+    padding: 0;
+    font-weight: 600;
+
+    &:hover {
+      background: var(--glass-bg-accent-hover);
+    }
+
+    &:active {
+      background: var(--glass-bg-accent-active);
+    }
+  }
+}
+
+/* Customize the vertical scrollbar on the content container to match
+ * the mockup. Only WebKit-based browsers will pick up these rules.
+ */
+.preview-area__content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.preview-area__content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.preview-area__content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+  transition: background-color 200ms ease;
+}
+
+.preview-area__content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* ============================================================================
+   HINT TEXT STYLING (for empty state hints)
+   ============================================================================ */
+
+.preview-hint {
+  font-family: Poppins, sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 22px;
+  color: var(--color-fg-muted, #354052);
+  opacity: 0.6;
+  white-space: nowrap;
+}/* Append editing state styles to existing SCSS */
+
+/* ============================================================================
+   EDITING STATE STYLES
+   ============================================================================ */
+
+.preview-tag--editing,
+.preview-field--editing {
+  /* Input field styling when in edit mode */
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  min-width: 80px;
+  padding: 0px 8px;
+  border-radius: 6px;
+  background: rgba(155, 77, 78, 0.2);
+  border: 1px solid var(--glass-bg-accent-focus);
+  box-shadow: 0 0 0 2px rgba(155, 77, 78, 0.15);
+  font-family: Poppins, sans-serif;
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 1;
+  color: var(--title-color);
+  outline: none;
+  cursor: text;
+  transition: all 150ms ease;
+
+  &:focus {
+    background: rgba(155, 77, 78, 0.25);
+    box-shadow: 0 0 0 2px rgba(155, 77, 78, 0.25);
+  }
+}
+
+.preview-field--editing {
+  font-size: 12px;
+  min-width: 120px;
+  border-radius: 10px;
+}
+
+.preview-tag--selected,
+.preview-field--selected {
+  /* Highlight when selected (before removal) */
+  background: rgba(155, 77, 78, 0.4);
+  box-shadow: 0 0 0 2px rgba(155, 77, 78, 0.2);
+}

@@ -1,22 +1,46 @@
+[build-system]
+requires = ["hatchling>=1.18"]
+build-backend = "hatchling.build"
+
 [project]
 name = "portfolio-backend"
 version = "0.0.1"
+description = "FastAPI backend for CV parsing and portfolio builder"
+requires-python = ">=3.12"
+
 dependencies = [
-  "fastapi",
-  "uvicorn[standard]",
-  "python-multipart",
-  "sqlalchemy>=2.0",
-  "psycopg[binary]",
-  "alembic>=1.7",
-  "asyncpg",
-  "pydantic>=2.0",
-  "python-dotenv",
-  "pypdf",
-  "python-docx",
-  "docx2txt",
-  "docx2python",
+  # API + server
+  "fastapi>=0.112",
+  "uvicorn[standard]>=0.30",
+
+  # Validation + forms
+  "pydantic[email]>=2.7",
+  "python-multipart>=0.0.9",
+
+  # DB stack
+  "SQLAlchemy>=2.0",
+  "alembic>=1.13",
+  "psycopg[binary]>=3.2",
+  "asyncpg>=0.29",
+
+  # Parsing core
+  "pypdf>=5.0.0",
   "defusedxml>=0.7.1",
-  # test deps
-  "pytest",
-  "httpx",
+  "regex>=2024.5.15",
+  "phonenumbers>=8.13.0",
+  "ftfy>=6.2.0",
+
+  # runtime env
+  "python-dotenv>=1.0.0",
 ]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.2",
+  "pytest-asyncio>=0.23",
+  "httpx>=0.27"
+]
+docx-fallbacks = [ "python-docx>=1.1.2" ]
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]

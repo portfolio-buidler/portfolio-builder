@@ -1,0 +1,15 @@
+/**
+ * ExperienceSection.styles.scss
+ * 
+ * Experience section specific styles.
+ * Imports shared collapsible section styles and adds experience-specific overrides if needed.
+ */
+
+@use '../shared/CollapsibleSection/CollapsibleSection.styles.scss';
+
+/* ==========================================================================
+   EXPERIENCE-SPECIFIC OVERRIDES
+   ========================================================================== */
+
+// Add experience-specific style overrides here if needed
+// Currently using all shared styles from CollapsibleSection

@@ -1,34 +1,51 @@
-from typing import Annotated
-from pydantic import BaseModel, ConfigDict, StrictStr, StringConstraints
+from __future__ import annotations
+from typing import Annotated, Optional, List
+from pydantic import BaseModel, ConfigDict, StrictStr, StringConstraints, EmailStr
 
-NonEmptyShortStr = Annotated[str, StringConstraints(min_length=1, max_length=200, strip_whitespace=True)]
+# centralize limits so we don't bikeshed later
+MAX_NAME_LEN = 200
+MAX_SKILL_LEN = 64
+MAX_EDU_FIELD_LEN = 200
+MAX_DESC_LEN = 1500  # bullets can be long; JSONB can take it
 
+NonEmptyShortStr = Annotated[str, StringConstraints(min_length=1, max_length=MAX_NAME_LEN, strip_whitespace=True)]
+SkillStr = Annotated[str, StringConstraints(min_length=1, max_length=MAX_SKILL_LEN, strip_whitespace=True)]
+EduStr = Annotated[str, StringConstraints(min_length=1, max_length=MAX_EDU_FIELD_LEN, strip_whitespace=True)]
+DescStr = Annotated[str, StringConstraints(min_length=1, max_length=MAX_DESC_LEN, strip_whitespace=True)]
 
 class EducationEntry(BaseModel):
-    degree: StrictStr | None = None
-    institution: StrictStr | None = None
-    year: StrictStr | None = None  # supports single year or range like "2019-2023"
+    degree: Optional[EduStr] = None
+    institution: Optional[EduStr] = None
+    years: Optional[StrictStr] = None      # e.g. "2021–2025" or "Expected 2025"
 
+class ExperienceEntry(BaseModel):
+    role: Optional[NonEmptyShortStr] = None
+    company: Optional[NonEmptyShortStr] = None
+    dates: Optional[StrictStr] = None      # keep human-readable for MVP
+    description: Optional[DescStr] = None
 
-class ResumeParsedJSON(BaseModel):
-    """Simplified parsed resume schema.
+class ProjectEntry(BaseModel):
+    project_name: Optional[NonEmptyShortStr] = None
+    description: Optional[DescStr] = None
 
-    - name: Full name 
-    - email: First-matched email address
-    - phone: First-matched phone number
-    - about: Summary/About text block
-    - experience: Free-text block aggregated under Experience/Projects sections
-    - education: Free-text block aggregated under Education section
-    - education_entries: List of parsed entries with (degree, institution, year)
-    - skills: List of skills if a Skills section or inline list is detected
-    """
+class ResumeParsed(BaseModel):
+    # Contact
+    name: Optional[NonEmptyShortStr] = None
+    email: EmailStr | StrictStr | None = None
+    phone: Optional[StrictStr] = None
+    linkedin: Optional[StrictStr] = None
+    github: Optional[StrictStr] = None
 
-    name: StrictStr | None = None
-    email: StrictStr | None = None
-    phone: StrictStr | None = None
-    about: StrictStr | None = None
-    experience: StrictStr | None = None
-    education: StrictStr | None = None
-    skills: list[NonEmptyShortStr] | None = None
-    education_entries: list[EducationEntry] | None = None
+    # Summary
+    about: Optional[StrictStr] = None
+
+    # Structured
+    skills: List[SkillStr] = []
+    education: List[EducationEntry] = []
+    experience: List[ExperienceEntry] = []
+    projects: List[ProjectEntry] = []
+
+    # Locale-specific
+    military_service: Optional[StrictStr] = None
+
     model_config = ConfigDict(strict=True)

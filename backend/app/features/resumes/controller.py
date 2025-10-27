@@ -1,47 +1,46 @@
 from __future__ import annotations
+
 from fastapi import UploadFile, File, HTTPException, status
-from sqlalchemy import select, update
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy import select
 from app.core.db import AsyncSessionLocal
 from app.db.models_resume import Resume
 from app.shared.enums import ParseStatus
-from .upload_schemas import UploadResponse, UploadData
+from .upload_schemas import UploadResponse, UploadData, SimpleParsedResponse
 from .service import ResumeService
 from .security import SUPPORTED_MIME
+from .jsonb_models import ResumeParsed
 
 async def upload_cv(file: UploadFile = File(...)) -> UploadResponse:
-    svc = ResumeService()
-
-    # Fast-fail unsupported MIME before touching the database (improves perf & testability)
-    ct = file.content_type or ""
+    # Quick content-type guard; we still validate magic bytes later.
+    ct = (file.content_type or "")
     if ct not in SUPPORTED_MIME:
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail=f"Unsupported content type: {ct}"
+            detail=f"Unsupported content type: {ct or '(missing)'}"
         )
 
-    # Parse first; if this fails we don't touch the DB
-    result = await svc.handle_upload(file)
-
-    # Create DB row only on success
+    svc = ResumeService()
+    # Parse first. If it fails, DB stays clean.
+    result = await svc.handle_upload(file)  # UploadResult dataclass
+    parsed_model = result.parsed_json
+    # Persist parsed JSON (JSONB) only on success
     async with AsyncSessionLocal() as session:
         resume = Resume(
-            user_id=None,
+            user_id=None,  # wire your auth later
             source_file_id=None,
-            original_name=file.filename or "upload.bin",
+            original_name=result.original_name,
             parse_status=ParseStatus.success,
             is_primary=False,
-            parsed_json=result.parsed_json.model_dump(mode="json"),
+            parsed_json=parsed_model.model_dump(mode="json"),
         )
         session.add(resume)
         await session.flush()
         resume_id = resume.id
         await session.commit()
 
-    # Response includes both full_text and parsed JSON
     extracted = {
         "full_text": result.raw_text,
-        "parsed": result.parsed_json.model_dump(mode="json"),
+        "parsed": parsed_model.model_dump(mode="json"),
         "file_info": {"filename": result.original_name, "content_type": result.content_type},
     }
     return UploadResponse(
@@ -51,7 +50,6 @@ async def upload_cv(file: UploadFile = File(...)) -> UploadResponse:
     )
 
 async def upload_status(file_id: str) -> UploadResponse:
-    # reads status from DB (not the filesystem)
     async with AsyncSessionLocal() as session:
         stmt = select(Resume.id, Resume.parse_status, Resume.parsed_json).where(Resume.id == int(file_id))
         row = (await session.execute(stmt)).first()
@@ -67,3 +65,12 @@ async def upload_status(file_id: str) -> UploadResponse:
             message="OK",
             data=UploadData(fileId=str(row.id), extractedData=extracted),
         )
+
+# Optional simplified endpoint returning flattened parsed data only
+async def upload_cv_simple(file: UploadFile = File(...)) -> SimpleParsedResponse:
+    svc = ResumeService()
+    result = await svc.handle_upload(file)
+    return SimpleParsedResponse(
+        **result.parsed_json.model_dump(mode="json"),
+        full_text=result.raw_text
+    )

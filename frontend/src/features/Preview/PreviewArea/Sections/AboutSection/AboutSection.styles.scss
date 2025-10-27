@@ -1,0 +1,139 @@
+/*
+ * About Section Styles
+ * Handles view/edit mode transitions and content area behavior
+ */
+
+.preview-section--about {
+  height: auto;
+  min-height: 156px;
+  border-radius: 15px;
+  background: var(--glass-bg-accent);
+  box-shadow: var(--shadow-glass-inset);
+  padding: 6px;
+  position: relative;
+  cursor: pointer;
+  transition: box-shadow 200ms ease;
+
+  /* Edit mode */
+  &[data-editing='true'] {
+    cursor: default;
+    
+    .preview-section__content {
+      height: auto;
+      min-height: 120px;
+      overflow: visible;
+      background: #FFFEFF66;
+    }
+  }
+
+  .preview-section__title-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 22px;
+    padding: 8px 10px 0;
+    gap: 2px;
+  }
+
+  .preview-section__title {
+    font-family: var(--font-family-base, 'Poppins', sans-serif);
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 100%;
+    text-transform: capitalize;
+    color: var(--title-color);
+    margin: 0;
+  }
+
+  .preview-section__char-counter,
+  .preview-section__placeholder {
+    font-family: Poppins;
+    font-weight: 500;
+    font-size: 12px;
+    margin-right: 32px;
+    line-height: 100%;
+    text-transform: capitalize;
+    color: #354052A6;
+  }
+
+  .preview-section__char-counter {
+    white-space: nowrap;
+  }
+
+  .preview-section__placeholder {
+    margin: 0;
+    padding: 0;
+  }
+
+  .preview-section__content {
+    height: auto;
+    min-height: 120px;
+    margin-top: 1px;
+    border-radius: 12px;
+    background: transparent;
+    padding: 0.5rem;
+    overflow: auto;
+    box-sizing: border-box;
+
+    p:not(.preview-section__placeholder) {
+      margin: 0;
+      font-family: var(--font-family-base, 'Poppins', sans-serif);
+      font-size: var(--font-size-md);
+      line-height: var(--line-height-normal);
+      color: var(--color-fg-default);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  }
+
+  .preview-section__textarea {
+    width: 100%;
+    min-height: 120px;
+    height: auto;
+    border: none;
+    background: transparent;
+    font-family: var(--font-family-base, 'Poppins', sans-serif);
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-normal);
+    color: var(--color-fg-default);
+    resize: none;
+    overflow: hidden;
+    padding: 0.5rem;
+    margin: -0.5rem;
+    box-sizing: border-box;
+
+    &:focus {
+      outline: none;
+    }
+
+    &::placeholder {
+      font-family: Poppins;
+      font-weight: 500;
+      font-size: 12px;
+      line-height: 100%;
+      text-transform: capitalize;
+      color: #354052A6;
+    }
+  }
+
+  /* Custom scrollbar */
+  .preview-section__content::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .preview-section__content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
+  }
+
+  .preview-section__content::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+    transition: background-color 200ms ease;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.35);
+    }
+  }
+}

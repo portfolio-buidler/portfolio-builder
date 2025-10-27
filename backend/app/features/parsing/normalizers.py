@@ -1,45 +1,29 @@
-import re
+from __future__ import annotations
+import regex as re
+from ftfy import fix_text # type: ignore
 
-import re
+NBSP = "\xa0"
 
-def clean_text(text: str | None, replace_newlines: bool = True) -> str:
-    """
-    Normalize text:
-    - Replace escaped or actual newlines with ', ' (optional)
-    - Normalize common Unicode punctuation to ASCII
-    - Remove zero-width characters
-    - Collapse multiple spaces/tabs
-    - Returns empty string if input is None
-    """
-    if not text:
-        return ""
+def normalize_text(s: str) -> str:
+    # Unicode fixes first
+    s = fix_text(s or "")
+    s = s.replace(NBSP, " ")
+    # normalize bullets to a single char
+    s = s.replace("•", "•").replace("·", "•")
+    # collapse whitespace
+    s = re.sub(r"[ \t]+", " ", s)
+    s = re.sub(r"[ \t]+\n", "\n", s)
+    s = re.sub(r"\n{3,}", "\n\n", s)
+    return s.strip()
 
-    # Convert escaped newlines (\n) to actual newlines
-    text = text.replace("\\n", "\n")
+def heal_urls(s: str) -> str:
+    # merge "https://example.\ncom/path" -> "https://example.com/path"
+    s = re.sub(r"(https?://[^\s]+)\.\n([^\s]+)", r"\1.\2", s, flags=re.I)
+    # Only merge URL across newline if the next line is a clear path continuation
+    # Acceptable continuations: starts with '/', '#', '?', '&', or a URL-encoded sequence like '%'
+    # DO NOT merge if the next line starts with letters/digits (to avoid gluing names like '.../Hezi')
+    s = re.sub(r"(https?://[^\s]+)\n([/#?&%][^\s]*)", r"\1\2", s, flags=re.I)
+    return s
 
-    # Normalize other newlines
-    text = text.replace("\r\n", "\n").replace("\r", "\n")
-
-    # Replace common Unicode punctuation with ASCII equivalents
-    text = text.translate(str.maketrans({
-        "\u00A0": " ",  # NBSP
-        "\u2010": "-",  # hyphen
-        "\u2011": "-",  # non-breaking hyphen
-        "\u2012": "-",  # figure dash
-        "\u2013": "-",  # en dash
-        "\u2014": "-",  # em dash
-        "\u2015": "-",  # horizontal bar
-        "\u2212": "-",  # minus sign
-    }))
-
-    # Remove zero-width characters
-    text = text.replace("\u200B", "").replace("\u200C", "").replace("\u200D", "").replace("\u00AD", "")
-
-    # Collapse multiple spaces/tabs
-    text = re.sub(r"[ \t]+", " ", text)
-
-    # Replace all newlines with ', ' if requested
-    if replace_newlines:
-        text = re.sub(r"\n+", ", ", text)
-
-    return text.strip()
+def split_blocks(text: str) -> list[str]:
+    return [b.strip() for b in re.split(r"\n{2,}", text) if b.strip()]

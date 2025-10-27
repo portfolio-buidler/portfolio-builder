@@ -1,86 +1,106 @@
-import re
-from app.features.resumes.jsonb_models import EducationEntry
+from __future__ import annotations
+from dataclasses import dataclass, asdict
+import regex as re
 
-_YEAR_PAT = re.compile(
-    r"\b(19\d{2}|20\d{2})(?:\s*[–\-]\s*(19\d{2}|20\d{2}))?\b"
-)
-_DEGREE_PHRASE_PAT = re.compile(
-    r"\b((?:Bachelor(?:’s|'s)?\s+Degree|Master(?:’s|'s)?\s+Degree|PhD|Doctorate|Diploma|Associate)"
-    r"(?:\s+in\s+[A-Z][^,;]{1,80})?)",
-    re.IGNORECASE,
-)
-_DEGREE_FIELD_PAREN_PAT = re.compile(
-    r"\b([A-Z][A-Za-z&\s]{2,80}\(\s*(?:B\.Sc|M\.Sc|MBA|PhD|Doctorate|Diploma|Associate)\.?\s*\))",
-    re.IGNORECASE,
-)
-_DEGREE_PAT = re.compile(
-    r"\b(B\.?\s?(?:Sc|A)|Bachelor(?:'s)?|M\.?\s?(?:Sc|A)|"
-    r"Master(?:'s)?|PhD|Doctorate|Diploma|Associate)\b",
-    re.IGNORECASE,
-)
-_INSTITUTION_HINT_PAT = re.compile(
-    r"\b(University|College|Institute|Polytechnic|Academy|School)\b",
-    re.IGNORECASE,
-)
-_COURSEWORK_SKIP = re.compile(
-    r"\b(coursework|courses|relevant\s+coursework)\b", re.IGNORECASE
+DEGREE_WORDS = r"\b(?:B\.?Sc\.?|BSc|B\.?A\.?|BA|M\.?Sc\.?|MSc|M\.?A\.?|MA|Bachelor|Master|Ph\.?D\.?|Bachelor'?s\s+Degree|Master'?s\s+Degree|Certificate)\b"
+YEAR_RANGE_RE = re.compile(
+    r"(?:(?:20|19)\d{2})(?:\s*[–-]\s*(?:Present|(?:20|19)\d{2}))?|Expected\s+(?:20|19)\d{2}",
+    re.I,
 )
 
+@dataclass
+class EducationItem:
+    degree: str | None = None
+    institution: str | None = None
+    years: str | None = None
 
-def _split_lines(text: str) -> list[str]:
-    return [ln.strip() for ln in text.split("\n") if ln.strip()]
-
-
-def _clean_institution(text: str) -> str:
-    """Remove trailing years (e.g., '2021 - 2025') from institution names."""
-    return re.sub(r'\s*\(?\b\d{4}(?:\s*[-–]\s*\d{4})?\)?$', '', text).strip(" ,.;-")
-
-
-def parse_education_entries(sections: dict[str, str]) -> list[EducationEntry] | None:
-    edu = sections.get("EDUCATION")
-    if not edu:
-        return None
-
-    lines = _split_lines(edu)
-    entries: list[EducationEntry] = []
-
+def parse_education(s: str) -> list[dict]:
+    if not s:
+        return []
+    items: list[EducationItem] = []
+    degree_pattern = re.compile(DEGREE_WORDS, re.I)
+    lines = [ln.strip() for ln in s.split("\n") if ln.strip()]
+    blocks: list[str] = []
+    current: str = ""
     for ln in lines:
-        ln = ln.strip()
-        if not ln:
-            continue
-        # Skip coursework or lines that are clearly not degrees
-        if _COURSEWORK_SKIP.search(ln) or ln.lower().startswith(("completed", "led", "developed", "tools", "technologies")):
-            continue
+        if degree_pattern.search(ln) and current:
+            blocks.append(current.strip())
+            current = ln
+        else:
+            current = f"{current} {ln}".strip() if current else ln
+    if current:
+        blocks.append(current.strip())
+    for block in blocks:
+        line = " ".join(block.split())
+        deg = degree_pattern.search(line)
+        yrs = YEAR_RANGE_RE.search(line)
+        inst: str | None = None
+        degree_phrase: str | None = None
+        if deg:
+            # Expand degree phrase to include preceding words up to delimiter and trailing subject like "... Degree in X"
+            # Determine boundaries: start at previous delimiter (comma or start), end at next delimiter (comma, ' - ', '(')
+            start = 0
+            # Move start to previous delimiter only if it appears after 0
+            prev_comma = line.rfind(",", 0, deg.end())
+            prev_dash = line.rfind(" - ", 0, deg.end())
+            prev_pipe = line.rfind(" | ", 0, deg.end())
+            prev_delim = max(prev_comma, prev_dash, prev_pipe)
+            if prev_delim != -1:
+                start = prev_delim + (3 if prev_delim == prev_dash or prev_delim == prev_pipe else 1)
+            # End after degree and optional subject until next delimiter
+            end_candidates = [
+                x for x in [
+                    line.find(",", deg.end()),
+                    line.find(" (", deg.end()),
+                    line.find(" - ", deg.end()),
+                    line.find(" | ", deg.end()),
+                ] if x != -1
+            ]
+            end = min(end_candidates) if end_candidates else len(line)
+            degree_phrase = line[start:end].strip(" ,-|()")
+            # Normalize prefixes like 'Graduate B.Sc.' -> 'B.Sc.'
+            degree_phrase = re.sub(r"^Graduate\s+", "", degree_phrase, flags=re.I)
 
-        # Extract year
-        year_match = _YEAR_PAT.search(ln)
-        year = year_match.group(0) if year_match else None
+            # Institution: try text after degree phrase; if missing, use preceding portion of block
+            after = line[end:].strip(",|-;: ")
+            inst = (
+                after.split(" (", 1)[0]
+                .split(" | ", 1)[0]
+                .split(" - ", 1)[0]
+                or None
+            )
+            if inst:
+                inst = re.sub(r"^[.\s]*(?:in|of)\s+", "", inst, flags=re.I).strip()
+                inst = re.sub(r"^(?:'s\s+)?degree\s+in\s+", "", inst, flags=re.I).strip()
+                # Trim trailing narrative like 'Relevant Coursework', 'Completed coursework', etc.
+                inst = re.split(r"\b(Relevaknt|Relevant|Completed) coursework\b", inst, flags=re.I)[0].strip()
+            else:
+                # Fall back: try text before degree phrase (institution first line)
+                before = line[:start].strip(" ,-|()")
+                if before:
+                    inst = before
+                else:
+                    # Try previous line in block
+                    block_lines = block.splitlines()
+                    idx = None
+                    for i, bl in enumerate(block_lines):
+                        if deg.group(0) in bl:
+                            idx = i
+                            break
+                    if idx is not None and idx > 0:
+                        inst_candidate = block_lines[idx - 1].strip()
+                        if inst_candidate:
+                            inst = inst_candidate
+                    elif idx is not None and idx + 1 < len(block_lines):
+                        inst_candidate = block_lines[idx + 1].strip()
+                        if inst_candidate:
+                            inst = inst_candidate
 
-        # Remove year from line to simplify parsing
-        ln_clean = ln
-        if year:
-            ln_clean = ln_clean.replace(year, "").strip()
-
-        # Split degree vs institution (only first comma or pipe)
-        parts = re.split(r",|\|", ln_clean, maxsplit=1)
-        degree_candidate = parts[0].strip() if parts else None
-        degree = re.sub(r"\s+", " ", degree_candidate).strip(" ,.;") if degree_candidate else None
-
-        # Institution: take second part if exists
-        institution = None
-        if len(parts) > 1:
-            institution_candidate = parts[1].strip()
-
-            # Remove everything starting from '(' (year or extra info)
-            institution_candidate = re.split(r"\(", institution_candidate, maxsplit=1)[0].strip()
-            # Remove empty parentheses and trailing dashes
-            institution_candidate = re.sub(r"\(\s*\)", "", institution_candidate).strip()
-
-            if institution_candidate:
-                institution = institution_candidate
-
-        if degree:  # only add if degree exists
-            entries.append(EducationEntry(degree=degree, institution=institution, year=year))
-            break  # <-- stop after the first real degree entry
-
-    return entries or None
+        items.append(
+            EducationItem(
+                degree=degree_phrase or (deg.group(0) if deg else None),
+                institution=inst,
+                years=yrs.group(0) if yrs else None,
+            )
+        )
+    return [asdict(x) for x in items if any([x.degree, x.institution, x.years])]
