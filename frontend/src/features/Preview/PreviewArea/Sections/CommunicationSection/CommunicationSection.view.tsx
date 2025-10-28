@@ -2,13 +2,10 @@
 import React from 'react'
 import type { CommunicationSectionViewProps } from './CommunicationSection.types'
 import questionMarkIcon from '../../../../../assets/icons/PreviewPage/question-mark.svg'
+import { getLinkLabel } from './CommunicationSection'
 
-/**
- * Communication Section View Component (Pure Presentation)
- * 
- * Renders the Communication section UI with no business logic.
- * All state and handlers are passed down from the container component.
- */
+
+
 export const CommunicationSectionView: React.FC<CommunicationSectionViewProps> = ({
   title,
   complete,
@@ -213,8 +210,9 @@ export const CommunicationSectionView: React.FC<CommunicationSectionViewProps> =
                         e.stopPropagation()
                         onDoubleClick('link', index)
                       }}
+                      title={link}
                     >
-                      {link}
+                      {getLinkLabel(link)}
                       {selectedItem?.type === 'link' && selectedItem?.index === index && (
                         <button
                           className="preview-tag__remove"

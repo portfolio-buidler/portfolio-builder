@@ -42,3 +42,9 @@
 14. undo redo controls colors needs tweaking, 
 
 15. remove green borders when clicking on undo redo controls.
+
+16. fix undo redo oparating only for about section
+
+
+fixed :
+11
