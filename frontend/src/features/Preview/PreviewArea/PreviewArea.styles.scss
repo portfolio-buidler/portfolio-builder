@@ -13,30 +13,38 @@
   flex-direction: column;
   align-items: stretch;
   width: 100%;
-  max-width: min(868px, 100%); /* Never exceed parent width */
+  max-width: min(868px, 100%);
+  /* Never exceed parent width */
   height: 100%;
   padding-right: 1rem;
-  padding-left: 0; /* Remove left padding to center content */
+  padding-left: 0;
+  /* Remove left padding to center content */
   margin-inline: auto;
   // border: #fff 1px solid;
-  box-sizing: border-box; /* Include border in width calculation */
-  position: relative; /* For absolute positioning of back button */
+  box-sizing: border-box;
+  /* Include border in width calculation */
+  position: relative;
+  /* For absolute positioning of back button */
 
   /* Header containing the back button and instructional text */
   &__header {
     display: flex;
-    align-items: center; /* Center align items vertically */
+    align-items: center;
+    /* Center align items vertically */
     gap: 1rem;
     margin-bottom: 1.25rem;
     flex-shrink: 0;
-    position: relative; /* For back button positioning */
+    position: relative;
+    /* For back button positioning */
   }
 
   &__back {
     /* Circle button for navigating back - positioned outside left border */
     position: absolute;
-    left: -3rem; /* Move further left, outside the border */
-    top: 5px; /* Align with top of header */
+    left: -3rem;
+    /* Move further left, outside the border */
+    top: 5px;
+    /* Align with top of header */
     width: 2rem;
     height: 2rem;
     min-width: 2rem;
@@ -80,13 +88,15 @@
     /* angle: 0deg; Not a real CSS property */
     opacity: 1;
     font-family: var(--font-family-base, 'Poppins', sans-serif);
-    font-weight: 700; /* Bold */
-    font-style: normal; /* 'Bold' is represented via font-weight */
-  font-size: var(--font-size-3xl);
+    font-weight: 700;
+    /* Bold */
+    font-style: normal;
+    /* 'Bold' is represented via font-weight */
+    font-size: var(--font-size-3xl);
     line-height: 100%;
     letter-spacing: 0;
     text-transform: capitalize;
-  color: var(--title-color);
+    color: var(--title-color);
     margin: 0;
     white-space: nowrap;
     /* leading-trim: cap-height; Not a real CSS property */
@@ -111,7 +121,7 @@
     padding-right: 1.5rem;
     flex: 1;
     position: relative;
-    
+
     /* No overflow here - parent preview__body handles scrolling */
   }
 
@@ -122,6 +132,7 @@
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
+
     @include mq.mq(md) {
       flex-direction: row;
     }
@@ -145,7 +156,7 @@
     width: 326px;
     height: 60px;
     border-radius: 15px;
-  background: var(--glass-bg-accent);
+    background: var(--glass-bg-accent);
     opacity: 1;
   }
 
@@ -158,7 +169,7 @@
     height: 30px;
     gap: 12px;
     border-radius: 15px;
-  background: var(--glass-bg-accent);
+    background: var(--glass-bg-accent);
     box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
     opacity: 1;
   }
@@ -172,12 +183,12 @@
     border: none;
     background: transparent;
     opacity: 1;
-    
+
     /* Display & alignment */
     display: flex;
     align-items: center;
     justify-content: center;
-    
+
     /* Behavior */
     cursor: pointer;
     transition: opacity 150ms ease;
@@ -290,7 +301,7 @@
     height: 24px;
     /* angle: 0deg; Not a real CSS property */
     opacity: 1;
-    
+
     svg {
       width: 24px;
       height: 24px;
@@ -331,7 +342,8 @@
     opacity: 1;
     cursor: pointer;
     transition: opacity 200ms ease;
-    flex-shrink: 0; /* Prevent icon from shrinking */
+    flex-shrink: 0;
+    /* Prevent icon from shrinking */
 
     &:hover {
       opacity: 0.8;
@@ -531,7 +543,7 @@
     letter-spacing: 0%;
     color: var(--Text-black, #354052);
     opacity: 1;
-    
+
     flex-shrink: 0;
   }
 
@@ -602,7 +614,7 @@
   box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
   font-family: Poppins, sans-serif;
   font-weight: 400;
-  font-size: 12px;  
+  font-size: 12px;
   line-height: 1;
   color: var(--title-color);
   white-space: nowrap;
@@ -623,7 +635,7 @@
     height: 22px;
     min-width: 34px;
     border-radius: 10px;
-    
+
     &:hover {
       background: var(--glass-bg-accent-hover);
       transform: scale(1.05);
@@ -759,7 +771,9 @@
   color: var(--color-fg-muted, #354052);
   opacity: 0.6;
   white-space: nowrap;
-}/* Append editing state styles to existing SCSS */
+}
+
+/* Append editing state styles to existing SCSS */
 
 /* ============================================================================
    EDITING STATE STYLES
@@ -817,32 +831,37 @@ $toggle-transition: 0.3s;
   /* Add transition for smooth expansion */
   transition: height $toggle-transition ease;
   overflow: hidden;
-  
+
   .preview-section__content {
     transition: max-height $toggle-transition ease;
   }
-  
+
   /* Collapsed state (default) */
   &[data-expanded='false'] {
     .preview-section__content {
       max-height: $skills-comm-collapsed-height;
       overflow: hidden;
     }
-    
+
     .preview-section__toggle::before {
       transform: rotate(0deg);
     }
   }
-  
+
   /* Expanded state */
   &[data-expanded='true'] {
     .preview-section__content {
       max-height: 400px;
       overflow-y: auto;
       overflow-x: hidden;
+      scrollbar-width: none; 
+      -ms-overflow-style: none; 
 
+      &::-webkit-scrollbar {
+        display: none; 
+      }
     }
-    
+
     .preview-section__toggle::before {
       transform: rotate(180deg);
     }
@@ -857,31 +876,37 @@ $toggle-transition: 0.3s;
   /* Add transition for smooth expansion */
   transition: height $toggle-transition ease;
   overflow: hidden;
-  
+
   .preview-section__content {
     transition: max-height $toggle-transition ease;
   }
-  
+
   /* Collapsed state (default) */
   &[data-expanded='false'] {
     .preview-section__content {
       max-height: $skills-comm-collapsed-height;
       overflow: hidden;
     }
-    
+
     .preview-section__toggle::before {
       transform: rotate(0deg);
     }
   }
-  
+
   /* Expanded state */
   &[data-expanded='true'] {
     .preview-section__content {
       max-height: 400px;
       overflow-y: auto;
       overflow-x: hidden;
+      scrollbar-width: none; // ✅ Firefox
+      -ms-overflow-style: none; // ✅ IE/Edge
+
+      &::-webkit-scrollbar {
+        display: none; // ✅ Chrome/Safari/Opera
+      }
     }
-    
+
     .preview-section__toggle::before {
       transform: rotate(180deg);
     }
@@ -922,7 +947,7 @@ $toggle-transition: 0.3s;
   width: 14px;
   height: 8px;
   margin-right: 20px;
-  
+
   /* Ensure toggle button has proper transition */
   &::before {
     transition: transform $toggle-transition ease;
