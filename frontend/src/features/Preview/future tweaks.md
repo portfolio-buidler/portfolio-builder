@@ -27,4 +27,18 @@
 	- Use a grey color for toggle buttons when inactive/disabled.
 	- Ensure color contrast meets accessibility standards.
 
-8. [Add more enhancements here as needed]
+8. About section - need to change the text font of the content inside the section to poppins
+
+9. collapsible sections bullet points "-" "~" "*" or "1" are converted to "●" when uploading docx file.
+
+10. skillsCategorizer - languages are not prograaming languages, but Hebrew, Russian,English,Arabic.. and etc
+
+11. Links at Communication section should appear as "Linkedin" not as the raw URL
+
+12. About section - after User uploads resume and first arrives to preview page, the content of about section only appears after double clicking on the section instead of striaht from the start.
+
+13. skill and Communication sections need to define minimal height.
+
+14. undo redo controls colors needs tweaking, 
+
+15. remove green borders when clicking on undo redo controls.

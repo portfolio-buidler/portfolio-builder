@@ -3,6 +3,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PreviewAreaView } from './PreviewArea.view'
 import type { PreviewSection, SkillsData, CommunicationData } from './PreviewArea.types'
+import { useResumeHydration } from './hooks/useResumeHydration.ts'
 
 /**
  * PreviewArea Container Component
@@ -12,73 +13,93 @@ import type { PreviewSection, SkillsData, CommunicationData } from './PreviewAre
  * - Undo/redo history
  * - Skills and communication data
  * - Navigation and edit mode
+ * - Resume data hydration from uploaded CV
  */
 const PreviewArea: React.FC = () => {
   const navigate = useNavigate()
 
   /* ========================================================================
-     INITIAL DATA
+     RESUME HYDRATION
+     Load parsed CV data from store and transform to frontend format
      ======================================================================== */
 
-  const initialSkillsData: SkillsData = {
+  const { hydratedData, hasHydrated, markAsHydrated } = useResumeHydration()
+
+  /* ========================================================================
+     INITIAL DATA (with hydration support)
+     ======================================================================== */
+
+  // Use hydrated data if available, otherwise use empty defaults
+  const initialSkillsData: SkillsData = hydratedData?.skills || {
     languages: [],
     technologies: [],
   }
 
-  const initialCommunicationData: CommunicationData = {
+  const initialCommunicationData: CommunicationData = hydratedData?.communication || {
     mobile: null,
     email: null,
     links: [],
   }
 
-  const initialSections: PreviewSection[] = [
-    {
-      id: 'about',
-      title: 'About Me',
-      content: '',
-      required: true,
-      complete: false,
-    },
-    {
-      id: 'education',
-      title: 'Education',
-      content: '',
-      required: true,
-      complete: false,
-    },
-    {
-      id: 'skills',
-      title: 'Skills',
-      content: null,
-      required: true,
-      complete: true,
-    },
-    {
-      id: 'communication',
-      title: 'Communication',
-      content: null,
-      required: true,
-      complete: true,
-    },
-    {
-      id: 'experience',
-      title: 'Work Experience',
-      content: null,
-      required: false,
-      complete: true,
-    },
-    {
-      id: 'projects',
-      title: 'Projects',
-      content: '',
-      required: false,
-      complete: false,
-    },
-  ]
+  // Build initial sections with hydrated content
+  const getInitialSections = (): PreviewSection[] => {
+    const aboutContent = hydratedData?.about || ''
+    const educationContent = hydratedData?.education || ''
+    const experienceContent = hydratedData?.experience || ''
+    const projectsContent = hydratedData?.projects || ''
+
+    return [
+      {
+        id: 'about',
+        title: 'About Me',
+        content: aboutContent ? <p style={{ whiteSpace: 'pre-wrap' }}>{aboutContent}</p> : '',
+        required: true,
+        complete: aboutContent.length > 0,
+      },
+      {
+        id: 'education',
+        title: 'Education',
+        content: educationContent,
+        required: true,
+        complete: educationContent.length > 0,
+      },
+      {
+        id: 'skills',
+        title: 'Skills',
+        content: null,
+        required: true,
+        complete: true, // Completion checked separately via isSkillsComplete
+      },
+      {
+        id: 'communication',
+        title: 'Communication',
+        content: null,
+        required: true,
+        complete: true, // Completion checked separately via isCommunicationComplete
+      },
+      {
+        id: 'experience',
+        title: 'Work Experience',
+        content: experienceContent,
+        required: false,
+        complete: experienceContent.length > 0,
+      },
+      {
+        id: 'projects',
+        title: 'Projects',
+        content: projectsContent,
+        required: false,
+        complete: projectsContent.length > 0,
+      },
+    ]
+  }
 
   /* ========================================================================
      STATE
      ======================================================================== */
+
+  // Initialize sections with hydrated data on first render
+  const [initialSections] = React.useState<PreviewSection[]>(getInitialSections)
 
   // History for undo/redo functionality
   const [history, setHistory] = React.useState<PreviewSection[][]>([initialSections])
@@ -101,6 +122,25 @@ const PreviewArea: React.FC = () => {
 
   // Edit mode tracking
   const [editingSectionId, setEditingSectionId] = React.useState<string | null>(null)
+
+  /* ========================================================================
+     HYDRATION EFFECT
+     Mark as hydrated after initial mount to prevent re-hydration
+     ======================================================================== */
+
+  React.useEffect(() => {
+    if (hydratedData && !hasHydrated) {
+      markAsHydrated()
+      console.log('[PreviewArea] Resume data hydrated successfully', {
+        about: hydratedData.about.length > 0,
+        education: hydratedData.education.length > 0,
+        experience: hydratedData.experience.length > 0,
+        projects: hydratedData.projects.length > 0,
+        skills: hydratedData.skills,
+        communication: hydratedData.communication,
+      })
+    }
+  }, [hydratedData, hasHydrated, markAsHydrated])
 
   /* ========================================================================
      COMPUTED VALUES
