@@ -10,6 +10,7 @@ import type { CommunicationSectionProps } from './CommunicationSection.types'
  * - Mobile, email, and links fields
  * - Add/remove/edit operations
  * - Edit mode state management
+ * - Auto-expand/collapse during editing
  * - Keyboard shortcuts and click-outside handling
  * 
  * @param props - Component props including title, initial data, and callbacks
@@ -19,7 +20,7 @@ export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
   complete,
   communicationData,
   onCommunicationDataChange,
-  isExpanded,
+  isExpanded: isExpandedProp,
   onToggleExpanded
 }) => {
   /* ========================================================================
@@ -43,6 +44,15 @@ export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
   
   // Ref for the input field to handle focus
   const inputRef = React.useRef<HTMLInputElement>(null)
+
+  // Internal expanded state for auto-expand during editing
+  const [autoExpanded, setAutoExpanded] = React.useState(false)
+
+  // Ref to track content height
+  const contentRef = React.useRef<HTMLDivElement>(null)
+
+  // Determine if section should be expanded (manual toggle OR auto-expand during edit)
+  const isExpanded = isExpandedProp || autoExpanded
 
   /* ========================================================================
      DATA HANDLERS - Update Parent State
@@ -165,6 +175,9 @@ export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
     
     setEditingItem(null)
     setEditValue('')
+    
+    // Auto-collapse after saving
+    setAutoExpanded(false)
   }, [editingItem, editValue, handleChangeMobile, handleChangeEmail, handleChangeLink,
       handleRemoveMobile, handleRemoveEmail, handleRemoveLink])
 
@@ -188,6 +201,9 @@ export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
       }
       setEditingItem(null)
       setEditValue('')
+      
+      // Auto-collapse on escape
+      setAutoExpanded(false)
     }
   }, [editingItem, handleSave, handleRemoveMobile, handleRemoveEmail, handleRemoveLink])
 
@@ -207,6 +223,45 @@ export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
     
     setSelectedItem(null)
   }, [selectedItem, handleRemoveMobile, handleRemoveEmail, handleRemoveLink])
+
+  /* ========================================================================
+     AUTO-EXPAND/COLLAPSE LOGIC
+     ======================================================================== */
+
+  /**
+   * Check if content overflows and auto-expand when editing starts
+   */
+  React.useEffect(() => {
+    if (!editingItem) return
+
+    // Check if content would overflow
+    const checkOverflow = () => {
+      const contentEl = contentRef.current
+      if (!contentEl) return
+
+      // Get the collapsed height (110px from SCSS)
+      const collapsedHeight = 110
+      const contentHeight = contentEl.scrollHeight
+
+      // If content exceeds collapsed height, auto-expand
+      if (contentHeight > collapsedHeight) {
+        setAutoExpanded(true)
+      }
+    }
+
+    // Small delay to ensure DOM has updated with new editing item
+    const timer = setTimeout(checkOverflow, 50)
+    return () => clearTimeout(timer)
+  }, [editingItem])
+
+  /**
+   * Clear auto-expand when user manually collapses the section
+   */
+  React.useEffect(() => {
+    if (isExpandedProp === false) {
+      setAutoExpanded(false)
+    }
+  }, [isExpandedProp])
 
   /* ========================================================================
      EFFECTS
@@ -272,6 +327,7 @@ export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
       editingItem={editingItem}
       editValue={editValue}
       inputRef={inputRef}
+      contentRef={contentRef}
       onAddMobile={handleAddMobile}
       onAddEmail={handleAddEmail}
       onAddLink={handleAddLink}
@@ -280,7 +336,7 @@ export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
       onKeyDown={handleKeyDown}
       onRemove={handleRemove}
       isExpanded={isExpanded}
-      onToggleExpanded={onToggleExpanded ? () => onToggleExpanded(!isExpanded) : undefined}
+      onToggleExpanded={onToggleExpanded ? () => onToggleExpanded(!isExpandedProp) : undefined}
     />
   )
 }

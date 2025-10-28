@@ -1,6 +1,5 @@
 @use '../../../styles/mixins/mq' as mq;
 
-
 /*
  * Styles for the preview area. These rules build upon the global design
  * system tokens defined elsewhere in the application. Cards within the
@@ -804,4 +803,129 @@
   /* Highlight when selected (before removal) */
   background: rgba(155, 77, 78, 0.4);
   box-shadow: 0 0 0 2px rgba(155, 77, 78, 0.2);
+}
+
+/* Section constants for collapsed state */
+$skills-comm-collapsed-height: 110px;
+$toggle-transition: 0.3s;
+
+/* ============================================================================
+   SKILLS SECTION - EXPAND/COLLAPSE
+   ============================================================================ */
+
+.preview-section--skills {
+  /* Add transition for smooth expansion */
+  transition: height $toggle-transition ease;
+  overflow: hidden;
+  
+  .preview-section__content {
+    transition: max-height $toggle-transition ease;
+  }
+  
+  /* Collapsed state (default) */
+  &[data-expanded='false'] {
+    .preview-section__content {
+      max-height: $skills-comm-collapsed-height;
+      overflow: hidden;
+    }
+    
+    .preview-section__toggle::before {
+      transform: rotate(0deg);
+    }
+  }
+  
+  /* Expanded state */
+  &[data-expanded='true'] {
+    .preview-section__content {
+      max-height: 400px;
+      overflow-y: auto;
+      overflow-x: hidden;
+
+    }
+    
+    .preview-section__toggle::before {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+/* ============================================================================
+   COMMUNICATION SECTION - EXPAND/COLLAPSE
+   ============================================================================ */
+
+.preview-section--communication {
+  /* Add transition for smooth expansion */
+  transition: height $toggle-transition ease;
+  overflow: hidden;
+  
+  .preview-section__content {
+    transition: max-height $toggle-transition ease;
+  }
+  
+  /* Collapsed state (default) */
+  &[data-expanded='false'] {
+    .preview-section__content {
+      max-height: $skills-comm-collapsed-height;
+      overflow: hidden;
+    }
+    
+    .preview-section__toggle::before {
+      transform: rotate(0deg);
+    }
+  }
+  
+  /* Expanded state */
+  &[data-expanded='true'] {
+    .preview-section__content {
+      max-height: 400px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    
+    .preview-section__toggle::before {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+/* ============================================================================
+   ADD BUTTON VISIBILITY - ALWAYS SHOW IN COLLAPSED STATE
+   ============================================================================
+   
+   Ensures the Add button remains visible even when content overflows
+   and the section is in collapsed state.
+   ============================================================================ */
+
+.preview-section--skills[data-expanded='false'],
+.preview-section--communication[data-expanded='false'] {
+  .preview-tag--add {
+    /* Ensure add button is always visible */
+    position: relative;
+    z-index: 10;
+  }
+}
+
+/* ============================================================================
+   TOGGLE BUTTON - CONSISTENT WITH COLLAPSIBLE SECTION
+   ============================================================================
+   
+   The toggle button styling is already defined in PreviewArea.styles.scss,
+   but we ensure it works consistently with the expand/collapse states.
+   ============================================================================ */
+
+.preview-section--skills .preview-section__toggle,
+.preview-section--communication .preview-section__toggle {
+  /* Match CollapsibleSection toggle positioning */
+  position: absolute;
+  bottom: var(--space-3);
+  right: var(--space-2);
+  width: 14px;
+  height: 8px;
+  margin-right: 20px;
+  
+  /* Ensure toggle button has proper transition */
+  &::before {
+    transition: transform $toggle-transition ease;
+    transform-origin: center;
+  }
 }

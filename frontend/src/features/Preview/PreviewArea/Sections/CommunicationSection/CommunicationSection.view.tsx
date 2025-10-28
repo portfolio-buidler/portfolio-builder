@@ -19,6 +19,7 @@ export const CommunicationSectionView: React.FC<CommunicationSectionViewProps> =
   editingItem,
   editValue,
   inputRef,
+  contentRef,
   onAddMobile,
   onAddEmail,
   onAddLink,
@@ -44,7 +45,10 @@ export const CommunicationSectionView: React.FC<CommunicationSectionViewProps> =
         />
       </div>
 
-      <div className="preview-section__content">
+      <div 
+        ref={contentRef}
+        className="preview-section__content"
+      >
         {/* Mobile Row */}
         <div className="preview-communication__row">
           <span className="preview-communication__label">Mobile:</span>
@@ -167,6 +171,22 @@ export const CommunicationSectionView: React.FC<CommunicationSectionViewProps> =
         <div className="preview-communication__row">
           <span className="preview-communication__label">Links:</span>
           <div className="preview-communication__items">
+            {/* Add button always at the start */}
+            <button
+              type="button"
+              className="preview-tag preview-tag--add"
+              onClick={onAddLink}
+              aria-label={links.length > 0 ? "Add another link" : "Add social link"}
+            >
+              +
+            </button>
+            
+            {/* Show hint if no links yet */}
+            {links.length === 0 && (
+              <span className="preview-hint">Add your social media</span>
+            )}
+            
+            {/* Render existing links after the add button */}
             {links.map((link, index) => (
               <React.Fragment key={`link-${index}`}>
                 {editingItem?.type === 'link' && editingItem?.index === index ? (
@@ -212,29 +232,6 @@ export const CommunicationSectionView: React.FC<CommunicationSectionViewProps> =
                 )}
               </React.Fragment>
             ))}
-
-            {links.length === 0 ? (
-              <>
-                <button
-                  type="button"
-                  className="preview-tag preview-tag--add"
-                  onClick={onAddLink}
-                  aria-label="Add social link"
-                >
-                  +
-                </button>
-                <span className="preview-hint">Add your social media</span>
-              </>
-            ) : (
-              <button
-                type="button"
-                className="preview-tag preview-tag--add"
-                onClick={onAddLink}
-                aria-label="Add another link"
-              >
-                +
-              </button>
-            )}
           </div>
         </div>
       </div>
