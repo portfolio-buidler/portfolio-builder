@@ -16,6 +16,10 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
   errorMessage,
   onStatusChange,
   onRetry,
+  user,
+  onLogin,
+  onRegister,
+  onLogout,
 }) => {
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (isUploading) {
@@ -44,13 +48,40 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
           Portify.
         </h1>
 
-        <div className="upload-cv__auth-buttons">
-          <button type="button" className="upload-cv__auth-btn upload-cv__auth-btn--login">
-            Log in
-          </button>
-          <button type="button" className="upload-cv__auth-btn upload-cv__auth-btn--register">
-            Registration
-          </button>
+        {/* Auth buttons or username */}
+        <div className="upload-cv__auth-section">
+          {user ? (
+            <div className="upload-cv__user-info">
+              <span className="upload-cv__username">{user.fullName}</span>
+              {onLogout && (
+                <button
+                  type="button"
+                  className="upload-cv__logout-btn"
+                  onClick={onLogout}
+                  aria-label="Logout"
+                >
+                  Logout
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="upload-cv__auth-buttons">
+              <button 
+                type="button" 
+                className="upload-cv__auth-btn upload-cv__auth-btn--login"
+                onClick={onLogin}
+              >
+                Log in
+              </button>
+              <button 
+                type="button" 
+                className="upload-cv__auth-btn upload-cv__auth-btn--register"
+                onClick={onRegister}
+              >
+                Registration
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="upload-cv__body">

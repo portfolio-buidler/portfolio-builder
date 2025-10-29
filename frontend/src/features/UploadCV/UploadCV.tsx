@@ -1,16 +1,19 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import backgroundImage from '../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6c8.jpg';
 import { UploadCVView } from './UploadCV.view';
 import { uploadCV } from '../../services/uploadService';
 import { toast } from 'react-toastify';
-import type { UploadCVViewProps } from './UploadCV.types';
+import type { UploadCVViewProps, User } from './UploadCV.types';
 import { useResumeStore } from '../../store/resumeStore';
-import { useEffect } from 'react';
 import type { UploadProgressData, UploadStatus } from './UplaodArea/UploadArea.types';
-import { useNavigate } from 'react-router-dom';
+import { isAuthenticated, getCurrentUser, logoutUser } from '../../services/AuthService';
 
 
 function UploadCV() {
+  const navigate = useNavigate();
+  
+  // File upload state
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState<UploadProgressData | undefined>(undefined);
@@ -18,13 +21,33 @@ function UploadCV() {
   const { resumeData, setResumeData } = useResumeStore();
   const [status, setStatus] = useState<UploadStatus>('idle');
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
-  const navigate = useNavigate();
+  
+  // Authentication state
+  const [user, setUser] = useState<User | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // Check authentication on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      if (isAuthenticated()) {
+        try {
+          const currentUser = await getCurrentUser();
+          setUser(currentUser);
+        } catch (error) {
+          console.error('Failed to get current user:', error);
+          setUser(null);
+        }
+      }
+      setAuthChecked(true);
+    };
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     console.log('[UploadCV] resumeData in global store:', resumeData);
   }, [resumeData]);
 
-  const onFileSelect = (file: File) => {
+  const onFileSelect = useCallback((file: File) => {
     console.log('📁 File selected via file input:');
     console.log('Name:', file.name);
     console.log('Size:', file.size, 'bytes', `(${(file.size / 1024 / 1024).toFixed(2)} MB)`);
@@ -34,9 +57,9 @@ function UploadCV() {
     console.log('---');
     setSelectedFile(file);
     setProgress(undefined);
-  };
+  }, []);
 
-  const onDropFile = (file: File) => {
+  const onDropFile = useCallback((file: File) => {
     console.log('🎯 File dropped via drag & drop:');
     console.log('Name:', file.name);
     console.log('Size:', file.size, 'bytes', `(${(file.size / 1024 / 1024).toFixed(2)} MB)`);
@@ -45,7 +68,7 @@ function UploadCV() {
     console.log('Full File Object:', file);
     console.log('---');
     setSelectedFile(file);
-  };
+  }, []);
 
   const handleUpload = async () => {
     if (!selectedFile) return;
@@ -85,14 +108,14 @@ function UploadCV() {
       setErrorMessage(undefined);
 
       console.log('[UploadCV] Simulated read back from store:', useResumeStore.getState().resumeData);
-  // Navigate to preview page after successful upload
-  navigate('/preview');
+      // Navigate to preview page after successful upload
+      navigate('/preview');
     } catch (err: any) {
       const msg = err?.response?.data?.detail || err?.message || 'Upload failed';
       console.error('❌ Upload error:', err);
       toast.error(String(msg));
       setStatus('error');
-      setErrorMessage('🦖 Oops! We couldn’t process that / Give it another shot');
+      setErrorMessage('🦖 Oops! We couldn\'t process that / Give it another shot');
     } finally {
       setIsUploading(false);
       if (selectedFile) {
@@ -118,6 +141,31 @@ function UploadCV() {
     document.getElementById('file-input')?.click();
   };
 
+  // Auth handlers
+  const handleLogin = useCallback(() => {
+    navigate('/login');
+  }, [navigate]);
+
+  const handleRegister = useCallback(() => {
+    navigate('/registration');
+  }, [navigate]);
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await logoutUser();
+      setUser(null);
+      toast.success('Logged out successfully');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Failed to logout');
+    }
+  }, []);
+
+  // Don't render until auth check is complete
+  if (!authChecked) {
+    return null;
+  }
+
   const viewProps: UploadCVViewProps = {
     backgroundUrl: backgroundImage,
     ready: Boolean(selectedFile),
@@ -133,6 +181,10 @@ function UploadCV() {
       setErrorMessage(msg);
     },
     onRetry: handleRetry,
+    user,
+    onLogin: handleLogin,
+    onRegister: handleRegister,
+    onLogout: handleLogout,
   };
 
   return <UploadCVView {...viewProps} />;

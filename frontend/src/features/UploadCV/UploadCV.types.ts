@@ -20,6 +20,15 @@ export interface UploadAreaProps {
   onDropFile: (file: File) => void
 }
 
+export interface User {
+  id: number
+  email: string
+  firstName: string
+  lastName: string
+  fullName: string
+  createdAt: string
+}
+
 export interface UploadCVViewProps {
   backgroundUrl: string
   ready: boolean
@@ -33,4 +42,9 @@ export interface UploadCVViewProps {
   errorMessage?: string
   onStatusChange?: (status: import('./UplaodArea/UploadArea.types').UploadStatus, errorMessage?: string) => void
   onRetry: () => void
+  // Auth-related props
+  user: User | null
+  onLogin: () => void
+  onRegister: () => void
+  onLogout?: () => void
 }
