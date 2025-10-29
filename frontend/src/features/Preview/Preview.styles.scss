@@ -44,6 +44,124 @@
     z-index: 2;
   }
 
+  // Auth section - positioned on the right side
+  &__auth-section {
+    position: fixed;
+    top: 2rem;
+    right: 1.5rem;
+    z-index: 2;
+  }
+
+  // Auth buttons container
+  &__auth-buttons {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 284px;
+    height: 38px;
+  }
+
+  // User info container
+  &__user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 38px;
+  }
+
+  // Username display
+  &__username {
+    font-family: Poppins, var(--font-family-base);
+    font-weight: 500;
+    font-size: 16px;
+    color: #354052;
+    padding: 0 0.75rem;
+    white-space: nowrap;
+  }
+
+  // Logout button
+  &__logout-btn {
+    height: 38px;
+    padding: 0 1rem;
+    font-family: Poppins, var(--font-family-base);
+    font-weight: 500;
+    font-size: 14px;
+    color: #6B7280;
+    background: transparent;
+    border: 1px solid rgba(53, 64, 82, 0.3);
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+
+    &:hover {
+      background: rgba(53, 64, 82, 0.05);
+      border-color: rgba(53, 64, 82, 0.5);
+    }
+
+    &:active {
+      background: rgba(53, 64, 82, 0.1);
+    }
+  }
+
+  // Common auth button styles
+  &__auth-btn {
+    width: 132px;
+    height: 38px;
+    border-radius: 15px;
+    padding: 22px 12px 22px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 200ms ease;
+    
+    // Text styles
+    font-family: Poppins, var(--font-family-base);
+    font-weight: 500;
+    font-style: normal;
+    font-size: 16px;
+    line-height: 22px;
+    letter-spacing: 0%;
+    text-align: center;
+    white-space: nowrap;
+
+    &:focus-visible {
+      outline: 2px solid #354052;
+      outline-offset: 2px;
+    }
+  }
+
+  // Log in button - outlined style
+  &__auth-btn--login {
+    border: 2px solid #354052;
+    background: transparent;
+    color: #354052;
+
+    &:hover {
+      background: rgba(53, 64, 82, 0.05);
+    }
+
+    &:active {
+      background: rgba(53, 64, 82, 0.1);
+    }
+  }
+
+  // Registration button - filled style
+  &__auth-btn--register {
+    border: none;
+    background: #354052;
+    color: #ffffff;
+
+    &:hover {
+      background: rgba(53, 64, 82, 0.9);
+    }
+
+    &:active {
+      background: rgba(53, 64, 82, 0.8);
+    }
+  }
+
   &__container {
     overflow-y: visible;
     overflow-x: hidden;
@@ -89,7 +207,7 @@
     &__scroll-indicator {
         position: absolute;
         top: 0;
-        right: 8px;            /* adjust to match your “line 4” rail */
+        right: 8px;            /* adjust to match your "line 4" rail */
         width: 2px;
         height: 32px;          /* the indicator head length */
         background: currentColor;
@@ -117,5 +235,18 @@
 
     /* Slight right padding so fixed indicator doesn't overlap content */
     padding-right: 0.75rem;
+  }
+
+  // Responsive
+  @media (max-width: 480px) {
+    &__title {
+      font-size: clamp(1.5rem, 8vw, 2rem);
+      top: 1rem;
+      left: 1rem;
+    }
+
+    &__auth-section {
+      display: none; // Hide auth section on mobile
+    }
   }
 }
