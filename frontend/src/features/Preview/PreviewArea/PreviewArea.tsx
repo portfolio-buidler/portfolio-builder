@@ -113,10 +113,10 @@ const PreviewArea: React.FC = () => {
 
   // Education section expand/collapse state
   const [educationExpanded, setEducationExpanded] = React.useState(false)
-  
+
   // Skills section expand/collapse state
   const [skillsExpanded, setSkillsExpanded] = React.useState(false)
-  
+
   // Communication section expand/collapse state
   const [communicationExpanded, setCommunicationExpanded] = React.useState(false)
 
@@ -209,7 +209,11 @@ const PreviewArea: React.FC = () => {
      ======================================================================== */
 
   const handleToggleSkills = React.useCallback(() => {
-    setSkillsExpanded((prev) => !prev)
+    setSkillsExpanded(prev => {
+      const next = !prev
+      if (next) setCommunicationExpanded(false)
+      return next
+    })
   }, [])
 
   /* ========================================================================
@@ -217,7 +221,11 @@ const PreviewArea: React.FC = () => {
      ======================================================================== */
 
   const handleToggleCommunication = React.useCallback(() => {
-    setCommunicationExpanded((prev) => !prev)
+    setCommunicationExpanded(prev => {
+      const next = !prev
+      if (next) setSkillsExpanded(false)
+      return next
+    })
   }, [])
 
   /* ========================================================================

@@ -1,0 +1,87 @@
+/* src/features/Preview/PreviewArea/Sections/CommunicationSection/CommunicationSection.styles.scss */
+/* CommunicationSection.styles.scss */
+
+/* Block */
+.preview-communication {
+  &[data-expanded="false"] {
+    .preview-section__toggle { background: var(--toggle-inactive); color: #fff; }
+  }
+}
+
+/* Rows */
+.preview-communication__row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--gap-md);
+  min-height: var(--row-min-h); /* requirement: minimal height */
+}
+
+.preview-communication__label {
+  flex: 0 0 var(--label-col-w);
+  display: inline-flex;
+  align-items: baseline;
+  line-height: 1.25;
+  padding-top: 2px;
+  color: var(--label-fg);
+}
+
+/* Items line: tags + add button share line and wrap responsively */
+.preview-communication__items {
+  flex: 1 1 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center; /* ensure baseline with add button */
+  gap: var(--chip-gap);
+}
+
+/* Input fields alignment */
+.preview-communication__input {
+  min-height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Link chips render human-readable labels */
+.preview-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--chip-border);
+  background: var(--chip-bg);
+  color: var(--chip-fg);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+
+  &--selected {
+    border-color: var(--chip-border-active);
+    outline: 2px solid var(--chip-outline);
+    outline-offset: 1px;
+  }
+
+  &__remove {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.875rem;
+    line-height: 1;
+    color: var(--chip-remove-fg);
+  }
+
+  &--add {
+    border-style: dashed;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  &--editing {
+    min-width: 14rem;
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .preview-communication__label { flex-basis: var(--label-col-w-sm); }
+  .preview-communication__items { gap: var(--chip-gap-sm); }
+}
