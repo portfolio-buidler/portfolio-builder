@@ -1,5 +1,3 @@
-
-
 @use '../../styles/components/contact-button';
 @use '../../styles/mixins/mq';
 
@@ -71,6 +69,77 @@
     left: 1.5rem;
     margin: 0;
     z-index: 2;
+  }
+
+  // Auth buttons container - positioned on the right side
+  &__auth-buttons {
+    position: fixed;
+    top: 2rem;
+    right: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 284px;
+    height: 38px;
+    z-index: 2;
+  }
+
+  // Common auth button styles
+  &__auth-btn {
+    width: 132px;
+    height: 38px;
+    border-radius: 15px;
+    padding: 22px 12px 22px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 200ms ease;
+    
+    // Text styles
+    font-family: Poppins, var(--font-family-base);
+    font-weight: 500;
+    font-style: normal;
+    font-size: 16px;
+    line-height: 22px;
+    letter-spacing: 0%;
+    text-align: center;
+    white-space: nowrap;
+
+    &:focus-visible {
+      outline: 2px solid #354052;
+      outline-offset: 2px;
+    }
+  }
+
+  // Log in button - outlined style
+  &__auth-btn--login {
+    border: 2px solid #354052;
+    background: transparent;
+    color: #354052;
+
+    &:hover {
+      background: rgba(53, 64, 82, 0.05);
+    }
+
+    &:active {
+      background: rgba(53, 64, 82, 0.1);
+    }
+  }
+
+  // Registration button - filled style
+  &__auth-btn--register {
+    border: none;
+    background: #354052;
+    color: #ffffff;
+
+    &:hover {
+      background: rgba(53, 64, 82, 0.9);
+    }
+
+    &:active {
+      background: rgba(53, 64, 82, 0.8);
+    }
   }
 
   &__body {
@@ -237,6 +306,11 @@
       line-height: 1.05;
       letter-spacing: 0.01em;
       white-space: nowrap;
+    }
+
+    // Hide auth buttons on mobile or stack them
+    &__auth-buttons {
+      display: none; // or you can style them differently for mobile
     }
 
     &__body {

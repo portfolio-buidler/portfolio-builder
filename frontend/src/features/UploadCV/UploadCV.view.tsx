@@ -44,6 +44,15 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
           Portify.
         </h1>
 
+        <div className="upload-cv__auth-buttons">
+          <button type="button" className="upload-cv__auth-btn upload-cv__auth-btn--login">
+            Log in
+          </button>
+          <button type="button" className="upload-cv__auth-btn upload-cv__auth-btn--register">
+            Registration
+          </button>
+        </div>
+
         <div className="upload-cv__body">
           <h2 className="upload-cv__upload-title">Upload your CV</h2>
           <UploadArea
