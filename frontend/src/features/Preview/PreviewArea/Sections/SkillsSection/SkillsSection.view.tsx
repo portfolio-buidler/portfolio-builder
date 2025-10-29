@@ -2,6 +2,7 @@
 import React from 'react'
 import type { SkillsSectionViewProps } from './SkillsSection.types'
 import questionMarkIcon from '../../../../../assets/icons/PreviewPage/question-mark.svg'
+import './SkillsSection.styles.scss'
 
 /**
  * Skills Section View Component (Pure Presentation)

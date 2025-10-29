@@ -20,7 +20,6 @@
   padding-left: 0;
   /* Remove left padding to center content */
   margin-inline: auto;
-  // border: #fff 1px solid;
   box-sizing: border-box;
   /* Include border in width calculation */
   position: relative;
@@ -85,13 +84,11 @@
   &__title {
     width: 163px;
     height: 38px;
-    /* angle: 0deg; Not a real CSS property */
     opacity: 1;
     font-family: var(--font-family-base, 'Poppins', sans-serif);
     font-weight: 700;
     /* Bold */
     font-style: normal;
-    /* 'Bold' is represented via font-weight */
     font-size: var(--font-size-3xl);
     line-height: 100%;
     letter-spacing: 0;
@@ -99,9 +96,7 @@
     color: var(--title-color);
     margin: 0;
     white-space: nowrap;
-    /* leading-trim: cap-height; Not a real CSS property */
   }
-
 
   &__subtitle {
     font-family: var(--font-family-base);
@@ -277,7 +272,6 @@
     display: inline-block;
     width: 45px;
     height: 14px;
-    /* angle: 0deg; Not a real CSS property */
     opacity: 1;
     font-family: var(--font-family-base, 'Poppins', sans-serif);
     font-weight: 500;
@@ -299,7 +293,6 @@
     justify-content: center;
     width: 24px;
     height: 24px;
-    /* angle: 0deg; Not a real CSS property */
     opacity: 1;
 
     svg {
@@ -446,6 +439,16 @@
       background-position: center;
       transition: transform 0.3s ease;
       transform-origin: center;
+      opacity: 0.6;
+    }
+    
+    /* Grey color for inactive/disabled toggle buttons */
+    &:not([aria-expanded='true'])::before {
+      filter: grayscale(100%) brightness(0.7);
+    }
+    
+    &:hover::before {
+      opacity: 0.8;
     }
   }
 }
@@ -458,7 +461,6 @@
   /* Ensure side-by-side sections share available space */
   flex: 1 1 0;
 }
-
 
 /* Gradient backgrounds for individual cards (grouped for DRYness) */
 /* Note: .preview-section--about styles are now in AboutSection.styles.scss */
@@ -488,112 +490,14 @@
   position: relative;
 }
 
-/* Position the collapse toggle within the skills card at the
- * bottom right. */
-.preview-section--skills .preview-section__toggle {
-  position: absolute;
-  bottom: 0.75rem;
-  right: 1rem;
-  margin-right: 10px;
-}
-
 .preview-section--communication {
   position: relative;
-}
-
-/* Position the collapse toggle within the communication card at the
- * bottom right. */
-.preview-section--communication .preview-section__toggle {
-  position: absolute;
-  bottom: 0.75rem;
-  right: 1rem;
-  margin-right: 10px;
 }
 
 /* Align help icons in Skills and Communication sections to match Education section */
 .preview-section--skills .preview-section__help-icon,
 .preview-section--communication .preview-section__help-icon {
   margin-right: 2px;
-}
-
-/* ============================================================================
-   SKILLS SECTION SPECIFIC STYLES
-   ============================================================================ */
-
-.preview-skills {
-  &__row {
-    display: flex;
-    align-items: baseline;
-    gap: 5px;
-    margin-bottom: 12px;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-
-  &__label {
-    /* Label specific styling as per requirements */
-    width: auto;
-    height: 12px;
-    font-family: Poppins, sans-serif;
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 12px;
-    letter-spacing: 0%;
-    color: var(--Text-black, #354052);
-    opacity: 1;
-
-    flex-shrink: 0;
-  }
-
-  &__items {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    flex: 1;
-  }
-}
-
-/* ============================================================================
-   COMMUNICATION SECTION SPECIFIC STYLES
-   ============================================================================ */
-
-.preview-communication {
-  &__row {
-    display: flex;
-    align-items: baseline;
-    gap: 5px;
-    flex-wrap: wrap;
-    margin-block: 0.35rem;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-
-  &__label {
-    /* Label specific styling as per requirements */
-    width: auto;
-    height: 12px;
-    font-family: Poppins, sans-serif;
-    white-space: nowrap;
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 12px;
-    letter-spacing: 0%;
-    color: var(--Text-black, #354052);
-    opacity: 1;
-    flex-shrink: 0;
-  }
-
-  &__items {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 5px;
-    min-width: 10ch;
-  }
 }
 
 /* ============================================================================
@@ -773,8 +677,6 @@
   white-space: nowrap;
 }
 
-/* Append editing state styles to existing SCSS */
-
 /* ============================================================================
    EDITING STATE STYLES
    ============================================================================ */
@@ -817,140 +719,4 @@
   /* Highlight when selected (before removal) */
   background: rgba(155, 77, 78, 0.4);
   box-shadow: 0 0 0 2px rgba(155, 77, 78, 0.2);
-}
-
-/* Section constants for collapsed state */
-$skills-comm-collapsed-height: 110px;
-$toggle-transition: 0.3s;
-
-/* ============================================================================
-   SKILLS SECTION - EXPAND/COLLAPSE
-   ============================================================================ */
-
-.preview-section--skills {
-  /* Add transition for smooth expansion */
-  transition: height $toggle-transition ease;
-  overflow: hidden;
-
-  .preview-section__content {
-    transition: max-height $toggle-transition ease;
-  }
-
-  /* Collapsed state (default) */
-  &[data-expanded='false'] {
-    .preview-section__content {
-      max-height: $skills-comm-collapsed-height;
-      overflow: hidden;
-    }
-
-    .preview-section__toggle::before {
-      transform: rotate(0deg);
-    }
-  }
-
-  /* Expanded state */
-  &[data-expanded='true'] {
-    .preview-section__content {
-      max-height: 400px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      scrollbar-width: none; 
-      -ms-overflow-style: none; 
-
-      &::-webkit-scrollbar {
-        display: none; 
-      }
-    }
-
-    .preview-section__toggle::before {
-      transform: rotate(180deg);
-    }
-  }
-}
-
-/* ============================================================================
-   COMMUNICATION SECTION - EXPAND/COLLAPSE
-   ============================================================================ */
-
-.preview-section--communication {
-  /* Add transition for smooth expansion */
-  transition: height $toggle-transition ease;
-  overflow: hidden;
-
-  .preview-section__content {
-    transition: max-height $toggle-transition ease;
-  }
-
-  /* Collapsed state (default) */
-  &[data-expanded='false'] {
-    .preview-section__content {
-      max-height: $skills-comm-collapsed-height;
-      overflow: hidden;
-    }
-
-    .preview-section__toggle::before {
-      transform: rotate(0deg);
-    }
-  }
-
-  /* Expanded state */
-  &[data-expanded='true'] {
-    .preview-section__content {
-      max-height: 400px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      scrollbar-width: none; // ✅ Firefox
-      -ms-overflow-style: none; // ✅ IE/Edge
-
-      &::-webkit-scrollbar {
-        display: none; // ✅ Chrome/Safari/Opera
-      }
-    }
-
-    .preview-section__toggle::before {
-      transform: rotate(180deg);
-    }
-  }
-}
-
-/* ============================================================================
-   ADD BUTTON VISIBILITY - ALWAYS SHOW IN COLLAPSED STATE
-   ============================================================================
-   
-   Ensures the Add button remains visible even when content overflows
-   and the section is in collapsed state.
-   ============================================================================ */
-
-.preview-section--skills[data-expanded='false'],
-.preview-section--communication[data-expanded='false'] {
-  .preview-tag--add {
-    /* Ensure add button is always visible */
-    position: relative;
-    z-index: 10;
-  }
-}
-
-/* ============================================================================
-   TOGGLE BUTTON - CONSISTENT WITH COLLAPSIBLE SECTION
-   ============================================================================
-   
-   The toggle button styling is already defined in PreviewArea.styles.scss,
-   but we ensure it works consistently with the expand/collapse states.
-   ============================================================================ */
-
-.preview-section--skills .preview-section__toggle,
-.preview-section--communication .preview-section__toggle {
-  /* Match CollapsibleSection toggle positioning */
-  position: absolute;
-  bottom: var(--space-3);
-  right: var(--space-2);
-  width: 14px;
-  height: 8px;
-  margin-right: 20px;
-
-  /* Ensure toggle button has proper transition */
-  &::before {
-    transition: transform $toggle-transition ease;
-    transform-origin: center;
-  }
 }

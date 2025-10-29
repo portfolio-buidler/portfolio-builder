@@ -125,11 +125,21 @@ const PreviewArea: React.FC = () => {
 
   /* ========================================================================
      HYDRATION EFFECT
-     Mark as hydrated after initial mount to prevent re-hydration
+     Update sections and state when hydration data becomes available
      ======================================================================== */
 
   React.useEffect(() => {
     if (hydratedData && !hasHydrated) {
+      // Update sections with hydrated content
+      const hydratedSections = getInitialSections()
+      const newHistory = [hydratedSections]
+      setHistory(newHistory)
+      setHistoryIndex(0)
+      
+      // Update skills and communication data
+      setSkillsData(hydratedData.skills)
+      setCommunicationData(hydratedData.communication)
+      
       markAsHydrated()
       console.log('[PreviewArea] Resume data hydrated successfully', {
         about: hydratedData.about.length > 0,

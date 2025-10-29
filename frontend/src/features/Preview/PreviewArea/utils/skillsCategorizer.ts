@@ -3,145 +3,135 @@
 /**
  * Skills Categorization Utility
  * 
- * Splits a flat array of skills into programming languages and technologies
+ * Splits a flat array of skills into spoken languages and technologies
  * using a heuristic-based approach.
  * 
- * Strategy: Maintain a curated list of ~100+ common programming languages.
- * Everything else goes to technologies (tools, frameworks, platforms).
+ * Strategy: Maintain a curated list of common spoken languages (Hebrew, English, etc.).
+ * Everything else goes to technologies (tools, frameworks, platforms, programming languages).
  */
 
 /**
- * Comprehensive list of programming languages (case-insensitive matching)
+ * Comprehensive list of spoken languages (case-insensitive matching)
+ * These are human languages, not programming languages
  */
-const PROGRAMMING_LANGUAGES = new Set([
-  // Popular languages
-  'javascript',
-  'js',
-  'typescript',
-  'ts',
-  'python',
-  'java',
-  'c',
-  'c++',
-  'cpp',
-  'c#',
-  'csharp',
-  'ruby',
-  'php',
-  'swift',
-  'kotlin',
-  'go',
-  'golang',
-  'rust',
-  'scala',
-  'r',
-  'matlab',
-  'perl',
-  'lua',
-  'dart',
-  'elixir',
-  'erlang',
-  'haskell',
-  'clojure',
-  'f#',
-  'fsharp',
+const SPOKEN_LANGUAGES = new Set([
+  // Major world languages
+  'english',
+  'spanish',
+  'mandarin',
+  'chinese',
+  'hindi',
+  'arabic',
+  'bengali',
+  'portuguese',
+  'russian',
+  'japanese',
+  'german',
+  'french',
+  'italian',
+  'korean',
+  'vietnamese',
+  'turkish',
+  'polish',
+  'ukrainian',
+  'dutch',
+  'greek',
+  'czech',
+  'swedish',
+  'hungarian',
+  'romanian',
+  'thai',
+  'danish',
+  'finnish',
+  'norwegian',
+  'slovak',
+  'croatian',
+  'hebrew',
+  'bulgarian',
+  'serbian',
+  'lithuanian',
+  'slovenian',
+  'latvian',
+  'estonian',
   
-  // Web/Scripting
-  'html',
-  'html5',
-  'css',
-  'css3',
-  'sass',
-  'scss',
-  'less',
-  'coffeescript',
+  // Additional European languages
+  'catalan',
+  'basque',
+  'galician',
+  'irish',
+  'welsh',
+  'scots',
+  'icelandic',
+  'maltese',
+  'albanian',
+  'macedonian',
+  'bosnian',
+  'montenegrin',
   
-  // Shell/System
-  'bash',
-  'shell',
-  'powershell',
-  'batch',
+  // Middle Eastern languages
+  'persian',
+  'farsi',
+  'kurdish',
+  'armenian',
+  'georgian',
+  'azerbaijani',
+  'pashto',
+  'urdu',
   
-  // Database query languages
-  'sql',
-  'mysql',
-  'postgresql',
-  'plsql',
-  'tsql',
-  'nosql',
+  // African languages
+  'swahili',
+  'amharic',
+  'yoruba',
+  'igbo',
+  'zulu',
+  'xhosa',
+  'afrikaans',
+  'somali',
+  'hausa',
   
-  // Older/Legacy
-  'fortran',
-  'cobol',
-  'pascal',
-  'delphi',
-  'vb',
-  'vba',
-  'visual basic',
-  'vb.net',
+  // Asian languages
+  'indonesian',
+  'malay',
+  'tagalog',
+  'filipino',
+  'burmese',
+  'khmer',
+  'lao',
+  'mongolian',
+  'nepali',
+  'sinhala',
+  'tamil',
+  'telugu',
+  'malayalam',
+  'kannada',
+  'gujarati',
+  'marathi',
+  'punjabi',
   
-  // Mobile
-  'objective-c',
-  'objective c',
-  'objc',
+  // Other languages
+  'latin',
+  'esperanto',
+  'yiddish',
   
-  // JVM languages
-  'groovy',
-  'clojure',
-  
-  // .NET
-  'vb.net',
-  
-  // Specialized
-  'assembly',
-  'asm',
-  'lisp',
-  'scheme',
-  'prolog',
-  'julia',
-  'nim',
-  'crystal',
-  'ocaml',
-  'elm',
-  'purescript',
-  'reasonml',
-  'solidity',
-  'vyper',
-  'move',
-  
-  // Query/Data
-  'graphql',
-  'sparql',
-  
-  // Markup (sometimes listed as languages)
-  'xml',
-  'json',
-  'yaml',
-  'toml',
-  'markdown',
-  
-  // Statistical
-  'sas',
-  'stata',
-  'spss',
-  
-  // Hardware description
-  'vhdl',
-  'verilog',
-  
-  // Esoteric but real
-  'apl',
-  'j',
-  'k',
-  'awk',
-  'sed',
+  // Common variations
+  'mandarin chinese',
+  'cantonese',
+  'taiwanese',
+  'british english',
+  'american english',
+  'brazilian portuguese',
+  'european portuguese',
+  'castilian spanish',
+  'mexican spanish',
+  'modern hebrew',
+  'classical hebrew',
 ])
 
 /**
  * Categorizes a flat array of skills into languages and technologies
  * 
  * @param skills - Array of skill strings from backend
- * @returns Object with languages and technologies arrays
+ * @returns Object with languages (spoken) and technologies arrays
  */
 export function categorizeSkills(skills: string[]): {
   languages: string[]
@@ -161,7 +151,7 @@ export function categorizeSkills(skills: string[]): {
     // Normalize for comparison (lowercase, remove special chars)
     const normalized = trimmed.toLowerCase().replace(/[._-]/g, ' ').trim()
     
-    if (PROGRAMMING_LANGUAGES.has(normalized)) {
+    if (SPOKEN_LANGUAGES.has(normalized)) {
       languages.push(trimmed)
     } else {
       technologies.push(trimmed)
@@ -172,9 +162,9 @@ export function categorizeSkills(skills: string[]): {
 }
 
 /**
- * For testing/debugging: Check if a skill would be categorized as a language
+ * For testing/debugging: Check if a skill would be categorized as a spoken language
  */
 export function isLanguage(skill: string): boolean {
   const normalized = skill.toLowerCase().replace(/[._-]/g, ' ').trim()
-  return PROGRAMMING_LANGUAGES.has(normalized)
+  return SPOKEN_LANGUAGES.has(normalized)
 }

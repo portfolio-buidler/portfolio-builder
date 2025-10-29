@@ -43,11 +43,35 @@ export interface BackendParsedData {
 }
 
 /**
+ * Normalize bullet points
+ * Converts various bullet formats (●, ○, ■, etc.) to a consistent bullet (•)
+ * Also normalizes line breaks
+ */
+function normalizeBulletPoints(text: string): string {
+  if (!text) return text
+  
+  return text
+    // Convert filled circle bullets (●) to standard bullet (•)
+    .replace(/●/g, '•')
+    // Convert hollow circle bullets (○) to standard bullet (•)
+    .replace(/○/g, '•')
+    // Convert square bullets (■, □) to standard bullet (•)
+    .replace(/[■□]/g, '•')
+    // Convert right-pointing triangle (▶) to standard bullet (•)
+    .replace(/▶/g, '•')
+    // Normalize multiple spaces to single space
+    .replace(/  +/g, ' ')
+    // Normalize line breaks (keep \n, remove \r)
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+}
+
+/**
  * Transform About section
  * Direct passthrough - backend sends plain text, we use it as-is
  */
 export function transformAbout(about?: string): string {
-  return about?.trim() || ''
+  return normalizeBulletPoints(about?.trim() || '')
 }
 
 /**
@@ -81,7 +105,7 @@ export function transformEducation(education?: BackendEducation[]): string {
         header += ` (${years})`
       }
       
-      return header
+      return normalizeBulletPoints(header)
     })
     .filter(Boolean)
     .join('\n\n') // Double newline between entries
@@ -119,9 +143,17 @@ export function transformExperience(experience?: BackendExperience[]): string {
         header += ` (${dates})`
       }
       
-      // Use description as-is (already contains bullets from backend)
-      if (description) {
-        return `${header}\n${description}`
+      // Normalize bullets in description
+      const normalizedDescription = normalizeBulletPoints(description)
+      
+      if (normalizedDescription) {
+        // Ensure proper spacing: always have a newline between header and content
+        // If description starts with a bullet, make sure there's a single newline
+        const trimmedDesc = normalizedDescription.trimStart()
+        if (trimmedDesc.startsWith('•')) {
+          return `${header}\n${trimmedDesc}`
+        }
+        return `${header}\n${normalizedDescription}`
       }
       
       return header
@@ -152,10 +184,17 @@ export function transformProjects(projects?: BackendProject[]): string {
       
       // If project_name contains the full formatted line (Role – Company (Dates))
       // use it as header, otherwise just use project_name
-      const header = projectName
+      const header = normalizeBulletPoints(projectName)
       
       if (description) {
-        return `${header}\n${description}`
+        const normalizedDescription = normalizeBulletPoints(description)
+        // Ensure proper spacing: always have a newline between header and content
+        // If description starts with a bullet, make sure there's a single newline
+        const trimmedDesc = normalizedDescription.trimStart()
+        if (trimmedDesc.startsWith('•')) {
+          return `${header}\n${trimmedDesc}`
+        }
+        return `${header}\n${normalizedDescription}`
       }
       
       return header
