@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import backgroundImage from '../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6c8.jpg'
 import { UploadCVView } from './UploadCV.view'
 import { uploadCV } from '../../services/uploadService'
@@ -22,7 +22,6 @@ import {
 
 function UploadCV() {
   const navigate = useNavigate()
-  const location = useLocation()
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [progress, setProgress] = useState<UploadProgressData | undefined>(undefined)

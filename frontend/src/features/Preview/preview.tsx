@@ -33,7 +33,11 @@ function Preview() {
         try {
           const currentUser = await getCurrentUser()
           setUser(currentUser)
-          console.log('[Preview] User authenticated:', currentUser.fullName)
+          if (currentUser) {
+            console.log('[Preview] User authenticated:', currentUser.fullName)
+          } else {
+            console.log('[Preview] User authenticated, but user data is null')
+          }
         } catch (error) {
           console.error('[Preview] Failed to get current user:', error)
           setUser(null)

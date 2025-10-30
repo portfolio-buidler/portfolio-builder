@@ -8,7 +8,7 @@
  * - Temporary CV storage for pre-auth uploads
  */
 
-import type { User, LoginCredentials, RegistrationData, AuthTokens } from '../types/auth.types'
+import type { User, LoginCredentials, RegistrationData, AuthTokens } from './Auth.types.ts'
 
 // Token expiry times (in milliseconds)
 const ACCESS_TOKEN_EXPIRY = 2 * 60 * 1000 // 2 minutes
