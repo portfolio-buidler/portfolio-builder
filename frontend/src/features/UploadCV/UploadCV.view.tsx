@@ -44,44 +44,44 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
       data-ready={ready}
     >
       <div className="upload-cv__container">
-        <h1 className="upload-cv__title">
-          Portify.
-        </h1>
+        <div className="upload-cv__header">
+          <h1 className="upload-cv__title">Portify.</h1>
 
-        {/* Auth buttons or username */}
-        <div className="upload-cv__auth-section">
-          {user ? (
-            <div className="upload-cv__user-info">
-              <span className="upload-cv__username">{user.fullName}</span>
-              {onLogout && (
-                <button
-                  type="button"
-                  className="upload-cv__logout-btn"
-                  onClick={onLogout}
-                  aria-label="Logout"
+          {/* Auth section - only addition to original */}
+          <div className="upload-cv__auth-section">
+            {user ? (
+              <div className="upload-cv__user-info">
+                <span className="upload-cv__username">{user.fullName}</span>
+                {onLogout && (
+                  <button
+                    type="button"
+                    className="upload-cv__logout-btn"
+                    onClick={onLogout}
+                    aria-label="Logout"
+                  >
+                    Logout
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="upload-cv__auth-buttons">
+                <button 
+                  type="button" 
+                  className="upload-cv__auth-btn upload-cv__auth-btn--login"
+                  onClick={onLogin}
                 >
-                  Logout
+                  Log in
                 </button>
-              )}
-            </div>
-          ) : (
-            <div className="upload-cv__auth-buttons">
-              <button 
-                type="button" 
-                className="upload-cv__auth-btn upload-cv__auth-btn--login"
-                onClick={onLogin}
-              >
-                Log in
-              </button>
-              <button 
-                type="button" 
-                className="upload-cv__auth-btn upload-cv__auth-btn--register"
-                onClick={onRegister}
-              >
-                Registration
-              </button>
-            </div>
-          )}
+                <button 
+                  type="button" 
+                  className="upload-cv__auth-btn upload-cv__auth-btn--register"
+                  onClick={onRegister}
+                >
+                  Registration
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="upload-cv__body">
@@ -124,13 +124,10 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
           </button>
         </div>
 
-
-          <div className="sr-only" aria-live="polite" aria-atomic="true">
-            {isUploading ? 'Upload in progress' : 'Idle'}
-          </div>
+        <div className="sr-only" aria-live="polite" aria-atomic="true">
+          {isUploading ? 'Upload in progress' : 'Idle'}
         </div>
-
-
+      </div>
     </div>
   )
 }

@@ -8,14 +8,14 @@ export interface User {
 }
 
 export interface PreviewProps {
-  backgroundUrl?: string;
+  backgroundUrl?: string
 }
 
 export interface PreviewViewProps {
-  backgroundUrl: string;
-  previewArea?: React.ReactNode;
-  user: User | null;
-  onLogin: () => void;
-  onRegister: () => void;
-  onLogout?: () => void;
+  backgroundUrl: string
+  previewArea?: React.ReactNode
+  user: User | null
+  onLogin: () => void
+  onRegister: () => void
+  onLogout?: () => void
 }

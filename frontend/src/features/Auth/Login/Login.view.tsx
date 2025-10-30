@@ -8,6 +8,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
   showPassword,
   error,
   isLoading,
+  hasPendingUpload,
   onEmailChange,
   onPasswordChange,
   onShowPasswordToggle,
@@ -15,6 +16,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
   onBack,
   onForgotPassword,
   onGoogleSignIn,
+  onSignUpClick,
   backgroundUrl,
 }) => {
   return (
@@ -44,7 +46,22 @@ export const LoginView: React.FC<LoginViewProps> = ({
           </button>
 
           <h2 className="login-page__title">Login</h2>
-          <p className="login-page__subtitle">Welcome back!</p>
+          <p className="login-page__subtitle">
+            {hasPendingUpload 
+              ? 'Login to continue with your upload' 
+              : 'Welcome back!'}
+          </p>
+
+          {hasPendingUpload && (
+            <div className="login-page__info-banner" role="status">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="login-page__info-icon">
+                <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2" />
+                <path d="M10 6V11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M10 13V14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              <span className="login-page__info-text">Your CV is ready to upload after login</span>
+            </div>
+          )}
 
           {error && (
             <div className="login-page__error" role="alert">
@@ -154,6 +171,18 @@ export const LoginView: React.FC<LoginViewProps> = ({
                 </svg>
               )}
             </button>
+
+            <div className="login-page__signup-link">
+              <span className="login-page__signup-text">Not a user? </span>
+              <button
+                type="button"
+                className="login-page__signup-btn"
+                onClick={onSignUpClick}
+                disabled={isLoading}
+              >
+                Sign-Up here!
+              </button>
+            </div>
           </form>
         </div>
       </div>

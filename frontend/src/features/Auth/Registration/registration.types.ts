@@ -22,6 +22,7 @@ export interface RegistrationViewProps {
     general?: string
   }
   isLoading: boolean
+  hasPendingUpload: boolean
   onFirstNameChange: (value: string) => void
   onLastNameChange: (value: string) => void
   onEmailChange: (value: string) => void
@@ -30,6 +31,7 @@ export interface RegistrationViewProps {
   onShowPasswordToggle: () => void
   onSubmit: (e: React.FormEvent) => void
   onBack: () => void
+  onLoginClick: () => void
   backgroundUrl: string
 }
 

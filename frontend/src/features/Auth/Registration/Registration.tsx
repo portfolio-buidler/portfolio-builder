@@ -1,12 +1,30 @@
-import { useState, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+/**
+ * Registration Component (Refactored)
+ * 
+ * Handles registration with proper flow management:
+ * - Standard registration flow (Flow B)
+ * - Post-upload registration (Flow A)
+ * - Redirects to upload page after success
+ * - Processes pending CV uploads after authentication
+ */
+
+import { useState, useCallback, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { RegistrationView } from './Registration.view.tsx'
 import type { RegistrationProps, RegistrationViewProps } from './Registration.types.ts'
-import { registerUser, isValidEmail, validatePassword } from '../../../services/AuthService'
+import { 
+  registerUser, 
+  isValidEmail, 
+  validatePassword,
+  hasPendingUploadAfterAuth,
+  getTempCV 
+} from '../../../services/AuthService'
 import backgroundImage from '../../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6c8.jpg'
 
 export const Registration: React.FC<RegistrationProps> = ({ onRegistrationSuccess, onBack }) => {
   const navigate = useNavigate()
+  const location = useLocation()
+  
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
@@ -22,6 +40,26 @@ export const Registration: React.FC<RegistrationProps> = ({ onRegistrationSucces
     general?: string
   }>({})
   const [isLoading, setIsLoading] = useState(false)
+
+  // Check if there's a pending upload
+  const [hasPendingUpload, setHasPendingUpload] = useState(false)
+
+  useEffect(() => {
+    // Check for pending upload from location state or session storage
+    const locationState = location.state as any
+    const pendingFromState = locationState?.hasPendingUpload
+    const pendingFromStorage = hasPendingUploadAfterAuth()
+    
+    if (pendingFromState || pendingFromStorage) {
+      setHasPendingUpload(true)
+      
+      // Show info about pending upload
+      const tempCV = getTempCV()
+      if (tempCV) {
+        console.log('[Registration] Pending CV upload detected:', tempCV.metadata.fileName)
+      }
+    }
+  }, [location])
 
   const validateForm = useCallback((): boolean => {
     const newErrors: typeof errors = {}
@@ -76,18 +114,31 @@ export const Registration: React.FC<RegistrationProps> = ({ onRegistrationSucces
       setIsLoading(true)
 
       try {
-        await registerUser({
+        const user = await registerUser({
           firstName: firstName.trim(),
           lastName: lastName.trim(),
           email: email.trim(),
           password,
         })
 
+        console.log('[Registration] Registration successful:', user.email)
+
+        // Determine where to redirect
+        const locationState = location.state as any
+        const from = locationState?.from || '/upload'
+
         // Success - call callback or navigate
         if (onRegistrationSuccess) {
           onRegistrationSuccess()
         } else {
-          navigate('/upload')
+          // If there's a pending upload, always go to upload page
+          // The UploadCV component will handle the pending upload automatically
+          if (hasPendingUpload) {
+            console.log('[Registration] Redirecting to upload page to process pending CV')
+            navigate('/upload', { replace: true })
+          } else {
+            navigate(from, { replace: true })
+          }
         }
       } catch (err) {
         setErrors({
@@ -97,7 +148,7 @@ export const Registration: React.FC<RegistrationProps> = ({ onRegistrationSucces
         setIsLoading(false)
       }
     },
-    [firstName, lastName, email, password, validateForm, navigate, onRegistrationSuccess]
+    [firstName, lastName, email, password, validateForm, navigate, onRegistrationSuccess, location, hasPendingUpload]
   )
 
   const handleBack = useCallback(() => {
@@ -108,6 +159,17 @@ export const Registration: React.FC<RegistrationProps> = ({ onRegistrationSucces
     }
   }, [navigate, onBack])
 
+  const handleLoginClick = useCallback(() => {
+    // Navigate to login, preserving the pending upload state
+    const locationState = location.state as any
+    navigate('/login', { 
+      state: { 
+        from: locationState?.from || '/upload',
+        hasPendingUpload: hasPendingUpload || locationState?.hasPendingUpload
+      } 
+    })
+  }, [navigate, location, hasPendingUpload])
+
   const viewProps: RegistrationViewProps = {
     firstName,
     lastName,
@@ -117,6 +179,7 @@ export const Registration: React.FC<RegistrationProps> = ({ onRegistrationSucces
     showPassword,
     errors,
     isLoading,
+    hasPendingUpload,
     onFirstNameChange: setFirstName,
     onLastNameChange: setLastName,
     onEmailChange: setEmail,
@@ -125,6 +188,7 @@ export const Registration: React.FC<RegistrationProps> = ({ onRegistrationSucces
     onShowPasswordToggle: () => setShowPassword(!showPassword),
     onSubmit: handleSubmit,
     onBack: handleBack,
+    onLoginClick: handleLoginClick,
     backgroundUrl: backgroundImage,
   }
 

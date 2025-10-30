@@ -9,6 +9,7 @@ export interface LoginViewProps {
   showPassword: boolean
   error: string | null
   isLoading: boolean
+  hasPendingUpload: boolean
   onEmailChange: (value: string) => void
   onPasswordChange: (value: string) => void
   onShowPasswordToggle: () => void
@@ -16,6 +17,7 @@ export interface LoginViewProps {
   onBack: () => void
   onForgotPassword: () => void
   onGoogleSignIn: () => void
+  onSignUpClick: () => void
   backgroundUrl: string
 }
 

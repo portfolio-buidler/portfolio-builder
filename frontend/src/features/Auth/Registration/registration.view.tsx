@@ -11,6 +11,7 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
   showPassword,
   errors,
   isLoading,
+  hasPendingUpload,
   onFirstNameChange,
   onLastNameChange,
   onEmailChange,
@@ -19,6 +20,7 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
   onShowPasswordToggle,
   onSubmit,
   onBack,
+  onLoginClick,
   backgroundUrl,
 }) => {
   return (
@@ -49,8 +51,21 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
 
           <h2 className="registration-page__title">Registration</h2>
           <p className="registration-page__subtitle">
-            At least 8 characters, including a letter and a number.
+            {hasPendingUpload 
+              ? 'Create an account to continue with your upload' 
+              : 'At least 8 characters, including a letter and a number.'}
           </p>
+
+          {hasPendingUpload && (
+            <div className="registration-page__info-banner" role="status">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="registration-page__info-icon">
+                <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2" />
+                <path d="M10 6V11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M10 13V14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              <span className="registration-page__info-text">Your CV is ready to upload after registration</span>
+            </div>
+          )}
 
           {errors.general && (
             <div className="registration-page__error" role="alert">
@@ -200,6 +215,18 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
                 </svg>
               )}
             </button>
+
+            <div className="registration-page__login-link">
+              <span className="registration-page__login-text">Already have an account? </span>
+              <button
+                type="button"
+                className="registration-page__login-btn"
+                onClick={onLoginClick}
+                disabled={isLoading}
+              >
+                Login here
+              </button>
+            </div>
           </form>
         </div>
       </div>
