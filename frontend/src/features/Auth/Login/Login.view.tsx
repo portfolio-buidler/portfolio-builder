@@ -79,13 +79,14 @@ export const LoginView: React.FC<LoginViewProps> = ({
               <input
                 type="email"
                 id="login-email"
-                className="login-page__input"
+                className={`login-page__input ${error ? 'login-page__input--error' : ''}`}
                 placeholder="Email"
                 value={email}
                 onChange={(e) => onEmailChange(e.target.value)}
                 disabled={isLoading}
                 autoComplete="email"
                 aria-label="Email address"
+                aria-invalid={!!error}
               />
             </div>
 
@@ -93,13 +94,14 @@ export const LoginView: React.FC<LoginViewProps> = ({
               <input
                 type={showPassword ? 'text' : 'password'}
                 id="login-password"
-                className="login-page__input login-page__input--password"
+                className={`login-page__input login-page__input--password ${error ? 'login-page__input--error' : ''}`}
                 placeholder="Password"
                 value={password}
                 onChange={(e) => onPasswordChange(e.target.value)}
                 disabled={isLoading}
                 autoComplete="current-password"
                 aria-label="Password"
+                aria-invalid={!!error}
               />
             </div>
 
