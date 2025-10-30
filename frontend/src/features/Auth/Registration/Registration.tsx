@@ -1,11 +1,11 @@
 /**
- * Registration Component (Refactored)
+ * Registration Component - Fixed Back Button
  * 
- * Handles registration with proper flow management:
- * - Standard registration flow (Flow B)
- * - Post-upload registration (Flow A)
- * - Redirects to upload page after success
- * - Processes pending CV uploads after authentication
+ * Back button behavior:
+ * - Goes back in browser history (navigate(-1))
+ * - This handles all cases naturally:
+ *   - From Upload → Registration → Back goes to Upload
+ *   - From Login → Registration → Back goes to Login
  */
 
 import { useState, useCallback, useEffect } from 'react'
@@ -155,7 +155,11 @@ export const Registration: React.FC<RegistrationProps> = ({ onRegistrationSucces
     if (onBack) {
       onBack()
     } else {
-      navigate('/upload')
+      // Go back in browser history
+      // This naturally handles all navigation paths:
+      // - From Upload → Registration → Back goes to Upload
+      // - From Login → Registration → Back goes to Login
+      navigate(-1)
     }
   }, [navigate, onBack])
 

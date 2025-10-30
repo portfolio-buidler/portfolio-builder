@@ -1,11 +1,11 @@
 /**
- * Login Component (Refactored)
+ * Login Component - Fixed Back Button
  * 
- * Handles login with proper flow management:
- * - Standard login flow
- * - Post-upload login (Flow D)
- * - Redirects to previous location or upload page after success
- * - Processes pending CV uploads after authentication
+ * Back button behavior:
+ * - Goes back in browser history (navigate(-1))
+ * - This handles all cases naturally:
+ *   - From Upload → Login → Back goes to Upload
+ *   - From Registration → Login → Back goes to Registration
  */
 
 import { useState, useCallback, useEffect } from 'react'
@@ -109,7 +109,11 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
     if (onBack) {
       onBack()
     } else {
-      navigate('/upload')
+      // Go back in browser history
+      // This naturally handles all navigation paths:
+      // - From Upload → Login → Back goes to Upload
+      // - From Registration → Login → Back goes to Registration
+      navigate(-1)
     }
   }, [navigate, onBack])
 
