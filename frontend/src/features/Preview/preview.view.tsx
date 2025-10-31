@@ -1,16 +1,9 @@
 // preview.view.tsx
 import React, { useEffect, useRef } from 'react'
-import type { PreviewViewProps } from './Preview.types.ts'
+import type { PreviewViewProps } from './Preview.types'
 import './Preview.styles.scss'
 
-export const PreviewView: React.FC<PreviewViewProps> = ({ 
-  backgroundUrl, 
-  previewArea,
-  user,
-  onLogin,
-  onRegister,
-  onLogout,
-}) => {
+export const PreviewView: React.FC<PreviewViewProps> = ({ backgroundUrl, previewArea }) => {
   const bodyRef = useRef<HTMLDivElement|null>(null)
   const indicatorRef = useRef<HTMLDivElement|null>(null)
 
@@ -73,43 +66,6 @@ export const PreviewView: React.FC<PreviewViewProps> = ({
     <div className="preview" style={{ ['--preview-bg' as any]: `url(${backgroundUrl})` }}>
       <div className="preview__container">
         <h1 className="preview__title">Portify.</h1>
-        
-        {/* Auth buttons or username */}
-        <div className="preview__auth-section">
-          {user ? (
-            <div className="preview__user-info">
-              <span className="preview__username">{user.fullName}</span>
-              {onLogout && (
-                <button
-                  type="button"
-                  className="preview__logout-btn"
-                  onClick={onLogout}
-                  aria-label="Logout"
-                >
-                  Logout
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="preview__auth-buttons">
-              <button 
-                type="button" 
-                className="preview__auth-btn preview__auth-btn--login"
-                onClick={onLogin}
-              >
-                Log in
-              </button>
-              <button 
-                type="button" 
-                className="preview__auth-btn preview__auth-btn--register"
-                onClick={onRegister}
-              >
-                Registration
-              </button>
-            </div>
-          )}
-        </div>
-
         <div className="preview__body" ref={bodyRef}>
           {/* The moving line */}
           <div className="preview__scroll-indicator" aria-hidden ref={indicatorRef} />
