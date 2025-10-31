@@ -1,12 +1,11 @@
 /**
- * Registration Page Styles - Refactored with Design Tokens
+ * Registration Page Styles - No Container Background, Fixed Logo
  * 
- * Following FRONTEND_SCSS_ARCHITECTURE_GUIDE.md:
- * - Uses BEM naming convention
- * - All values from design tokens
- * - Max nesting depth: 3 levels
- * - Consistent with Login patterns
- * - Uses media query mixin (when available)
+ * Matches UploadCV pattern:
+ * - Logo fixed at top-left of viewport
+ * - No white card container
+ * - Form elements float directly on gradient background
+ * - Back button positioned relative to form
  */
 
 .registration-page {
@@ -14,44 +13,57 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-image: var(--registration-bg);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
   padding: var(--space-5);
   font-family: var(--font-family-base);
+  position: relative;
+
+  /* Background as pseudo-element like UploadCV */
+  &::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: var(--registration-bg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 0;
+  }
 }
 
 .registration-page__container {
   width: 100%;
   max-width: 520px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8);
+  position: relative;
+  z-index: 1;
 }
 
+/* Logo fixed at top-left like UploadCV */
 .registration-page__logo {
+  position: fixed;
+  top: 2rem;
+  left: 1.5rem;
   font-family: var(--font-family-base);
-  font-size: 2.5rem; /* 40px */
+  font-size: var(--font-size-3xl); /* 2.5rem / 40px */
   font-weight: var(--font-weight-bold);
-  line-height: 1.5;
-  text-align: left;
+  line-height: var(--line-height-tight);
   color: var(--title-color);
+  letter-spacing: 2px;
+  text-transform: capitalize;
   margin: 0;
+  z-index: 2;
 }
 
+/* No white container - form content directly on gradient */
 .registration-page__form-container {
-  background: var(--color-bg);
-  border-radius: var(--radius-2xl);
-  padding: var(--space-10);
-  box-shadow: var(--shadow-lg);
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
   position: relative;
 }
 
+/* Back button positioned relative to form */
 .registration-page__back-btn {
-  position: absolute;
-  top: var(--space-6);
-  left: var(--space-6);
   width: var(--space-10);
   height: var(--space-10);
   display: flex;
@@ -62,7 +74,8 @@
   color: var(--title-color);
   cursor: pointer;
   border-radius: var(--radius-md);
-  transition: background-color 200ms ease;
+  transition: all 200ms ease;
+  margin-bottom: var(--space-6);
 
   &:hover {
     background: var(--hover-overlay);
@@ -81,7 +94,6 @@
   line-height: 1.5;
   color: var(--title-color);
   margin: 0 0 var(--space-2) 0;
-  padding-top: var(--space-6);
 }
 
 .registration-page__subtitle {
@@ -314,19 +326,16 @@
   }
 }
 
-/* Responsive - will use mixin later */
+/* Responsive */
 @media (max-width: 640px) {
   .registration-page {
     padding: var(--space-4);
   }
 
   .registration-page__logo {
-    font-size: 2rem; /* 32px */
-    line-height: 1.5;
-  }
-
-  .registration-page__form-container {
-    padding: var(--space-8) var(--space-6);
+    font-size: clamp(2rem, 11.1vw, 3rem);
+    line-height: 1.05;
+    letter-spacing: 0.01em;
   }
 
   .registration-page__title {

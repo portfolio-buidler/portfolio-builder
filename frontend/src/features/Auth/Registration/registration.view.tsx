@@ -28,9 +28,10 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
       className="registration-page"
       style={{ ['--registration-bg' as any]: `url(${backgroundUrl})` }}
     >
-      <div className="registration-page__container">
-        <h1 className="registration-page__logo">Portify.</h1>
+      {/* Logo fixed at top-left of viewport - outside container */}
+      <h1 className="registration-page__logo">Portify.</h1>
 
+      <div className="registration-page__container">
         <div className="registration-page__form-container">
           <button
             type="button"

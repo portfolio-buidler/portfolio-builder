@@ -24,9 +24,10 @@ export const LoginView: React.FC<LoginViewProps> = ({
       className="login-page"
       style={{ ['--login-bg' as any]: `url(${backgroundUrl})` }}
     >
-      <div className="login-page__container">
-        <h1 className="login-page__logo">Portify.</h1>
+      {/* Logo fixed at top-left of viewport - outside container */}
+      <h1 className="login-page__logo">Portify.</h1>
 
+      <div className="login-page__container">
         <div className="login-page__form-container">
           <button
             type="button"
