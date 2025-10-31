@@ -1,209 +1,121 @@
-/**
- * Preview Page Styles
- */
+@use '../../styles/tokens/colors';
+@use '../../styles/tokens/typography';
+@use '../../styles/tokens/spacing';
+@use '../../styles/tokens/radii';
+@use '../../styles/tokens/shadows';
+@use '../../styles/tokens/zindex';
+@use '../../styles/mixins/mq' as mq;
 
-.preview {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-image: var(--preview-bg);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  padding: 20px;
-  font-family: 'Poppins', sans-serif;
-}
 
-.preview__container {
-  width: 100%;
-  max-width: 1200px;
+
+ .preview {
+  min-height: 100svh;
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 24px;
-}
-
-.preview__title {
-  font-family: 'Poppins', sans-serif;
-  font-size: 40px;
-  font-weight: 700;
-  line-height: 60px;
-  text-align: left;
-  color: #354052;
-  margin: 0;
-}
-
-/* Auth Section */
-.preview__auth-section {
-  display: flex;
-  justify-content: flex-end;
   align-items: center;
-  min-height: 38px;
-}
+  overflow-x: hidden; /* Prevent horizontal scrollbar */
+  width: 100%;
 
-.preview__auth-buttons {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.preview__auth-btn {
-  width: 132px;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 15px;
-  font-family: 'Poppins', sans-serif;
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 22px;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &--login {
-    background: transparent;
-    border: 2px solid #354052;
-    color: #354052;
-
-    &:hover {
-      background: rgba(53, 64, 82, 0.08);
-    }
+  &::before {
+    content: '';
+    position: fixed;
+    /* Using inset avoids 100vw/100vh overflow issues that can trigger scrollbars */
+    inset: 0;
+    background-image: var(--preview-bg);
+    background-size: 100% 100%; /* stretch to fill the visual viewport */
+    background-position: center center; /* kept for consistency */
+    background-repeat: no-repeat;
+    z-index: 0;
   }
 
-  &--register {
-    background: #354052;
-    border: 2px solid #354052;
-    color: #ffffff;
-
-    &:hover {
-      background: #2A3342;
-      border-color: #2A3342;
-    }
+  &__title {
+    font-family: var(--font-family-base);
+    color: var(--title-color);
+    text-transform: capitalize;
+    letter-spacing: 2px;
+    line-height: var(--line-height-tight);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-3xl);
+    position: fixed;
+    top: 2rem;
+    left: 1.5rem;
+    margin: 0;
+    z-index: 2;
   }
 
-  &:focus-visible {
-    outline: 2px solid #354052;
-    outline-offset: 2px;
-  }
-}
-
-.preview__user-info {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.preview__username {
-  font-family: 'Poppins', sans-serif;
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 22px;
-  color: #354052;
-}
-
-.preview__logout-btn {
-  padding: 8px 16px;
-  background: transparent;
-  border: 1px solid #354052;
-  border-radius: 8px;
-  font-family: 'Poppins', sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-  color: #354052;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    background: rgba(53, 64, 82, 0.08);
+  &__container {
+    overflow-y: visible;
+    overflow-x: hidden;
+    position: relative;
+    width: 100%;
+    max-width: 100%; /* Allow full width, child controls max-width */
+    margin-inline: auto;
+    padding: 2rem;
+    z-index: 1;
   }
 
-  &:focus-visible {
-    outline: 2px solid #354052;
-    outline-offset: 2px;
-  }
-}
-
-/* Body */
-.preview__body {
-  background: #ffffff;
-  border-radius: 20px;
-  padding: 40px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  position: relative;
-  overflow-y: auto;
-  max-height: calc(100vh - 200px);
-}
-
-/* Scroll Indicator */
-.preview__scroll-indicator {
-  position: absolute;
-  left: 20px;
-  top: 20px;
-  width: 4px;
-  height: 80px;
-  background: linear-gradient(180deg, #354052 0%, #6B7280 100%);
-  border-radius: 2px;
-  transition: transform 0.1s ease-out;
-  pointer-events: none;
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-  .preview__container {
-    max-width: 900px;
-  }
-}
-
-@media (max-width: 768px) {
-  .preview__container {
-    max-width: 100%;
-  }
-
-  .preview__title {
-    font-size: 32px;
-    line-height: 48px;
-  }
-
-  .preview__body {
-    padding: 32px 24px;
-    max-height: calc(100vh - 180px);
-  }
-
-  .preview__auth-buttons {
-    gap: 12px;
-  }
-
-  .preview__auth-btn {
-    width: 110px;
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 480px) {
-  .preview {
-    padding: 16px;
-  }
-
-  .preview__title {
-    font-size: 28px;
-    line-height: 42px;
-  }
-
-  .preview__auth-section {
+  &__body {
+    display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    gap: 12px;
-  }
+    align-items: stretch;
+    justify-content: flex-start;
+    width: 100%;
+    max-width: min(1200px, 100vw - 4rem); /* Responsive: never exceed viewport */
+    gap: var(--space-3);
+    margin-inline: auto;
+    margin-top: 127px;
+    padding: 0;
+    box-sizing: border-box;
+    /* Make the preview area frame invisible */
+    opacity: 1;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    z-index: var(--z-base);
+    /* Preview area itself will be scrollable */
+    max-height: calc(100vh - 127px - 4rem);
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    
+    /* Hide native scrollbar */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+    &::-webkit-scrollbar {
+      display: none; /* Chrome/Safari/Opera */
+    }
 
-  .preview__body {
-    padding: 24px 20px;
-    max-height: calc(100vh - 160px);
-  }
+    &__scroll-indicator {
+        position: absolute;
+        top: 0;
+        right: 8px;            /* adjust to match your “line 4” rail */
+        width: 2px;
+        height: 32px;          /* the indicator head length */
+        background: currentColor;
+        opacity: 0.9;
+        pointer-events: none;
+        /* will-change so the compositor handles it smoothly */
+        will-change: transform;
+    }
+    
+    /* Custom scrollbar using "Line 4" as scroll indicator (fixed in viewport) */
+    &::after {
+      content: '';
+      position: fixed; /* stay fixed to the viewport */
+      top: var(--scroll-indicator-top, 0px); /* viewport-relative Y */
+      /* Position directly on the right border of preview-area (868px max-width + padding) */
+      right: calc(50vw - min(434px, 50vw - 2rem) - 0.5rem);
+      width: 0;
+      height: 296px; /* line length */
+      border-right: 3px solid #00000066;
+      opacity: var(--scroll-indicator-opacity, 0); /* controlled from JS */
+      pointer-events: none;
+      transition: top 80ms ease-out, opacity 120ms ease;
+      z-index: 10;
+    }
 
-  .preview__scroll-indicator {
-    left: 12px;
-    height: 60px;
+    /* Slight right padding so fixed indicator doesn't overlap content */
+    padding-right: 0.75rem;
   }
 }
