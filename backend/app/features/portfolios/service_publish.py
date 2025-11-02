@@ -17,7 +17,7 @@ from typing import Any
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models_portfolio import PortfolioDraft, PortfolioSite
+from app.db.models_portfolio import PortfolioDraft, PortfolioSite, SiteView
 from app.features.portfolios.schemas_draft import PortfolioDraftOut
 
 
@@ -105,7 +105,15 @@ class PortfolioPublishService:
         await PortfolioPublishService._increment_view_count(db, site.id)
         
         return site
-    
+
+    @staticmethod
+    async def track_view(db: AsyncSession, *, site_id: int) -> None:
+        """
+        Insert a single view row and commit. Failures shouldn't break the public GET.
+        """
+        view = SiteView(site_id=site_id)
+        db.add(view)
+        await db.commit()
     @staticmethod
     async def get_user_published_portfolios(
         db: AsyncSession,

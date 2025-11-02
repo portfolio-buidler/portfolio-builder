@@ -165,3 +165,21 @@ class SiteBuild(Base):
     __table_args__ = (
         Index("ix_site_builds_site", "site_id"),
     )
+
+# ----------------------------
+# Basic analytics: site views
+# ----------------------------
+class SiteView(Base):
+    """
+    Minimal view counter per published site.
+    One row per view (you can deduplicate later by IP/UA if תרצה).
+    """
+    __tablename__ = "site_views"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    site_id: Mapped[int] = mapped_column(BigInteger, index=True, nullable=False)
+    viewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    __table_args__ = (
+        Index("ix_site_views_site", "site_id"),
+    )

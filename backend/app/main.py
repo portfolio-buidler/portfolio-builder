@@ -8,6 +8,7 @@ from app.core.rate_limiting import rate_limit_middleware
 from app.features.resumes.routes import router as resumes_router
 from app.features.portfolios.routes_draft import router as draft_router  # PC-65
 from app.features.portfolios.routes_public import router as public_router  # PC-68
+from app.features.portfolios import routes_site
 
 app = FastAPI(title="Portfolio Builder API", version="1.0.0")
 
@@ -29,6 +30,7 @@ app.add_middleware(
 app.include_router(resumes_router)
 app.include_router(draft_router)  # /api/v1/portfolio/draft/seed
 app.include_router(public_router)  # /api/v1/portfolio/public/{slug}
+app.include_router(routes_site.router)
 
 
 @app.get("/")
