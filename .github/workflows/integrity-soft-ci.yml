@@ -1,0 +1,99 @@
+name: Soft CI (integrity-testing)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ integrity-testing ]
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - ".github/workflows/integrity-soft-ci.yml"
+  pull_request:
+    branches: [ integrity-testing ]
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - ".github/workflows/integrity-soft-ci.yml"
+
+concurrency:
+  group: soft-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-soft:
+    name: Backend (soft)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry & deps (no venv)
+        run: |
+          python -m pip install --upgrade pip poetry
+          cd backend
+          poetry config virtualenvs.create false
+          poetry install --no-interaction --no-ansi || true
+
+      - name: Lint (ruff) — soft
+        working-directory: backend
+        continue-on-error: true
+        run: |
+          pip install ruff
+          ruff check .
+
+      - name: Tests (pytest) — soft
+        working-directory: backend
+        continue-on-error: true
+        run: |
+          pip install pytest
+          pytest -q --maxfail=1 --disable-warnings
+
+  frontend-soft:
+    name: Frontend (soft)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install deps
+        working-directory: frontend
+        run: npm ci || npm install
+
+      - name: Typecheck — soft
+        working-directory: frontend
+        continue-on-error: true
+        run: npm run typecheck || echo "no typecheck script"
+
+      - name: Lint — soft
+        working-directory: frontend
+        continue-on-error: true
+        run: npm run lint || echo "no lint script"
+
+      - name: Test — soft
+        working-directory: frontend
+        continue-on-error: true
+        run: npm test -- --watch=false || echo "no test script"
+
+      - name: Build — soft
+        working-directory: frontend
+        continue-on-error: true
+        run: npm run build || echo "build failed or missing build script"
