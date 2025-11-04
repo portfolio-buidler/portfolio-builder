@@ -1,0 +1,135 @@
+// SkillsSection.styles.scss
+@use '../../../../../styles/mixins/mq' as mq;
+
+/* ============================================================================
+   SKILLS SECTION STYLES
+   ============================================================================ */
+
+/* Section constants for collapsed state */
+$skills-collapsed-height: 110px;
+$toggle-transition: 0.3s;
+
+.preview-section--skills {
+  /* Minimum height to prevent section from being too small */
+  min-height: 120px;
+  
+  /* Add transition for smooth expansion */
+  transition: height $toggle-transition ease;
+  overflow: hidden;
+
+  .preview-section__content {
+    transition: max-height $toggle-transition ease;
+  }
+
+  /* Collapsed state (default) */
+  &[data-expanded='false'] {
+    .preview-section__content {
+      max-height: $skills-collapsed-height;
+      overflow: hidden;
+    }
+
+    .preview-section__toggle::before {
+      transform: rotate(0deg);
+    }
+    
+    /* Ensure add button is always visible in collapsed state */
+    .preview-tag--add {
+      position: relative;
+      z-index: 10;
+    }
+  }
+
+  /* Expanded state */
+  &[data-expanded='true'] {
+    .preview-section__content {
+      max-height: 400px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none; 
+      -ms-overflow-style: none; 
+
+      &::-webkit-scrollbar {
+        display: none; 
+      }
+    }
+
+    .preview-section__toggle::before {
+      transform: rotate(180deg);
+    }
+  }
+  
+  /* Toggle button positioning */
+  .preview-section__toggle {
+    position: absolute;
+    bottom: var(--space-3);
+    right: var(--space-2);
+    width: 14px;
+    height: 8px;
+    margin-right: 20px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    
+    /* Arrow icon */
+    &::before {
+      content: '';
+      display: block;
+      width: 14px;
+      height: 8px;
+      background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M1 1L7 7L13 1" stroke="%23354052" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/%3E%3C/svg%3E');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      transition: transform $toggle-transition ease;
+      transform-origin: center;
+      opacity: 0.6;
+    }
+    
+    &:hover::before {
+      opacity: 0.8;
+    }
+    
+    /* Grey color when inactive/collapsed */
+    &:not([aria-expanded='true'])::before {
+      filter: grayscale(100%) brightness(0.7);
+    }
+  }
+}
+
+/* ============================================================================
+   SKILLS ROW LAYOUT
+   ============================================================================ */
+
+.preview-skills__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.preview-skills__label {
+  /* Label positioning and styling */
+  flex-shrink: 0;
+  width: 100px;
+  padding-top: 4px; /* Align with first tag baseline */
+  font-family: Poppins, sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--title-color);
+  text-align: left;
+}
+
+.preview-skills__items {
+  /* Tags container with flexbox for proper wrapping */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-height: 22px; /* Minimum height to accommodate tags */
+}

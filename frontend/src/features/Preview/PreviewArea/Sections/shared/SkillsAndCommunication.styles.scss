@@ -1,0 +1,270 @@
+// SkillsAndCommunication.styles.scss
+
+/**
+ * Collapsed/Expanded Styles for Skills and Communication Sections
+ * 
+ * This file adds auto-expand/collapse functionality to Skills and Communication sections.
+ * Should be imported after PreviewArea.styles.scss to override/extend base styles.
+ */
+
+/* ==========================================================================
+   CONSTANTS
+   ========================================================================== */
+
+$collapsed-height: 110px;
+$transition-duration: 0.3s;
+$toggle-size: 14px 8px;
+
+/* ==========================================================================
+   SKILLS SECTION - COLLAPSED/EXPANDED STATES
+   ========================================================================== */
+
+.preview-section--skills {
+  position: relative;
+  transition: height $transition-duration ease;
+
+  /* ========================================================================
+     STATE: COLLAPSED (default)
+     ======================================================================== */
+
+  &[data-expanded='false'] {
+    .preview-section__content {
+      max-height: $collapsed-height;
+      overflow: hidden;
+      transition: max-height $transition-duration ease;
+    }
+
+    .preview-section__toggle::before {
+      transform: rotate(0deg);
+    }
+  }
+
+  /* ========================================================================
+     STATE: EXPANDED
+     ======================================================================== */
+
+  &[data-expanded='true'] {
+    .preview-section__content {
+      max-height: none;
+      overflow: visible;
+      transition: max-height $transition-duration ease;
+    }
+
+    .preview-section__toggle::before {
+      transform: rotate(180deg);
+    }
+  }
+
+  /* ========================================================================
+     STATE: EDITING (auto-expanded)
+     ======================================================================== */
+
+  &[data-editing='true'] {
+    .preview-section__content {
+      max-height: none;
+      overflow: visible;
+    }
+
+    // Keep toggle visible during editing
+    .preview-section__toggle {
+      display: flex;
+    }
+  }
+
+  /* ========================================================================
+     TOGGLE BUTTON
+     ======================================================================== */
+
+  .preview-section__toggle {
+    /* Layout */
+    position: absolute;
+    bottom: 12px;
+    right: 16px;
+    width: nth($toggle-size, 1);
+    height: nth($toggle-size, 2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+
+    /* Visual */
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    opacity: 1;
+
+    /* Animation */
+    transition: opacity 150ms ease;
+
+    &:hover {
+      opacity: 0.7;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--brand-500, #34C759);
+      outline-offset: 2px;
+    }
+
+    /* Arrow icon (SVG embedded as data URI) */
+    &::before {
+      content: '';
+      display: block;
+      width: nth($toggle-size, 1);
+      height: nth($toggle-size, 2);
+      background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M13 1L7 7L1 1" stroke="%23354052" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/%3E%3C/svg%3E');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      transition: transform $transition-duration ease;
+      transform-origin: center;
+    }
+  }
+}
+
+/* ==========================================================================
+   COMMUNICATION SECTION - COLLAPSED/EXPANDED STATES
+   ========================================================================== */
+
+.preview-section--communication {
+  position: relative;
+  transition: height $transition-duration ease;
+
+  /* ========================================================================
+     STATE: COLLAPSED (default)
+     ======================================================================== */
+
+  &[data-expanded='false'] {
+    .preview-section__content {
+      max-height: $collapsed-height;
+      overflow: hidden;
+      transition: max-height $transition-duration ease;
+    }
+
+    .preview-section__toggle::before {
+      transform: rotate(0deg);
+    }
+  }
+
+  /* ========================================================================
+     STATE: EXPANDED
+     ======================================================================== */
+
+  &[data-expanded='true'] {
+    .preview-section__content {
+      max-height: none;
+      overflow: visible;
+      transition: max-height $transition-duration ease;
+    }
+
+    .preview-section__toggle::before {
+      transform: rotate(180deg);
+    }
+  }
+
+  /* ========================================================================
+     STATE: EDITING (auto-expanded)
+     ======================================================================== */
+
+  &[data-editing='true'] {
+    .preview-section__content {
+      max-height: none;
+      overflow: visible;
+    }
+
+    // Keep toggle visible during editing
+    .preview-section__toggle {
+      display: flex;
+    }
+  }
+
+  /* ========================================================================
+     TOGGLE BUTTON
+     ======================================================================== */
+
+  .preview-section__toggle {
+    /* Layout */
+    position: absolute;
+    bottom: 12px;
+    right: 16px;
+    width: nth($toggle-size, 1);
+    height: nth($toggle-size, 2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+
+    /* Visual */
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    opacity: 1;
+
+    /* Animation */
+    transition: opacity 150ms ease;
+
+    &:hover {
+      opacity: 0.7;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--brand-500, #34C759);
+      outline-offset: 2px;
+    }
+
+    /* Arrow icon (SVG embedded as data URI) */
+    &::before {
+      content: '';
+      display: block;
+      width: nth($toggle-size, 1);
+      height: nth($toggle-size, 2);
+      background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M13 1L7 7L1 1" stroke="%23354052" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/%3E%3C/svg%3E');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      transition: transform $transition-duration ease;
+      transform-origin: center;
+    }
+  }
+}
+
+/* ==========================================================================
+   ADD BUTTON VISIBILITY IN COLLAPSED STATE
+   ========================================================================== */
+
+.preview-section--skills[data-expanded='false'],
+.preview-section--communication[data-expanded='false'] {
+  // Ensure add buttons remain visible even when collapsed
+  .preview-tag--add {
+    position: relative;
+    z-index: 10;
+  }
+
+  // Ensure labels remain visible
+  .preview-skills__label,
+  .preview-communication__label {
+    position: relative;
+    z-index: 10;
+  }
+}
+
+/* ==========================================================================
+   SMOOTH CONTENT TRANSITIONS
+   ========================================================================== */
+
+.preview-section--skills .preview-section__content,
+.preview-section--communication .preview-section__content {
+  transition: 
+    max-height $transition-duration ease,
+    overflow $transition-duration ease;
+}
+
+/* ==========================================================================
+   EDITING STATE ENHANCEMENTS
+   ========================================================================== */
+
+// When editing, slightly highlight the section content area
+.preview-section--skills[data-editing='true'] .preview-section__content,
+.preview-section--communication[data-editing='true'] .preview-section__content {
+  background: rgba(255, 254, 255, 0.1);
+  border-radius: 12px;
+}

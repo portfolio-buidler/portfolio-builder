@@ -36,6 +36,7 @@ export interface CommunicationSectionViewProps {
   editingItem: { type: 'mobile' | 'email' | 'link', index?: number } | null
   editValue: string
   inputRef: React.RefObject<HTMLInputElement>
+  contentRef: React.RefObject<HTMLDivElement>
   
   // Callbacks
   onAddMobile: () => void

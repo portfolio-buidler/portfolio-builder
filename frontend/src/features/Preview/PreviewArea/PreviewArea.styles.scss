@@ -1,6 +1,5 @@
 @use '../../../styles/mixins/mq' as mq;
 
-
 /*
  * Styles for the preview area. These rules build upon the global design
  * system tokens defined elsewhere in the application. Cards within the
@@ -14,30 +13,37 @@
   flex-direction: column;
   align-items: stretch;
   width: 100%;
-  max-width: min(868px, 100%); /* Never exceed parent width */
+  max-width: min(868px, 100%);
+  /* Never exceed parent width */
   height: 100%;
   padding-right: 1rem;
-  padding-left: 0; /* Remove left padding to center content */
+  padding-left: 0;
+  /* Remove left padding to center content */
   margin-inline: auto;
-  // border: #fff 1px solid;
-  box-sizing: border-box; /* Include border in width calculation */
-  position: relative; /* For absolute positioning of back button */
+  box-sizing: border-box;
+  /* Include border in width calculation */
+  position: relative;
+  /* For absolute positioning of back button */
 
   /* Header containing the back button and instructional text */
   &__header {
     display: flex;
-    align-items: center; /* Center align items vertically */
+    align-items: center;
+    /* Center align items vertically */
     gap: 1rem;
     margin-bottom: 1.25rem;
     flex-shrink: 0;
-    position: relative; /* For back button positioning */
+    position: relative;
+    /* For back button positioning */
   }
 
   &__back {
     /* Circle button for navigating back - positioned outside left border */
     position: absolute;
-    left: -3rem; /* Move further left, outside the border */
-    top: 5px; /* Align with top of header */
+    left: -3rem;
+    /* Move further left, outside the border */
+    top: 5px;
+    /* Align with top of header */
     width: 2rem;
     height: 2rem;
     min-width: 2rem;
@@ -78,21 +84,19 @@
   &__title {
     width: 163px;
     height: 38px;
-    /* angle: 0deg; Not a real CSS property */
     opacity: 1;
     font-family: var(--font-family-base, 'Poppins', sans-serif);
-    font-weight: 700; /* Bold */
-    font-style: normal; /* 'Bold' is represented via font-weight */
-  font-size: var(--font-size-3xl);
+    font-weight: 700;
+    /* Bold */
+    font-style: normal;
+    font-size: var(--font-size-3xl);
     line-height: 100%;
     letter-spacing: 0;
     text-transform: capitalize;
-  color: var(--title-color);
+    color: var(--title-color);
     margin: 0;
     white-space: nowrap;
-    /* leading-trim: cap-height; Not a real CSS property */
   }
-
 
   &__subtitle {
     font-family: var(--font-family-base);
@@ -112,7 +116,7 @@
     padding-right: 1.5rem;
     flex: 1;
     position: relative;
-    
+
     /* No overflow here - parent preview__body handles scrolling */
   }
 
@@ -123,6 +127,7 @@
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
+
     @include mq.mq(md) {
       flex-direction: row;
     }
@@ -146,7 +151,7 @@
     width: 326px;
     height: 60px;
     border-radius: 15px;
-  background: var(--glass-bg-accent);
+    background: var(--glass-bg-accent);
     opacity: 1;
   }
 
@@ -159,7 +164,7 @@
     height: 30px;
     gap: 12px;
     border-radius: 15px;
-  background: var(--glass-bg-accent);
+    background: var(--glass-bg-accent);
     box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
     opacity: 1;
   }
@@ -173,12 +178,12 @@
     border: none;
     background: transparent;
     opacity: 1;
-    
+
     /* Display & alignment */
     display: flex;
     align-items: center;
     justify-content: center;
-    
+
     /* Behavior */
     cursor: pointer;
     transition: opacity 150ms ease;
@@ -267,7 +272,6 @@
     display: inline-block;
     width: 45px;
     height: 14px;
-    /* angle: 0deg; Not a real CSS property */
     opacity: 1;
     font-family: var(--font-family-base, 'Poppins', sans-serif);
     font-weight: 500;
@@ -289,9 +293,8 @@
     justify-content: center;
     width: 24px;
     height: 24px;
-    /* angle: 0deg; Not a real CSS property */
     opacity: 1;
-    
+
     svg {
       width: 24px;
       height: 24px;
@@ -332,7 +335,8 @@
     opacity: 1;
     cursor: pointer;
     transition: opacity 200ms ease;
-    flex-shrink: 0; /* Prevent icon from shrinking */
+    flex-shrink: 0;
+    /* Prevent icon from shrinking */
 
     &:hover {
       opacity: 0.8;
@@ -435,6 +439,16 @@
       background-position: center;
       transition: transform 0.3s ease;
       transform-origin: center;
+      opacity: 0.6;
+    }
+    
+    /* Grey color for inactive/disabled toggle buttons */
+    &:not([aria-expanded='true'])::before {
+      filter: grayscale(100%) brightness(0.7);
+    }
+    
+    &:hover::before {
+      opacity: 0.8;
     }
   }
 }
@@ -447,7 +461,6 @@
   /* Ensure side-by-side sections share available space */
   flex: 1 1 0;
 }
-
 
 /* Gradient backgrounds for individual cards (grouped for DRYness) */
 /* Note: .preview-section--about styles are now in AboutSection.styles.scss */
@@ -477,112 +490,14 @@
   position: relative;
 }
 
-/* Position the collapse toggle within the skills card at the
- * bottom right. */
-.preview-section--skills .preview-section__toggle {
-  position: absolute;
-  bottom: 0.75rem;
-  right: 1rem;
-  margin-right: 20px;
-}
-
 .preview-section--communication {
   position: relative;
-}
-
-/* Position the collapse toggle within the communication card at the
- * bottom right. */
-.preview-section--communication .preview-section__toggle {
-  position: absolute;
-  bottom: 0.75rem;
-  right: 1rem;
-  margin-right: 20px;
 }
 
 /* Align help icons in Skills and Communication sections to match Education section */
 .preview-section--skills .preview-section__help-icon,
 .preview-section--communication .preview-section__help-icon {
-  margin-right: 32px;
-}
-
-/* ============================================================================
-   SKILLS SECTION SPECIFIC STYLES
-   ============================================================================ */
-
-.preview-skills {
-  &__row {
-    display: flex;
-    align-items: baseline;
-    gap: 5px;
-    margin-bottom: 12px;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-
-  &__label {
-    /* Label specific styling as per requirements */
-    width: auto;
-    height: 12px;
-    font-family: Poppins, sans-serif;
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 12px;
-    letter-spacing: 0%;
-    color: var(--Text-black, #354052);
-    opacity: 1;
-    
-    flex-shrink: 0;
-  }
-
-  &__items {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    flex: 1;
-  }
-}
-
-/* ============================================================================
-   COMMUNICATION SECTION SPECIFIC STYLES
-   ============================================================================ */
-
-.preview-communication {
-  &__row {
-    display: flex;
-    align-items: baseline;
-    gap: 5px;
-    flex-wrap: wrap;
-    margin-block: 0.35rem;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-
-  &__label {
-    /* Label specific styling as per requirements */
-    width: auto;
-    height: 12px;
-    font-family: Poppins, sans-serif;
-    white-space: nowrap;
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 12px;
-    letter-spacing: 0%;
-    color: var(--Text-black, #354052);
-    opacity: 1;
-    flex-shrink: 0;
-  }
-
-  &__items {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 5px;
-    min-width: 10ch;
-  }
+  margin-right: 2px;
 }
 
 /* ============================================================================
@@ -603,7 +518,7 @@
   box-shadow: 1px 1px 2px 0px #FFFFFF4D inset, -3px -3px 3px 0px #DDDDDD26 inset;
   font-family: Poppins, sans-serif;
   font-weight: 400;
-  font-size: 12px;  
+  font-size: 12px;
   line-height: 1;
   color: var(--title-color);
   white-space: nowrap;
@@ -624,7 +539,7 @@
     height: 22px;
     min-width: 34px;
     border-radius: 10px;
-    
+
     &:hover {
       background: var(--glass-bg-accent-hover);
       transform: scale(1.05);
@@ -760,7 +675,7 @@
   color: var(--color-fg-muted, #354052);
   opacity: 0.6;
   white-space: nowrap;
-}/* Append editing state styles to existing SCSS */
+}
 
 /* ============================================================================
    EDITING STATE STYLES

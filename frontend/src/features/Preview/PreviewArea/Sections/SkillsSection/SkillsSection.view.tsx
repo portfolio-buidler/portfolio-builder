@@ -2,6 +2,7 @@
 import React from 'react'
 import type { SkillsSectionViewProps } from './SkillsSection.types'
 import questionMarkIcon from '../../../../../assets/icons/PreviewPage/question-mark.svg'
+import './SkillsSection.styles.scss'
 
 /**
  * Skills Section View Component (Pure Presentation)
@@ -18,6 +19,7 @@ export const SkillsSectionView: React.FC<SkillsSectionViewProps> = ({
   editingItem,
   editValue,
   inputRef,
+  contentRef,
   onAddLanguage,
   onAddTechnology,
   onDoubleClick,
@@ -42,77 +44,70 @@ export const SkillsSectionView: React.FC<SkillsSectionViewProps> = ({
         />
       </div>
 
-      <div className="preview-section__content">
+      <div 
+        ref={contentRef}
+        className="preview-section__content"
+      >
         {/* Languages Row */}
         <div className="preview-skills__row">
           <span className="preview-skills__label">Languages:</span>
           <div className="preview-skills__items">
-            {languages.length > 0 ? (
-              <>
-                {languages.map((lang, index) => (
-                  <React.Fragment key={`lang-${index}`}>
-                    {editingItem?.type === 'language' && editingItem?.index === index ? (
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        className="preview-tag preview-tag--editing"
-                        value={editValue}
-                        onChange={(e) => onEditValueChange(e.target.value)}
-                        onKeyDown={onKeyDown}
-                        onClick={(e) => e.stopPropagation()}
-                        placeholder="Type here..."
-                        aria-label="Edit language"
-                      />
-                    ) : (
-                      lang !== '' && (
-                        <span
-                          className={`preview-tag ${
-                            selectedItem?.type === 'language' && selectedItem?.index === index 
-                              ? 'preview-tag--selected' 
-                              : ''
-                          }`}
-                          onDoubleClick={(e) => { 
+            {/* Add button always at the start */}
+            <button
+              type="button"
+              className="preview-tag preview-tag--add"
+              onClick={onAddLanguage}
+              aria-label={languages.length > 0 ? "Add another language" : "Add language"}
+            >
+              +
+            </button>
+            
+            {/* Render existing tags after the add button */}
+            {languages.map((lang, index) => (
+              <React.Fragment key={`lang-${index}`}>
+                {editingItem?.type === 'language' && editingItem?.index === index ? (
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    className="preview-tag preview-tag--editing"
+                    value={editValue}
+                    onChange={(e) => onEditValueChange(e.target.value)}
+                    onKeyDown={onKeyDown}
+                    onClick={(e) => e.stopPropagation()}
+                    placeholder="Type here..."
+                    aria-label="Edit language"
+                  />
+                ) : (
+                  lang !== '' && (
+                    <span
+                      className={`preview-tag ${
+                        selectedItem?.type === 'language' && selectedItem?.index === index 
+                          ? 'preview-tag--selected' 
+                          : ''
+                      }`}
+                      onDoubleClick={(e) => { 
+                        e.stopPropagation()
+                        onDoubleClick('language', index)
+                      }}
+                    >
+                      {lang}
+                      {selectedItem?.type === 'language' && selectedItem?.index === index && (
+                        <button
+                          className="preview-tag__remove"
+                          onClick={(e) => { 
                             e.stopPropagation()
-                            onDoubleClick('language', index)
+                            onRemove()
                           }}
+                          aria-label="Remove language"
                         >
-                          {lang}
-                          {selectedItem?.type === 'language' && selectedItem?.index === index && (
-                            <button
-                              className="preview-tag__remove"
-                              onClick={(e) => { 
-                                e.stopPropagation()
-                                onRemove()
-                              }}
-                              aria-label="Remove language"
-                            >
-                              -
-                            </button>
-                          )}
-                        </span>
-                      )
-                    )}
-                  </React.Fragment>
-                ))}
-                <button
-                  type="button"
-                  className="preview-tag preview-tag--add"
-                  onClick={onAddLanguage}
-                  aria-label="Add another language"
-                >
-                  +
-                </button>
-              </>
-            ) : (
-              <button
-                type="button"
-                className="preview-tag preview-tag--add"
-                onClick={onAddLanguage}
-                aria-label="Add language"
-              >
-                +
-              </button>
-            )}
+                          -
+                        </button>
+                      )}
+                    </span>
+                  )
+                )}
+              </React.Fragment>
+            ))}
           </div>
         </div>
 
@@ -120,75 +115,67 @@ export const SkillsSectionView: React.FC<SkillsSectionViewProps> = ({
         <div className="preview-skills__row">
           <span className="preview-skills__label">Technologies:</span>
           <div className="preview-skills__items">
-            {technologies.length > 0 ? (
-              <>
-                {technologies.map((tech, index) => (
-                  <React.Fragment key={`tech-${index}`}>
-                    {editingItem?.type === 'technology' && editingItem?.index === index ? (
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        className="preview-tag preview-tag--editing"
-                        value={editValue}
-                        onChange={(e) => onEditValueChange(e.target.value)}
-                        onKeyDown={onKeyDown}
-                        onClick={(e) => e.stopPropagation()}
-                        placeholder="Type here..."
-                        aria-label="Edit technology"
-                      />
-                    ) : (
-                      tech !== '' && (
-                        <span
-                          className={`preview-tag ${
-                            selectedItem?.type === 'technology' && selectedItem?.index === index 
-                              ? 'preview-tag--selected' 
-                              : ''
-                          }`}
-                          onDoubleClick={(e) => { 
-                            e.stopPropagation()
-                            onDoubleClick('technology', index)
-                          }}
-                        >
-                          {tech}
-                          {selectedItem?.type === 'technology' && selectedItem?.index === index && (
-                            <button
-                              className="preview-tag__remove"
-                              onClick={(e) => { 
-                                e.stopPropagation()
-                                onRemove()
-                              }}
-                              aria-label="Remove technology"
-                            >
-                              -
-                            </button>
-                          )}
-                        </span>
-                      )
-                    )}
-                  </React.Fragment>
-                ))}
-                <button
-                  type="button"
-                  className="preview-tag preview-tag--add"
-                  onClick={onAddTechnology}
-                  aria-label="Add another technology"
-                >
-                  +
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  className="preview-tag preview-tag--add"
-                  onClick={onAddTechnology}
-                  aria-label="Add technology"
-                >
-                  +
-                </button>
-                <span className="preview-hint">Add your top skills</span>
-              </>
+            {/* Add button always at the start */}
+            <button
+              type="button"
+              className="preview-tag preview-tag--add"
+              onClick={onAddTechnology}
+              aria-label={technologies.length > 0 ? "Add another technology" : "Add technology"}
+            >
+              +
+            </button>
+            
+            {/* Show hint if no technologies yet */}
+            {technologies.length === 0 && (
+              <span className="preview-hint">Add your top skills</span>
             )}
+            
+            {/* Render existing tags after the add button */}
+            {technologies.map((tech, index) => (
+              <React.Fragment key={`tech-${index}`}>
+                {editingItem?.type === 'technology' && editingItem?.index === index ? (
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    className="preview-tag preview-tag--editing"
+                    value={editValue}
+                    onChange={(e) => onEditValueChange(e.target.value)}
+                    onKeyDown={onKeyDown}
+                    onClick={(e) => e.stopPropagation()}
+                    placeholder="Type here..."
+                    aria-label="Edit technology"
+                  />
+                ) : (
+                  tech !== '' && (
+                    <span
+                      className={`preview-tag ${
+                        selectedItem?.type === 'technology' && selectedItem?.index === index 
+                          ? 'preview-tag--selected' 
+                          : ''
+                      }`}
+                      onDoubleClick={(e) => { 
+                        e.stopPropagation()
+                        onDoubleClick('technology', index)
+                      }}
+                    >
+                      {tech}
+                      {selectedItem?.type === 'technology' && selectedItem?.index === index && (
+                        <button
+                          className="preview-tag__remove"
+                          onClick={(e) => { 
+                            e.stopPropagation()
+                            onRemove()
+                          }}
+                          aria-label="Remove technology"
+                        >
+                          -
+                        </button>
+                      )}
+                    </span>
+                  )
+                )}
+              </React.Fragment>
+            ))}
           </div>
         </div>
       </div>

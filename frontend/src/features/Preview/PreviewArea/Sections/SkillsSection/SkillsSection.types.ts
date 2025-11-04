@@ -34,6 +34,7 @@ export interface SkillsSectionViewProps {
   editingItem: { type: 'language' | 'technology', index: number } | null
   editValue: string
   inputRef: React.RefObject<HTMLInputElement>
+  contentRef: React.RefObject<HTMLDivElement>
   
   // Callbacks
   onAddLanguage: () => void
