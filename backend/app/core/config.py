@@ -3,6 +3,19 @@ import os
 from pathlib import Path
 
 
+SECRET_KEY: str = os.getenv("SECRET_KEY", "")
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY required")
+
+ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "15"))
+REFRESH_TOKEN_EXPIRE_DAYS: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
+JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
+COOKIE_SECURE: bool = os.getenv("COOKIE_SECURE", "false").lower() == "true"
+COOKIE_DOMAIN: str = os.getenv("COOKIE_DOMAIN", "")
+COOKIE_SAMESITE: str = os.getenv("COOKIE_SAMESITE", "lax")
+BCRYPT_ROUNDS: int = int(os.getenv("BCRYPT_ROUNDS", "12"))
+
+
 API_PREFIX: str = os.getenv("API_PREFIX", "/api")
 
 ALLOWED_ORIGINS: list[str] = [
