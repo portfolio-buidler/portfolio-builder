@@ -1,7 +1,7 @@
 """Add auth models: users and refresh_tokens tables, update resumes with user FK
 
 Revision ID: 0adee79e99d0
-Revises: d1592f313169
+Revises: da09d80f9460
 Create Date: 2025-11-01 18:08:47.136350
 
 """
@@ -13,7 +13,8 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision: str = '0adee79e99d0'
-down_revision: Union[str, None] = 'd1592f313169'
+down_revision: Union[str, None] = 'da09d80f9460'
+
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
