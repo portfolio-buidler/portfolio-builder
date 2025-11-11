@@ -145,4 +145,3 @@ export const UploadAreaView: React.FC<UploadAreaViewProps> = ({
     </div>
   )
 }
-

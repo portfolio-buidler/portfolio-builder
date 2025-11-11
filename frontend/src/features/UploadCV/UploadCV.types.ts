@@ -34,12 +34,13 @@ export interface UploadCVViewProps {
   ready: boolean
   isUploading: boolean
   onUpload: () => void
+  onNext: () => void // ✅ New: Called when user clicks Next after success
   onFileSelect: (file: File) => void
   onDropFile: (file: File) => void
-  progress?: import('./UplaodArea/UploadArea.types').UploadProgressData
-  status: import('./UplaodArea/UploadArea.types').UploadStatus
+  progress?: import('./UploadArea/UploadArea.types').UploadProgressData
+  status: import('./UploadArea/UploadArea.types').UploadStatus
   errorMessage?: string
-  onStatusChange?: (status: import('./UplaodArea/UploadArea.types').UploadStatus, errorMessage?: string) => void
+  onStatusChange?: (status: import('./UploadArea/UploadArea.types').UploadStatus, errorMessage?: string) => void
   onRetry: () => void
   user: User | null
   onLogin: () => void

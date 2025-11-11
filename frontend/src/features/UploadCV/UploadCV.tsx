@@ -6,18 +6,13 @@ import { uploadCV } from '../../services/uploadService'
 import { toast } from 'react-toastify'
 import type { UploadCVViewProps, User } from './UploadCV.types'
 import { useResumeStore } from '../../store/resumeStore'
-import type { UploadProgressData, UploadStatus } from './UplaodArea/UploadArea.types'
+import type { UploadProgressData, UploadStatus } from './UploadArea/UploadArea.types'
 
 // Import authentication helpers
 import {
   isAuthenticated,
   getCurrentUser,
   logoutUser,
-  storeTempCV,
-  getTempCV,
-  clearTempCV,
-  hasPendingUploadAfterAuth,
-  setPendingUploadAfterAuth,
 } from '../../services/AuthService'
 
 function UploadCV() {
@@ -58,32 +53,6 @@ function UploadCV() {
     checkAuth()
   }, [])
 
-  /**
-   * Handle pending upload after authentication
-   * If a CV was uploaded before login/registration, resume the upload now
-   */
-  useEffect(() => {
-    if (!authChecked || !user) return
-    // Process only if there is a pending upload flag set
-    if (hasPendingUploadAfterAuth()) {
-      const tempCV = getTempCV()
-      if (tempCV) {
-        console.log('[UploadCV] Processing pending upload after auth:', tempCV.metadata.fileName)
-        // Set the file as selected and clear temp storage
-        setSelectedFile(tempCV.file)
-        clearTempCV()
-        setPendingUploadAfterAuth(false)
-        // Trigger upload after a slight delay to allow state updates
-        setTimeout(() => {
-          handleUploadWithFile(tempCV.file)
-        }, 100)
-      } else {
-        // No temp file found, clear the pending flag
-        setPendingUploadAfterAuth(false)
-      }
-    }
-  }, [authChecked, user])
-
   const onFileSelect = (file: File) => {
     console.log('📁 File selected via file input:')
     console.log('Name:', file.name)
@@ -95,6 +64,9 @@ function UploadCV() {
     
     setSelectedFile(file)
     setProgress(undefined)
+    // Reset status to idle when new file is selected
+    setStatus('idle')
+    setErrorMessage(undefined)
   }
 
    const onDropFile = (file: File) => {
@@ -107,11 +79,15 @@ function UploadCV() {
     console.log('---')
     
     setSelectedFile(file)
+    setProgress(undefined)
+    // Reset status to idle when new file is selected
+    setStatus('idle')
+    setErrorMessage(undefined)
   }
 
   /**
    * Upload handler with a specific file
-   * Used to resume uploads after authentication
+   * Shows progress feedback regardless of authentication status
    */
   const handleUploadWithFile = async (file: File) => {
     if (!file) return
@@ -120,6 +96,7 @@ function UploadCV() {
       setErrorMessage(undefined)
       setIsUploading(true)
       startTimeRef.current = Date.now()
+      
       const res = await uploadCV(file, {
         onUploadProgress: (evt) => {
           if (!evt.total) return
@@ -144,6 +121,7 @@ function UploadCV() {
           })
         },
       })
+      
       toast.success(res.message || 'File uploaded successfully')
       console.log('Upload response:', res)
       setResumeData(res)
@@ -151,14 +129,16 @@ function UploadCV() {
       setErrorMessage(undefined)
 
       console.log('[UploadCV] Simulated read back from store:', useResumeStore.getState().resumeData)
-      // Redirect to preview page after successful upload
-      navigate('/preview')
+      
+      // ✅ Don't auto-navigate - let user see success and click Next
+      // Authentication check will happen when they click Next button
+      
     } catch (err: any) {
       const msg = err?.response?.data?.detail || err?.message || 'Upload failed'
       console.error('❌ Upload error:', err)
       toast.error(String(msg))
       setStatus('error')
-      setErrorMessage('🦖 Oops! We couldn’t process that / Give it another shot')
+      setErrorMessage('🦖 Oops! We couldn\'t process that / Give it another shot')
     } finally {
       setIsUploading(false)
       if (file) {
@@ -180,30 +160,44 @@ function UploadCV() {
 
   /**
    * Primary upload handler
-   * If the user is not authenticated, store the CV and redirect to login
+   * Always upload the file and show progress/success feedback
+   * Authentication check happens when user clicks Next after success
    */
   const handleUpload = async () => {
     if (!selectedFile) return
-    // If user is not authenticated, store the file and redirect to login
-    if (!isAuthenticated()) {
-      console.log('[UploadCV] User not authenticated, storing CV temporarily and redirecting to login')
-      // Store the CV temporarily in session
-      storeTempCV(selectedFile)
-      // Set pending upload flag
-      setPendingUploadAfterAuth(true)
-      // Inform the user via toast
-      toast.info('Please login to continue with your upload')
-      // Redirect to login page with state
-      navigate('/login', { state: { from: '/upload', hasPendingUpload: true } })
+    
+    // Always proceed with upload to show progress feedback
+    await handleUploadWithFile(selectedFile)
+  }
+
+  /**
+   * Handle Next button click after successful upload
+   * This is where authentication check happens
+   */
+  const handleNext = () => {
+    if (!authChecked) {
+      console.log('[UploadCV] Auth not checked yet, waiting...')
       return
     }
-    // User is authenticated, proceed with upload
-    await handleUploadWithFile(selectedFile)
+
+    // Check authentication before proceeding to preview
+    if (!isAuthenticated()) {
+      console.log('[UploadCV] User not authenticated, redirecting to login')
+      toast.info('Please login to continue')
+      navigate('/login', { state: { from: '/upload' } })
+      return
+    }
+
+    // User is authenticated, proceed to preview
+    console.log('[UploadCV] User authenticated, proceeding to preview')
+    navigate('/preview')
   }
 
   const handleRetry = () => {
     setStatus('idle')
     setErrorMessage(undefined)
+    setSelectedFile(null)
+    setProgress(undefined)
     document.getElementById('file-input')?.click()
   }
 
@@ -223,9 +217,11 @@ function UploadCV() {
       await logoutUser()
       setUser(null)
       toast.success('Logged out successfully')
-      // Clear any temporary CV data and pending flags
-      clearTempCV()
-      setPendingUploadAfterAuth(false)
+      // Reset upload state
+      setSelectedFile(null)
+      setStatus('idle')
+      setErrorMessage(undefined)
+      setProgress(undefined)
     } catch (error) {
       console.error('[UploadCV] Logout error:', error)
       toast.error('Failed to logout')
@@ -238,6 +234,7 @@ function UploadCV() {
     ready: Boolean(selectedFile),
     isUploading,
     onUpload: handleUpload,
+    onNext: handleNext, // ✅ New prop for Next button after success
     onFileSelect,
     onDropFile,
     progress,

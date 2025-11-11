@@ -1,7 +1,7 @@
 import React from 'react'
 import type { UploadCVViewProps } from './UploadCV.types'
 import './UploadCV.styles.scss'
-import UploadArea from './UplaodArea/UploadArea'
+import UploadArea from './UploadArea/UploadArea'
 import RefreshIcon from '../../assets/icons/refresh.png'
 
 export const UploadCVView: React.FC<UploadCVViewProps> = ({
@@ -9,6 +9,7 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
   ready,
   isUploading,
   onUpload,
+  onNext,
   onFileSelect,
   onDropFile,
   progress,
@@ -21,20 +22,41 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
   onRegister,
   onLogout,
 }) => {
+  /**
+   * Handle Next/Try Again button click
+   * Different behavior based on current status:
+   * - error: Retry file selection
+   * - success: Proceed to next step (auth check + navigation)
+   * - idle + ready: Start upload
+   * - uploading: Do nothing
+   */
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // Prevent action during upload
     if (isUploading) {
       e.preventDefault()
       return
     }
+
+    // Error state: Retry file selection
     if (status === 'error') {
       onRetry()
       return
     }
-    if (ready) {
-      onUpload()
-    } else {
-      e.preventDefault()
+
+    // Success state: Proceed to next step (auth check happens in parent)
+    if (status === 'success') {
+      onNext()
+      return
     }
+
+    // Idle state with file: Start upload
+    if (ready && status === 'idle') {
+      onUpload()
+      return
+    }
+
+    // Default: Do nothing
+    e.preventDefault()
   }
 
   return (
@@ -47,7 +69,7 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
         <div className="upload-cv__header">
           <h1 className="upload-cv__title">Portify.</h1>
 
-          {/* Auth section - only addition to original */}
+          {/* Auth section */}
           <div className="upload-cv__auth-section">
             {user ? (
               <div className="upload-cv__user-info">
@@ -104,8 +126,8 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
               (status === 'error' ? ' upload-cv__cta--error' : '')
             }
             onClick={handleClick}
-            aria-disabled={isUploading || undefined}
-            disabled={isUploading || undefined}
+            aria-disabled={isUploading || (!ready && status === 'idle') || undefined}
+            disabled={isUploading || (!ready && status === 'idle') || undefined}
             aria-busy={isUploading || undefined}
           >
             {status === 'error' ? (
@@ -115,6 +137,9 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
               </>
             ) : (
               <>
+                {isUploading && (
+                  <span className="upload-cv__cta-spinner" aria-hidden="true" />
+                )}
                 <span className="upload-cv__cta-label">Next</span>
                 {!isUploading && (
                   <span className="upload-cv__cta-icon" aria-hidden="true">›</span>
@@ -125,7 +150,7 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
         </div>
 
         <div className="sr-only" aria-live="polite" aria-atomic="true">
-          {isUploading ? 'Upload in progress' : 'Idle'}
+          {isUploading ? 'Upload in progress' : status === 'success' ? 'Upload complete' : 'Idle'}
         </div>
       </div>
     </div>
