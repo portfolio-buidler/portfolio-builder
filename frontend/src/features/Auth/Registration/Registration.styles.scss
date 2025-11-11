@@ -88,12 +88,18 @@
 }
 
 .registration-page__title {
-  font-family: var(--font-family-base);
-  font-size: 2rem; /* 32px */
-  font-weight: var(--font-weight-medium);
-  line-height: 1.5;
+  font-family: 'Poppins', var(--font-family-base);
+  font-size: 40px;
+  font-weight: 700;
+  font-style: normal;
+  line-height: 1.2;
   color: var(--title-color);
   margin: 0 0 var(--space-2) 0;
+  text-transform: capitalize;
+  letter-spacing: 0%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
 }
 
 .registration-page__subtitle {

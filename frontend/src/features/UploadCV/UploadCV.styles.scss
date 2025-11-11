@@ -53,15 +53,14 @@
 
   &__title {
 
-    font-family: var(--font-family-base);
+    font-family: 'Poppins', var(--font-family-base);
+    font-size: 40px;
+    font-weight: 700;
+    font-style: normal;
+    line-height: 1.2;
     color: var(--title-color);
     text-transform: capitalize;
-    letter-spacing: 2px;
-    line-height: var(--line-height-tight);
-    font-weight: var(--font-weight-bold);
-
-
-    font-size: var(--font-size-3xl);
+    letter-spacing: 0%;
 
   
     position: fixed;

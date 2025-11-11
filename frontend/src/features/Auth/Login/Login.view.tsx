@@ -29,24 +29,25 @@ export const LoginView: React.FC<LoginViewProps> = ({
 
       <div className="login-page__container">
         <div className="login-page__form-container">
-          <button
-            type="button"
-            className="login-page__back-btn"
-            onClick={onBack}
-            aria-label="Go back"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M15 18L9 12L15 6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-
-          <h2 className="login-page__title">Login</h2>
+          <h2 className="login-page__title">
+            <button
+              type="button"
+              className="login-page__back-btn"
+              onClick={onBack}
+              aria-label="Go back"
+            >
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M15 18L9 12L15 6"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            Login
+          </h2>
           <p className="login-page__subtitle">
             {hasPendingUpload 
               ? 'Login to continue with your upload' 
