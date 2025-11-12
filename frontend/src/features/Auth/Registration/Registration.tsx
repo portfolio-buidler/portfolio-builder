@@ -145,10 +145,6 @@ export const Registration: React.FC<RegistrationProps> = ({ onRegistrationSucces
     if (onBack) {
       onBack()
     } else {
-      // Go back in browser history
-      // This naturally handles all navigation paths:
-      // - From Upload → Registration → Back goes to Upload
-      // - From Login → Registration → Back goes to Login
       navigate(-1)
     }
   }, [navigate, onBack])
