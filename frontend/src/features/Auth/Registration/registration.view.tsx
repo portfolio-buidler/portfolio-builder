@@ -1,5 +1,5 @@
 import React from 'react'
-import type { RegistrationViewProps } from './registration.types.ts'
+import type { RegistrationViewProps } from './Registration.types.ts'
 import './Registration.styles.scss'
 
 export const RegistrationView: React.FC<RegistrationViewProps> = ({
