@@ -95,11 +95,6 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
                   aria-label="First name"
                   aria-invalid={!!errors.firstName}
                 />
-                {errors.firstName && (
-                  <span className="registration-page__field-error" role="alert">
-                    {errors.firstName}
-                  </span>
-                )}
               </div>
 
               <div className="registration-page__input-group">
@@ -115,11 +110,6 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
                   aria-label="Last name"
                   aria-invalid={!!errors.lastName}
                 />
-                {errors.lastName && (
-                  <span className="registration-page__field-error" role="alert">
-                    {errors.lastName}
-                  </span>
-                )}
               </div>
             </div>
 
@@ -136,11 +126,6 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
                 aria-label="Email address"
                 aria-invalid={!!errors.email}
               />
-              {errors.email && (
-                <span className="registration-page__field-error" role="alert">
-                  {errors.email}
-                </span>
-              )}
             </div>
 
             <div className="registration-page__input-group">
@@ -158,11 +143,6 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
                 aria-label="Password"
                 aria-invalid={!!errors.password}
               />
-              {errors.password && (
-                <span className="registration-page__field-error" role="alert">
-                  {errors.password}
-                </span>
-              )}
             </div>
 
             <div className="registration-page__input-group">
@@ -180,11 +160,6 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
                 aria-label="Confirm password"
                 aria-invalid={!!errors.confirmPassword}
               />
-              {errors.confirmPassword && (
-                <span className="registration-page__field-error" role="alert">
-                  {errors.confirmPassword}
-                </span>
-              )}
             </div>
 
             <label className="registration-page__checkbox">

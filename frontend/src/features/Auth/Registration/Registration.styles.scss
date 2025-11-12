@@ -9,13 +9,15 @@
  */
 
 .registration-page {
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--space-5);
   font-family: var(--font-family-base);
   position: relative;
+  overflow: hidden;
 
   /* Background as pseudo-element like UploadCV */
   &::before {
@@ -26,6 +28,7 @@
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    background-attachment: fixed;
     z-index: 0;
   }
 }
