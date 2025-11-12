@@ -1,13 +1,3 @@
-/**
- * Registration Component - Fixed Back Button
- * 
- * Back button behavior:
- * - Goes back in browser history (navigate(-1))
- * - This handles all cases naturally:
- *   - From Upload → Registration → Back goes to Upload
- *   - From Login → Registration → Back goes to Login
- */
-
 import { useState, useCallback, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { RegistrationView } from './Registration.view.tsx'
