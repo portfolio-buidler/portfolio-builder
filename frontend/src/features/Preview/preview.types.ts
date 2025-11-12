@@ -1,4 +1,3 @@
-
 export interface PreviewProps {
   backgroundUrl?: string;
 }

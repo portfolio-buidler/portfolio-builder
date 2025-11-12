@@ -39,5 +39,47 @@
   /* Title color from Tailwind config */
   --title-color: #354052;
 
+  /* Text colors */
+  --text-body: #374151;        /* gray-700 */
+  --text-muted: #6B7280;       /* gray-600 */
+  --text-placeholder: #9CA3AF; /* gray-400 */
 
+  /* Border colors */
+  --border-default: #E5E7EB;   /* gray-200 */
+  --border-focus: #354052;     /* title-color */
+
+  /* Error state colors */
+  --error-50: #FEF2F2;
+  --error-100: #FEE2E2;
+  --error-200: #FECACA;
+  --error-300: #FCA5A5;
+  --error-500: #EF4444;
+  --error-600: #DC2626;
+  --error-700: #B91C1C;
+  --error-900: #991B1B;
+
+  /* Info/Primary state colors */
+  --info-50: #EFF6FF;
+  --info-100: #DBEAFE;
+  --info-200: #BFDBFE;
+  --info-500: #3B82F6;
+  --info-700: #1D4ED8;
+  --info-900: #1E40AF;
+
+  /* Success state colors (for future use) */
+  --success-50: #F0FDF4;
+  --success-100: #DCFCE7;
+  --success-500: #22C55E;
+  --success-600: #16A34A;
+  --success-700: #15803D;
+
+  /* Button colors */
+  --button-primary: #354052;
+  --button-primary-hover: #2A3342;
+  --button-primary-active: #1F2937;
+  --button-disabled-opacity: 0.5;
+
+  /* Interactive overlay colors */
+  --hover-overlay: rgba(53, 64, 82, 0.08);
+  --active-overlay: rgba(53, 64, 82, 0.12);
 }
