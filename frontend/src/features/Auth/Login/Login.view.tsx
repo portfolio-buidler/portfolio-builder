@@ -49,12 +49,25 @@ export const LoginView: React.FC<LoginViewProps> = ({
             Login
           </h2>
           <p className="login-page__subtitle">
-            {hasPendingUpload 
+            {error 
+              ? ''
+              : hasPendingUpload 
               ? 'Login to continue with your upload' 
               : 'Welcome back!'}
           </p>
 
-          {hasPendingUpload && (
+          {error && (
+            <div className="login-page__error-message" role="alert">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="login-page__error-message-icon">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+                <path d="M12 8V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <circle cx="12" cy="16" r="1" fill="currentColor" />
+              </svg>
+              <span>{error}</span>
+            </div>
+          )}
+
+          {hasPendingUpload && !error && (
             <div className="login-page__info-banner" role="status">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="login-page__info-icon">
                 <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2" />
@@ -62,17 +75,6 @@ export const LoginView: React.FC<LoginViewProps> = ({
                 <path d="M10 13V14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
               <span className="login-page__info-text">Your CV is ready to upload after login</span>
-            </div>
-          )}
-
-          {error && (
-            <div className="login-page__error" role="alert">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="login-page__error-icon">
-                <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2" />
-                <path d="M10 6V11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <circle cx="10" cy="14" r="1" fill="currentColor" />
-              </svg>
-              <span className="login-page__error-text">{error}</span>
             </div>
           )}
 

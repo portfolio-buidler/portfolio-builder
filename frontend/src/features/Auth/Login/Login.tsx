@@ -56,19 +56,8 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
       setError(null)
 
       // Validate email format
-      if (!email.trim()) {
-        setError('Email is required')
-        return
-      }
-
-      if (!isValidEmail(email)) {
-        setError('Please enter a valid email address')
-        return
-      }
-
-      // Validate password
-      if (!password) {
-        setError('Password is required')
+      if (!email.trim() || !password || !isValidEmail(email)) {
+        setError('Invalid email or password')
         return
       }
 
@@ -97,7 +86,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
           }
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Login failed')
+        setError(err instanceof Error ? err.message : 'Invalid email or password')
       } finally {
         setIsLoading(false)
       }

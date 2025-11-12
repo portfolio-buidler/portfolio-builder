@@ -173,6 +173,24 @@
   color: var(--error-900);
 }
 
+.login-page__error-message {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 0 var(--space-4) 0;
+  margin: 0 0 var(--space-4) 0;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
+  color: #FF3B30;
+}
+
+.login-page__error-message-icon {
+  flex-shrink: 0;
+  color: #FF3B30;
+}
+
 .login-page__form {
   display: flex;
   flex-direction: column;
@@ -220,7 +238,9 @@
 
   /* Error state modifier */
   &--error {
-    border-color: var(--error-600);
+    background: #FF3B304D;
+    border: 1px solid #FF3B30;
+    box-shadow: inset 1px 1px 2px 0px #FFFFFF4D, inset -3px -3px 3px 0px #DDDDDD26;
   }
 }
 
