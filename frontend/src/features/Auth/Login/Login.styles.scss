@@ -268,10 +268,37 @@
   cursor: pointer;
 
   input[type='checkbox'] {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     cursor: pointer;
+    border-radius: 5px;
+    border-width: 2px;
+    border: 2px solid #354052;
+    background: #35405233;
     accent-color: var(--title-color);
+    appearance: none;
+    -webkit-appearance: none;
+    transition: all 200ms ease;
+
+    &:checked {
+      background: #354052;
+      border-color: #354052;
+
+      &::after {
+        content: '✓';
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+      }
+    }
+
+    &:hover:not(:disabled) {
+      border-color: #354052;
+      background: #35405244;
+    }
   }
 }
 
@@ -283,6 +310,7 @@
   line-height: 22px;
   letter-spacing: 0%;
   color: #354052;
+
   user-select: none;
   text-shadow: 0px 0px 4px #00000040;
 }
