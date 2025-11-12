@@ -1,14 +1,19 @@
 from datetime import datetime
-from sqlalchemy import BigInteger, Boolean, CheckConstraint, Enum, Integer, String, text, func, Index
+from sqlalchemy import BigInteger, Boolean, CheckConstraint, Enum, ForeignKey, Integer, String, text, func, Index
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 from app.shared.enums import ParseStatus  
 class Resume(Base):
     __tablename__ = "resumes"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
-    user_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True, index=True)
+    user_id: Mapped[int | None] = mapped_column(
+        BigInteger,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True
+    )
     source_file_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
 
     original_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
@@ -24,6 +29,9 @@ class Resume(Base):
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relationships
+    user: Mapped["User"] = relationship("User", back_populates="resumes")
 
     __table_args__ = (
         Index("ix_resumes_status", "parse_status"),

@@ -10,6 +10,7 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 from app.db.base import Base
+from app.db import models_portfolio  # noqa: F401
 import asyncio, os
 
 # Import models so Base.metadata has all tables for autogenerate.

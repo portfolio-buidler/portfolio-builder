@@ -1,28 +1,42 @@
+# app/main.py
 import uvicorn
-from fastapi import APIRouter, FastAPI
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.features.resumes.routes import router as resumes_router
+
 from app.core.config import ALLOWED_ORIGINS
+from app.core.rate_limiting import rate_limit_middleware
+from app.features.resumes.routes import router as resumes_router
+from app.features.portfolios.routes_draft import router as draft_router  # PC-65
+from app.features.portfolios.routes_public import router as public_router  # PC-68
+from app.features.portfolios import routes_site
 
 app = FastAPI(title="Portfolio Builder API", version="1.0.0")
-app.include_router(resumes_router)
 
+# --- Middleware ---
+# Rate limiting (applied before CORS)
+app.middleware("http")(rate_limit_middleware)
+
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=ALLOWED_ORIGINS,            # e.g. ["http://localhost:3000"]
     allow_credentials=True,
-    allow_methods=["POST", "GET", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
+
+# --- Routers ---
+app.include_router(resumes_router)
+app.include_router(draft_router)  # /api/v1/portfolio/draft/seed
+app.include_router(public_router)  # /api/v1/portfolio/public/{slug}
+app.include_router(routes_site.router)
+
+
 @app.get("/")
-def root():
-    return {
-        "status": "ok",
-        "service": "portfolio-builder",
-        "version": app.version
-    }
+async def root():
+    return {"status": "ok", "service": "portfolio-builder", "version": app.version}
 
 if __name__ == "__main__":
-    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)
-
+    # for local runs; in Docker we also want 0.0.0.0:9000
+    uvicorn.run("app.main:app", host="0.0.0.0", port=9000, reload=True)
