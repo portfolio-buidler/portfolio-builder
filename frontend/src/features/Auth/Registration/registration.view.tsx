@@ -1,5 +1,5 @@
 import React from 'react'
-import type { RegistrationViewProps } from './Registration.types.ts'
+import type { RegistrationViewProps } from './registration.types.ts'
 import './Registration.styles.scss'
 
 export const RegistrationView: React.FC<RegistrationViewProps> = ({
@@ -33,24 +33,25 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
 
       <div className="registration-page__container">
         <div className="registration-page__form-container">
-          <button
-            type="button"
-            className="registration-page__back-btn"
-            onClick={onBack}
-            aria-label="Go back"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M15 18L9 12L15 6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-
-          <h2 className="registration-page__title">Registration</h2>
+          <h2 className="registration-page__title">
+            <button
+              type="button"
+              className="registration-page__back-btn"
+              onClick={onBack}
+              aria-label="Go back"
+            >
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M15 18L9 12L15 6"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            Registration
+          </h2>
           <p className="registration-page__subtitle">
             {hasPendingUpload 
               ? 'Create an account to continue with your upload' 
