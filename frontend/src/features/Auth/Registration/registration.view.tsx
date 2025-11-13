@@ -12,6 +12,7 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
   errors,
   isLoading,
   hasPendingUpload,
+  isFormValid,
   onFirstNameChange,
   onLastNameChange,
   onEmailChange,
@@ -55,7 +56,7 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
           <p className="registration-page__subtitle">
             {hasPendingUpload 
               ? 'Create an account to continue with your upload' 
-              : 'At least 8 characters, including a letter and a number.'}
+              : <span className="registration-page__subtitle--normal">Create your account</span>}
           </p>
 
           {hasPendingUpload && (
@@ -145,6 +146,11 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
               />
             </div>
 
+            {/* Password hint message moved here between password and confirm password */}
+            <p className="registration-page__password-hint">
+              At least 8 characters, including a letter and a number.
+            </p>
+
             <div className="registration-page__input-group">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -174,7 +180,7 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
 
             <button
               type="submit"
-              className="registration-page__submit-btn"
+              className={`registration-page__submit-btn ${isFormValid && !isLoading ? 'registration-page__submit-btn--ready' : ''}`}
               disabled={isLoading}
             >
               <span className="registration-page__submit-label">
