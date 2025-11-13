@@ -228,7 +228,7 @@
     cursor: pointer;
 
     &[aria-disabled='true'] {
-      background: var(--gray-500);
+      background: #8E8E93;
       cursor: not-allowed;
     }
 
