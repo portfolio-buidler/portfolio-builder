@@ -12,6 +12,11 @@ body {
   color: var(--color-fg);
 }
 
+/* Prevent scrollbars from page overflow */
+html {
+  overflow: hidden;
+}
+
 /* Improve image defaults */
 img,
 svg,

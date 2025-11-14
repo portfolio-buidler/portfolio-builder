@@ -12,6 +12,7 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
   errors,
   isLoading,
   hasPendingUpload,
+  isFormValid,
   onFirstNameChange,
   onLastNameChange,
   onEmailChange,
@@ -55,7 +56,7 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
           <p className="registration-page__subtitle">
             {hasPendingUpload 
               ? 'Create an account to continue with your upload' 
-              : 'At least 8 characters, including a letter and a number.'}
+              : <span className="registration-page__subtitle--normal">Create your account</span>}
           </p>
 
           {hasPendingUpload && (
@@ -95,11 +96,6 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
                   aria-label="First name"
                   aria-invalid={!!errors.firstName}
                 />
-                {errors.firstName && (
-                  <span className="registration-page__field-error" role="alert">
-                    {errors.firstName}
-                  </span>
-                )}
               </div>
 
               <div className="registration-page__input-group">
@@ -115,11 +111,6 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
                   aria-label="Last name"
                   aria-invalid={!!errors.lastName}
                 />
-                {errors.lastName && (
-                  <span className="registration-page__field-error" role="alert">
-                    {errors.lastName}
-                  </span>
-                )}
               </div>
             </div>
 
@@ -136,11 +127,6 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
                 aria-label="Email address"
                 aria-invalid={!!errors.email}
               />
-              {errors.email && (
-                <span className="registration-page__field-error" role="alert">
-                  {errors.email}
-                </span>
-              )}
             </div>
 
             <div className="registration-page__input-group">
@@ -158,12 +144,12 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
                 aria-label="Password"
                 aria-invalid={!!errors.password}
               />
-              {errors.password && (
-                <span className="registration-page__field-error" role="alert">
-                  {errors.password}
-                </span>
-              )}
             </div>
+
+            {/* Password hint message moved here between password and confirm password */}
+            <p className="registration-page__password-hint">
+              At least 8 characters, including a letter and a number.
+            </p>
 
             <div className="registration-page__input-group">
               <input
@@ -180,11 +166,6 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
                 aria-label="Confirm password"
                 aria-invalid={!!errors.confirmPassword}
               />
-              {errors.confirmPassword && (
-                <span className="registration-page__field-error" role="alert">
-                  {errors.confirmPassword}
-                </span>
-              )}
             </div>
 
             <label className="registration-page__checkbox">
@@ -199,7 +180,7 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
 
             <button
               type="submit"
-              className="registration-page__submit-btn"
+              className={`registration-page__submit-btn ${isFormValid && !isLoading ? 'registration-page__submit-btn--ready' : ''}`}
               disabled={isLoading}
             >
               <span className="registration-page__submit-label">

@@ -1,13 +1,3 @@
-/**
- * Login Component - Fixed Back Button
- * 
- * Back button behavior:
- * - Goes back in browser history (navigate(-1))
- * - This handles all cases naturally:
- *   - From Upload → Login → Back goes to Upload
- *   - From Registration → Login → Back goes to Registration
- */
-
 import { useState, useCallback, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { LoginView } from './Login.view'
@@ -29,9 +19,16 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [isFormValid, setIsFormValid] = useState(false)
 
   // Check if there's a pending upload
   const [hasPendingUpload, setHasPendingUpload] = useState(false)
+
+  // Update form validity when email or password changes
+  useEffect(() => {
+    const isValid = email.trim().length > 0 && password.length > 0 && isValidEmail(email)
+    setIsFormValid(isValid)
+  }, [email, password])
 
   useEffect(() => {
     // Check for pending upload from location state or session storage
@@ -134,6 +131,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
     error,
     isLoading,
     hasPendingUpload,
+    isFormValid,
     onEmailChange: setEmail,
     onPasswordChange: setPassword,
     onShowPasswordToggle: () => setShowPassword(!showPassword),

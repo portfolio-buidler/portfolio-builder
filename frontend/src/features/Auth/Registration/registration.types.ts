@@ -23,6 +23,7 @@ export interface RegistrationViewProps {
   }
   isLoading: boolean
   hasPendingUpload: boolean
+  isFormValid: boolean
   onFirstNameChange: (value: string) => void
   onLastNameChange: (value: string) => void
   onEmailChange: (value: string) => void

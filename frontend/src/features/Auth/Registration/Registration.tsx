@@ -1,13 +1,3 @@
-/**
- * Registration Component - Fixed Back Button
- * 
- * Back button behavior:
- * - Goes back in browser history (navigate(-1))
- * - This handles all cases naturally:
- *   - From Upload → Registration → Back goes to Upload
- *   - From Login → Registration → Back goes to Login
- */
-
 import { useState, useCallback, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { RegistrationView } from './Registration.view.tsx'
@@ -40,9 +30,25 @@ export const Registration: React.FC<RegistrationProps> = ({ onRegistrationSucces
     general?: string
   }>({})
   const [isLoading, setIsLoading] = useState(false)
+  const [isFormValid, setIsFormValid] = useState(false)
 
   // Check if there's a pending upload
   const [hasPendingUpload, setHasPendingUpload] = useState(false)
+
+  // Update form validity when fields change
+  useEffect(() => {
+    const isValid = 
+      firstName.trim().length > 0 &&
+      lastName.trim().length > 0 &&
+      email.trim().length > 0 &&
+      isValidEmail(email) &&
+      password.length > 0 &&
+      confirmPassword.length > 0 &&
+      password === confirmPassword &&
+      validatePassword(password).valid
+    
+    setIsFormValid(isValid)
+  }, [firstName, lastName, email, password, confirmPassword])
 
   useEffect(() => {
     // Check for pending upload from location state or session storage
@@ -123,23 +129,16 @@ export const Registration: React.FC<RegistrationProps> = ({ onRegistrationSucces
 
         console.log('[Registration] Registration successful:', user.email)
 
-        // Determine where to redirect
-        const locationState = location.state as any
-        const from = locationState?.from || '/upload'
-
-        // Success - call callback or navigate
-        if (onRegistrationSuccess) {
-          onRegistrationSuccess()
-        } else {
-          // If there's a pending upload, always go to upload page
-          // The UploadCV component will handle the pending upload automatically
-          if (hasPendingUpload) {
-            console.log('[Registration] Redirecting to upload page to process pending CV')
-            navigate('/upload', { replace: true })
-          } else {
-            navigate(from, { replace: true })
+        // After successful registration, redirect to login page
+        // User needs to login with their new credentials
+        navigate('/login', { 
+          replace: true,
+          state: {
+            from: location.state?.from || '/upload',
+            hasPendingUpload: hasPendingUpload,
+            registrationSuccess: true
           }
-        }
+        })
       } catch (err) {
         setErrors({
           general: err instanceof Error ? err.message : 'Registration failed',
@@ -148,17 +147,13 @@ export const Registration: React.FC<RegistrationProps> = ({ onRegistrationSucces
         setIsLoading(false)
       }
     },
-    [firstName, lastName, email, password, validateForm, navigate, onRegistrationSuccess, location, hasPendingUpload]
+    [firstName, lastName, email, password, validateForm, navigate, location, hasPendingUpload]
   )
 
   const handleBack = useCallback(() => {
     if (onBack) {
       onBack()
     } else {
-      // Go back in browser history
-      // This naturally handles all navigation paths:
-      // - From Upload → Registration → Back goes to Upload
-      // - From Login → Registration → Back goes to Login
       navigate(-1)
     }
   }, [navigate, onBack])
@@ -184,6 +179,7 @@ export const Registration: React.FC<RegistrationProps> = ({ onRegistrationSucces
     errors,
     isLoading,
     hasPendingUpload,
+    isFormValid,
     onFirstNameChange: setFirstName,
     onLastNameChange: setLastName,
     onEmailChange: setEmail,

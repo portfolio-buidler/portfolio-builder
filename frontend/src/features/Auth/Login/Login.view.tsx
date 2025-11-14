@@ -9,6 +9,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
   error,
   isLoading,
   hasPendingUpload,
+  isFormValid,
   onEmailChange,
   onPasswordChange,
   onShowPasswordToggle,
@@ -56,11 +57,11 @@ export const LoginView: React.FC<LoginViewProps> = ({
                   <path d="M12 8V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                   <circle cx="12" cy="16" r="1" fill="currentColor" />
                 </svg>
-                <span>{error}</span>
+                <span className="login-page__subtitle--error">{error}</span>
               </>
             ) : hasPendingUpload 
               ? 'Login to continue with your upload' 
-              : 'Welcome back!'}
+              : <span className="login-page__subtitle--normal">Welcome back!</span>}
           </p>
 
           {hasPendingUpload && !error && (
@@ -155,7 +156,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
 
             <button
               type="submit"
-              className="login-page__submit-btn"
+              className={`login-page__submit-btn ${isFormValid && !isLoading ? 'login-page__submit-btn--ready' : ''}`}
               disabled={isLoading}
             >
               <span className="login-page__submit-label">
