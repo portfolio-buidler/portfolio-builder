@@ -11,7 +11,9 @@ Endpoints:
 - POST   /auth/change-password - Change password
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request, Response, Depends
+from app.core.db import get_db
+from app.core.security import get_current_user
 from app.features.auth import controller
 from app.features.auth.schemas import (
     RegisterRequest,
@@ -42,7 +44,7 @@ router = APIRouter(
 )
 async def register_endpoint(
     data: RegisterRequest,
-    db=controller.Depends(controller.get_db)
+    db=Depends(get_db)
 ):
     """Register a new user account."""
     return await controller.register(data, db)
@@ -56,9 +58,9 @@ async def register_endpoint(
 )
 async def login_endpoint(
     data: LoginRequest,
-    response=controller.Response,
-    request=controller.Request,
-    db=controller.Depends(controller.get_db)
+    response: Response,
+    request: Request,
+    db=Depends(get_db)
 ):
     """Login and receive authentication tokens."""
     return await controller.login(data, response, request, db)
@@ -71,9 +73,9 @@ async def login_endpoint(
     description="Use refresh token from cookie to get a new access token (token rotation)"
 )
 async def refresh_endpoint(
-    request=controller.Request,
-    response=controller.Response,
-    db=controller.Depends(controller.get_db)
+    request: Request,
+    response: Response,
+    db=Depends(get_db)
 ):
     """Refresh access token using refresh token from cookie."""
     return await controller.refresh(request, response, db)
@@ -85,9 +87,9 @@ async def refresh_endpoint(
     description="Revoke refresh token and clear cookie"
 )
 async def logout_endpoint(
-    request=controller.Request,
-    response=controller.Response,
-    db=controller.Depends(controller.get_db)
+    request: Request,
+    response: Response,
+    db=Depends(get_db)
 ):
     """Logout and revoke refresh token."""
     return await controller.logout(request, response, db)
@@ -104,7 +106,7 @@ async def logout_endpoint(
     description="Get the profile of the currently authenticated user"
 )
 async def get_me_endpoint(
-    user=controller.Depends(controller.get_current_user)
+    user=Depends(get_current_user)
 ):
     """Get current user's profile."""
     return await controller.get_me(user)
@@ -118,8 +120,8 @@ async def get_me_endpoint(
 )
 async def update_me_endpoint(
     data: UpdateProfile,
-    user=controller.Depends(controller.get_current_user),
-    db=controller.Depends(controller.get_db)
+    user=Depends(get_current_user),
+    db=Depends(get_db)
 ):
     """Update current user's profile."""
     return await controller.update_me(data, user, db)
@@ -132,8 +134,8 @@ async def update_me_endpoint(
 )
 async def change_password_endpoint(
     data: ChangePasswordRequest,
-    user=controller.Depends(controller.get_current_user),
-    db=controller.Depends(controller.get_db)
+    user=Depends(get_current_user),
+    db=Depends(get_db)
 ):
     """Change user's password."""
     return await controller.change_password(data, user, db)

@@ -63,16 +63,16 @@ async def register_user(db: AsyncSession, data: RegisterRequest) -> User:
     if existing_user:
         raise ValueError("Email already registered")
     
-    # Create new user
+    # Create new user with only email and password
     user = User(
         email=data.email,
         password_hash=hash_password(data.password.get_secret_value()),
-        full_name=data.full_name,
-        headline=data.headline,
-        location=data.location,
-        timezone=data.timezone,
-        languages={"languages": data.languages} if data.languages else None,
-        phone_e164=data.phone,
+        full_name=None,
+        headline=None,
+        location=None,
+        timezone=None,
+        languages=None,
+        phone_e164=None,
         is_active=True,
         is_verified=False,
     )
