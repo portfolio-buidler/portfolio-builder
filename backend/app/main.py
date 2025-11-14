@@ -1,10 +1,13 @@
 # app/main.py
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.core.config import ALLOWED_ORIGINS
 from app.core.rate_limiting import rate_limit_middleware
+from app.core.errors import AuthenticationError, AuthorizationError
+from app.features.auth.routes import router as auth_router
 from app.features.resumes.routes import router as resumes_router
 from app.features.portfolios.routes_draft import router as draft_router  # PC-65
 from app.features.portfolios.routes_public import router as public_router  # PC-68
@@ -26,7 +29,28 @@ app.add_middleware(
 )
 
 
+# --- Exception Handlers ---
+@app.exception_handler(AuthenticationError)
+async def authentication_error_handler(request: Request, exc: AuthenticationError):
+    """Handle 401 authentication errors."""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers=exc.headers
+    )
+
+
+@app.exception_handler(AuthorizationError)
+async def authorization_error_handler(request: Request, exc: AuthorizationError):
+    """Handle 403 authorization errors."""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail}
+    )
+
+
 # --- Routers ---
+app.include_router(auth_router)  # /auth/*
 app.include_router(resumes_router)
 app.include_router(draft_router)  # /api/v1/portfolio/draft/seed
 app.include_router(public_router)  # /api/v1/portfolio/public/{slug}

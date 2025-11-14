@@ -49,3 +49,9 @@ class UpdateProfile(APIModel):
     timezone: str | None = None
     languages: list[str] | None = None
     phone: Phone | None = None
+
+# Password change request with optional session revocation.
+class ChangePasswordRequest(APIModel):
+    old_password: SecretStr
+    new_password: SecretStr = Field(min_length=8, description="New password (min 8 chars)")
+    revoke_all_sessions: bool = Field(default=False, description="Logout from all devices after password change")
