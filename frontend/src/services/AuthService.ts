@@ -1,13 +1,3 @@
-/**
- * AuthService - Mock Authentication Service
- * 
- * Implements JWT-based authentication with:
- * - Access tokens (2-minute expiry)
- * - Refresh tokens (5-minute expiry)
- * - Automatic token refresh
- * - Temporary CV storage for pre-auth uploads
- */
-
 import type { User, LoginCredentials, RegistrationData, AuthTokens } from './Auth.types.ts'
 
 // Token expiry times (in milliseconds)
