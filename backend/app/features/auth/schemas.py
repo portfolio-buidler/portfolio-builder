@@ -11,12 +11,6 @@ Phone = Annotated[str, StringConstraints(pattern=r"^(?:\+972|0)(5[0-9])[-]?\d{7}
 class RegisterRequest(APIModel):
     email: EmailStr
     password: SecretStr = Field(min_length=8, description="hash server-side")
-    full_name: FullName
-    headline: Headline | None = None
-    location: str | None = None
-    timezone: str | None = None
-    languages: list[str] = []
-    phone: Phone | None = None
 
 # User login authentication request
 class LoginRequest(APIModel):
@@ -33,12 +27,12 @@ class TokenPair(APIModel):
 # Public safe user profile returned from the API. Excludes sensitive fields like email and phone.
 class UserPublic(IDModel, Timestamped):
     email: EmailStr
-    full_name: FullName
-    headline: Headline | None = None
+    full_name: str | None = None
+    headline: str | None = None
     location: str | None = None
     timezone: str | None = None
-    languages: list[str] = []
-    phone: Phone | None = None
+    languages: dict | None = None  # JSONB field from database
+    phone: str | None = None
     updated_at: datetime | None = None
     
 # Editable fields for user profile updates.
@@ -49,3 +43,9 @@ class UpdateProfile(APIModel):
     timezone: str | None = None
     languages: list[str] | None = None
     phone: Phone | None = None
+
+# Password change request with optional session revocation.
+class ChangePasswordRequest(APIModel):
+    old_password: SecretStr
+    new_password: SecretStr = Field(min_length=8, description="New password (min 8 chars)")
+    revoke_all_sessions: bool = Field(default=False, description="Logout from all devices after password change")

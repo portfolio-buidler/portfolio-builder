@@ -15,6 +15,8 @@ import asyncio, os
 
 # Import models so Base.metadata has all tables for autogenerate.
 from app.db import models_resume as _models_resume  # noqa: F401
+from app.db import models_user as _models_user  # noqa: F401
+from app.db import models_refresh_token as _models_refresh_token  # noqa: F401
 
 config = context.config
 if config.config_file_name:
