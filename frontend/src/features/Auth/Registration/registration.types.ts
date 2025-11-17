@@ -37,6 +37,5 @@ export interface RegistrationViewProps {
 }
 
 export interface RegistrationProps {
-  onRegistrationSuccess?: () => void
   onBack?: () => void
 }

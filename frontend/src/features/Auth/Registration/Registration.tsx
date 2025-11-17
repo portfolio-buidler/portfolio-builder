@@ -9,9 +9,13 @@ import {
 } from '../../../services/AuthService'
 import backgroundImage from '../../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6c8.jpg'
 
-export const Registration: React.FC<RegistrationProps> = ({ onRegistrationSuccess, onBack }) => {
+export const Registration: React.FC<RegistrationProps> = ({ onBack }) => {
   const navigate = useNavigate()
   const location = useLocation()
+  
+  // Extract hasPendingUpload from location state (if user came from upload page)
+  const locationState = location.state as { hasPendingUpload?: boolean, from?: string }
+  const hasPendingUpload = locationState?.hasPendingUpload || false
   
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')

@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
+import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9000';
 
@@ -37,7 +37,7 @@ export const clearAccessToken = (): void => {
 };
 
 // Create main API instance
-export const api: AxiosInstance = axios.create({
+export const api = axios.create({
   baseURL: `${API_BASE_URL}/api/v1`,
   withCredentials: true, // Critical: allows cookies (refresh token)
   headers: {
@@ -49,13 +49,13 @@ export const api: AxiosInstance = axios.create({
  * Request interceptor: Inject access token into Authorization header
  */
 api.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
+  (config: any) => {
     if (accessToken && config.headers) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
     return config;
   },
-  (error) => {
+  (error: any) => {
     return Promise.reject(error);
   }
 );
@@ -64,8 +64,8 @@ api.interceptors.request.use(
  * Response interceptor: Handle 401 errors and auto-refresh tokens
  */
 api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  (response: any) => response,
+  async (error: any) => {
     const originalRequest = error.config;
 
     // Check if error is 401 and we haven't already retried
