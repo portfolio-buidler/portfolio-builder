@@ -11,6 +11,7 @@ Phone = Annotated[str, StringConstraints(pattern=r"^(?:\+972|0)(5[0-9])[-]?\d{7}
 class RegisterRequest(APIModel):
     email: EmailStr
     password: SecretStr = Field(min_length=8, description="hash server-side")
+    full_name: FullName = Field(..., description="User's full name")
 
 # User login authentication request
 class LoginRequest(APIModel):

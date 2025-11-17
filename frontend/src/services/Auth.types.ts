@@ -1,14 +1,20 @@
 /**
  * Authentication Type Definitions
+ * 
+ * Note: User interface matches backend's UserPublic schema
  */
 
 export interface User {
   id: number
   email: string
-  firstName: string
-  lastName: string
-  fullName: string
-  createdAt: string
+  full_name: string | null
+  headline: string | null
+  location: string | null
+  timezone: string | null
+  languages: Record<string, unknown> | null
+  phone: string | null
+  created_at: string
+  updated_at: string | null
 }
 
 export interface LoginCredentials {
@@ -17,8 +23,7 @@ export interface LoginCredentials {
 }
 
 export interface RegistrationData {
-  firstName: string
-  lastName: string
+  fullName: string
   email: string
   password: string
 }
