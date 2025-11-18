@@ -4,9 +4,7 @@ import { LoginView } from './Login.view'
 import type { LoginProps, LoginViewProps } from './Login.types'
 import { 
   loginUser, 
-  isValidEmail,
-  hasPendingUploadAfterAuth,
-  getTempCV 
+  isValidEmail
 } from '../../../services/AuthService'
 import backgroundImage from '../../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6c8.jpg'
 
@@ -31,19 +29,13 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
   }, [email, password])
 
   useEffect(() => {
-    // Check for pending upload from location state or session storage
+    // Check for pending upload from location state only
     const locationState = location.state as any
     const pendingFromState = locationState?.hasPendingUpload
-    const pendingFromStorage = hasPendingUploadAfterAuth()
     
-    if (pendingFromState || pendingFromStorage) {
+    if (pendingFromState) {
       setHasPendingUpload(true)
-      
-      // Show info about pending upload
-      const tempCV = getTempCV()
-      if (tempCV) {
-        console.log('[Login] Pending CV upload detected:', tempCV.metadata.fileName)
-      }
+      console.log('[Login] Pending upload detected from location state')
     }
   }, [location])
 
