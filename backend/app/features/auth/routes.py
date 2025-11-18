@@ -24,9 +24,9 @@ from app.features.auth.schemas import (
     ChangePasswordRequest,
 )
 
-# Create router with /auth prefix
+# Create router with /api/v1/auth prefix
 router = APIRouter(
-    prefix="/auth",
+    prefix="/api/v1/auth",
     tags=["Authentication"]
 )
 

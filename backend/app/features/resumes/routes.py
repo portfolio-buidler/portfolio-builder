@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from .upload_schemas import UploadResponse, SimpleParsedResponse
 from .controller import upload_cv, upload_status, upload_cv_simple
 
-router = APIRouter(prefix="/resumes", tags=["resumes"])
+router = APIRouter(prefix="/api/v1/resumes", tags=["resumes"])
 
 router.add_api_route(
     "/upload",

@@ -13,7 +13,7 @@ export async function uploadCV(
   form.append('file', file)
 
 
-  const path = import.meta.env.VITE_UPLOAD_PATH || '/resumes/upload'
+  const path = import.meta.env.VITE_UPLOAD_PATH || '/api/v1/resumes/upload'
 
   const res = await api.post(path, form, {
     headers: { 'Content-Type': 'multipart/form-data' },
@@ -28,7 +28,7 @@ export async function uploadCV(
 
 export async function getUploadStatus(fileId: string): Promise<UploadResponse> {
 
-  const base = import.meta.env.VITE_UPLOAD_STATUS_PATH || '/resumes/upload'
+  const base = import.meta.env.VITE_UPLOAD_STATUS_PATH || '/api/v1/resumes/upload'
   const res = await api.get(`${base}/${encodeURIComponent(fileId)}/status`)
 
   console.log('[uploadService] getUploadStatus response:', res.data)
