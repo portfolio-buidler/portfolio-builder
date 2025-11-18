@@ -1,7 +1,7 @@
 """Security utilities for authentication: JWT, password hashing, and auth dependencies."""
 import secrets
 import hashlib
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Annotated
 
 from fastapi import Depends
@@ -51,13 +51,13 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 # ============================================================================
 
 def create_access_token(user_id: int, email: str) -> str:
-    """Create a JWT access token with user claims."""
-    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    """Create a JWT access token for a user."""
+    expire = datetime.now(UTC) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     payload = {
         "sub": str(user_id),
         "email": email,
         "exp": expire,
-        "iat": datetime.utcnow(),
+        "iat": datetime.now(UTC),
     }
     return jwt.encode(payload, SECRET_KEY, algorithm=JWT_ALGORITHM)
 
@@ -109,11 +109,16 @@ def create_refresh_token_cookie(token: str) -> dict:
 
 
 def clear_refresh_token_cookie() -> dict:
-    """Create cookie parameters for clearing a refresh token."""
+    """Create cookie parameters for clearing a refresh token.
+
+    Adds both max_age=0 and an expires date in the past to ensure all
+    browsers drop the cookie immediately (some dev setups with domain/path
+    mismatches ignore only max_age)."""
     return {
         "key": "refresh_token",
         "value": "",
         "max_age": 0,
+        "expires": "Thu, 01 Jan 1970 00:00:00 GMT",
         "httponly": True,
         "secure": COOKIE_SECURE,
         "samesite": COOKIE_SAMESITE,
@@ -126,19 +131,22 @@ def clear_refresh_token_cookie() -> dict:
 # FastAPI Authentication Dependency
 # ============================================================================
 
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 
 
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),
     db: AsyncSession = Depends(get_db)
 ):
     """
     FastAPI dependency to get the current authenticated user.
     
     Extracts JWT from Authorization header, validates it, and returns the User object.
-    Raises AuthenticationError if token is invalid or user not found.
+    Raises AuthenticationError (401) if token is invalid or user not found.
     """
+    if not credentials:
+        raise AuthenticationError("Missing authentication credentials")
+    
     token = credentials.credentials
     try:
         payload = decode_access_token(token)

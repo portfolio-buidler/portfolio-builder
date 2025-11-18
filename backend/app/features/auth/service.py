@@ -7,7 +7,7 @@ This module handles:
 - Profile management
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
 
@@ -192,7 +192,7 @@ async def refresh_access_token(
         return None
     
     # Check if token is expired
-    if db_token.expires_at < datetime.utcnow():
+    if db_token.expires_at < datetime.now(UTC):
         return None
     
     # Get the user
@@ -201,7 +201,7 @@ async def refresh_access_token(
         return None
     
     # Revoke old token
-    db_token.revoked_at = datetime.utcnow()
+    db_token.revoked_at = datetime.now(UTC)
     
     # Create new tokens
     new_access_token = create_access_token(user.id, user.email)
@@ -209,7 +209,7 @@ async def refresh_access_token(
     new_token_hash = hash_refresh_token(new_refresh_token)
     
     # Store new refresh token with rotation tracking
-    expires_at = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    expires_at = datetime.now(UTC) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
     new_db_token = RefreshToken(
         user_id=user.id,
         token_hash=new_token_hash,
@@ -242,7 +242,7 @@ async def revoke_refresh_token(db: AsyncSession, refresh_token: str) -> bool:
         update(RefreshToken)
         .where(RefreshToken.token_hash == token_hash)
         .where(RefreshToken.revoked_at.is_(None))
-        .values(revoked_at=datetime.utcnow())
+        .values(revoked_at=datetime.now(UTC))
     )
     await db.commit()
     
@@ -264,7 +264,7 @@ async def revoke_all_user_tokens(db: AsyncSession, user_id: int) -> int:
         update(RefreshToken)
         .where(RefreshToken.user_id == user_id)
         .where(RefreshToken.revoked_at.is_(None))
-        .values(revoked_at=datetime.utcnow())
+        .values(revoked_at=datetime.now(UTC))
     )
     await db.commit()
     

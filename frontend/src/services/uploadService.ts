@@ -20,9 +20,6 @@ export async function uploadCV(
     onUploadProgress: opts?.onUploadProgress,
   })
 
-  console.log('[uploadService] uploadCV response:', res.data)
-
-  console.log('[uploadService] uploadCV response (pretty):', JSON.stringify(res.data, null, 2))
   return res.data as UploadResponse
 }
 
@@ -31,8 +28,5 @@ export async function getUploadStatus(fileId: string): Promise<UploadResponse> {
   const base = import.meta.env.VITE_UPLOAD_STATUS_PATH || 'resumes/upload'
   const res = await api.get(`${base}/${encodeURIComponent(fileId)}/status`)
 
-  console.log('[uploadService] getUploadStatus response:', res.data)
-
-  console.log('[uploadService] getUploadStatus response (pretty):', JSON.stringify(res.data, null, 2))
   return res.data as UploadResponse
 }

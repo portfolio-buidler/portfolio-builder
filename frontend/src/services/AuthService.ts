@@ -57,8 +57,6 @@ export async function registerUser(data: RegistrationData): Promise<void> {
       password: data.password,
       full_name: data.fullName,
     });
-    
-    console.log('[AuthService] User registered successfully');
   } catch (error: any) {
     const message = error?.response?.data?.detail || 'Registration failed';
     console.error('[AuthService] Registration error:', message);
@@ -86,11 +84,17 @@ export async function loginUser(credentials: LoginCredentials): Promise<User> {
     // Store access token in memory
     setAccessToken(access_token);
     
+    // Clear manual logout sentinel (user explicitly logged back in)
+    try { 
+      localStorage.removeItem('auth:manualLogout');
+    } catch (e) {
+      console.error('[AuthService] Login: failed to clear localStorage flag', e);
+    }
+    
     // Fetch user profile with the new token
     const userResponse = await api.get('auth/me');
     const user: User = userResponse.data;
     
-    console.log('[AuthService] Login successful:', user.email);
     return user;
   } catch (error: any) {
     const message = error?.response?.data?.detail || 'Login failed';
@@ -122,14 +126,18 @@ export async function getCurrentUser(): Promise<User | null> {
  */
 export async function logoutUser(): Promise<void> {
   try {
-    // Call logout endpoint to revoke refresh token
+    // Call logout endpoint to revoke refresh token + clear cookie
     await api.post('auth/logout');
-    console.log('[AuthService] Logout successful');
   } catch (error: any) {
-    console.warn('[AuthService] Logout request failed:', error?.message);
+    console.warn('[AuthService] Logout: backend request failed:', error?.message);
   } finally {
-    // Always clear local token
+    // Always clear local token and set manual logout sentinel
     clearAccessToken();
+    try { 
+      localStorage.setItem('auth:manualLogout', 'true');
+    } catch (e) {
+      console.error('[AuthService] Logout: failed to set localStorage flag', e);
+    }
   }
 }
 
@@ -143,7 +151,6 @@ export async function logoutUser(): Promise<void> {
 export async function updateUserProfile(updates: Partial<User>): Promise<User> {
   try {
     const response = await api.patch('auth/me', updates);
-    console.log('[AuthService] Profile updated successfully');
     return response.data;
   } catch (error: any) {
     const message = error?.response?.data?.detail || 'Profile update failed';
@@ -171,8 +178,6 @@ export async function changePassword(
       new_password: newPassword,
       revoke_all_sessions: revokeAllSessions,
     });
-    
-    console.log('[AuthService] Password changed successfully');
     
     // If all sessions revoked, clear local token
     if (revokeAllSessions) {

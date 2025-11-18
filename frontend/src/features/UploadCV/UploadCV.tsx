@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import backgroundImage from '../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6c8.jpg'
 import { UploadCVView } from './UploadCV.view'
@@ -17,37 +17,14 @@ function UploadCV() {
   const [isUploading, setIsUploading] = useState(false)
   const [progress, setProgress] = useState<UploadProgressData | undefined>(undefined)
   const startTimeRef = useRef<number | null>(null)
-  const { resumeData, setResumeData } = useResumeStore()
+  const { setResumeData } = useResumeStore()
   const [status, setStatus] = useState<UploadStatus>('idle')
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
 
   // Use global auth store instead of local state
-  const { user, isAuthenticated, fetchUser, logout: authLogout } = useAuthStore()
-
-  useEffect(() => {
-    console.log('[UploadCV] resumeData in global store:', resumeData)
-  }, [resumeData])
-
-  /**
-   * Check authentication on mount
-   */
-  useEffect(() => {
-    const checkAuth = async () => {
-      // Fetch current user from backend (updates global store)
-      await fetchUser()
-    }
-    checkAuth()
-  }, [fetchUser])
+  const { user, isAuthenticated, logout: authLogout } = useAuthStore()
 
   const onFileSelect = (file: File) => {
-    console.log('📁 File selected via file input:')
-    console.log('Name:', file.name)
-    console.log('Size:', file.size, 'bytes', `(${(file.size / 1024 / 1024).toFixed(2)} MB)`)
-    console.log('Type:', file.type)
-    console.log('Last Modified:', new Date(file.lastModified).toLocaleString())
-    console.log('Full File Object:', file)
-    console.log('---')
-    
     setSelectedFile(file)
     setProgress(undefined)
     // Reset status to idle when new file is selected
@@ -56,14 +33,6 @@ function UploadCV() {
   }
 
    const onDropFile = (file: File) => {
-    console.log('🎯 File dropped via drag & drop:')
-    console.log('Name:', file.name)
-    console.log('Size:', file.size, 'bytes', `(${(file.size / 1024 / 1024).toFixed(2)} MB)`)
-    console.log('Type:', file.type)
-    console.log('Last Modified:', new Date(file.lastModified).toLocaleString())
-    console.log('Full File Object:', file)
-    console.log('---')
-    
     setSelectedFile(file)
     setProgress(undefined)
     // Reset status to idle when new file is selected
@@ -109,12 +78,9 @@ function UploadCV() {
       })
       
       toast.success(res.message || 'File uploaded successfully')
-      console.log('Upload response:', res)
       setResumeData(res)
       setStatus('success')
       setErrorMessage(undefined)
-
-      console.log('[UploadCV] Simulated read back from store:', useResumeStore.getState().resumeData)
       
       // ✅ Don't auto-navigate - let user see success and click Next
       // Authentication check will happen when they click Next button
@@ -163,14 +129,12 @@ function UploadCV() {
   const handleNext = () => {
     // Check authentication before proceeding to preview
     if (!isAuthenticated) {
-      console.log('[UploadCV] User not authenticated, redirecting to login')
       toast.info('Please login to continue')
       navigate('/login', { state: { from: '/upload' } })
       return
     }
 
     // User is authenticated, proceed to preview
-    console.log('[UploadCV] User authenticated, proceeding to preview')
     navigate('/preview')
   }
 

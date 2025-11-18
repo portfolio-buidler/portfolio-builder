@@ -1,8 +1,7 @@
 /**
  * Authentication Store - Global State Management
  * 
- * Manages authentication state across the application using Zustand.
- * Provides centralized user data and authentication status.
+ * Manages authentication state using Zustand with automatic session restoration.
  */
 
 import { create } from 'zustand';
@@ -14,64 +13,76 @@ interface AuthStore {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isBootstrapped: boolean;
   error: string | null;
+  _fetchPromise: Promise<void> | null;
 
   // Actions
   setUser: (user: User | null) => void;
   fetchUser: () => Promise<void>;
   logout: () => Promise<void>;
+  markBootstrapped: () => void;
   clearError: () => void;
 }
 
-/**
- * Global authentication store
- * 
- * Usage:
- * ```typescript
- * const { user, isAuthenticated, fetchUser } = useAuthStore();
- * 
- * useEffect(() => {
- *   fetchUser(); // Load user on mount
- * }, []);
- * ```
- */
-export const useAuthStore = create<AuthStore>((set) => ({
+export const useAuthStore = create<AuthStore>((set, get) => ({
   // Initial state
   user: null,
   isAuthenticated: false,
   isLoading: false,
+  isBootstrapped: false,
   error: null,
+  _fetchPromise: null,
 
   // Set user directly (used after login/registration)
   setUser: (user) =>
     set({
       user,
       isAuthenticated: user !== null,
+      isBootstrapped: true,
       error: null,
     }),
 
   // Fetch current user from API
   fetchUser: async () => {
-    set({ isLoading: true, error: null });
-
-    try {
-      const user = await getCurrentUser();
-      
-      set({
-        user,
-        isAuthenticated: user !== null,
-        isLoading: false,
-      });
-    } catch (error: any) {
-      const message = error?.message || 'Failed to fetch user';
-      
-      set({
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-        error: message,
-      });
+    // Deduplication: if a fetch is already in progress, return that promise
+    const state = get();
+    if (state._fetchPromise) {
+      return state._fetchPromise;
     }
+    
+    // Create new fetch promise
+    const fetchPromise = (async () => {
+      set({ isLoading: true, error: null });
+
+      try {
+        const user = await getCurrentUser();
+        
+        set({
+          user,
+          isAuthenticated: user !== null,
+          isLoading: false,
+          isBootstrapped: true,
+          _fetchPromise: null,
+        });
+      } catch (error: any) {
+        const message = error?.message || 'Failed to fetch user';
+        
+        set({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+          isBootstrapped: true,
+          error: message,
+          _fetchPromise: null,
+        });
+      }
+    })();
+
+    // Store promise for deduplication
+    set({ _fetchPromise: fetchPromise });
+    
+    return fetchPromise;
   },
 
   // Logout and clear user state
@@ -85,6 +96,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
         user: null,
         isAuthenticated: false,
         isLoading: false,
+        isBootstrapped: true,
       });
     } catch (error: any) {
       const message = error?.message || 'Logout failed';
@@ -94,10 +106,13 @@ export const useAuthStore = create<AuthStore>((set) => ({
         user: null,
         isAuthenticated: false,
         isLoading: false,
+        isBootstrapped: true,
         error: message,
       });
     }
   },
+
+  markBootstrapped: () => set({ isBootstrapped: true, isLoading: false }),
 
   // Clear error message
   clearError: () => set({ error: null }),

@@ -11,7 +11,7 @@ Responsibilities:
 from __future__ import annotations
 import re
 import secrets
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Any
 
 from sqlalchemy import select, update
@@ -271,7 +271,7 @@ class PortfolioPublishService:
             seo=PortfolioPublishService._generate_seo_data(draft),
             public_contact=PortfolioPublishService._sanitize_contact_for_public(draft.contact),
             content=published_content,
-            last_published_at=datetime.utcnow(),
+            last_published_at=datetime.now(UTC),
             build_version=1,
         )
         
@@ -337,7 +337,7 @@ class PortfolioPublishService:
     async def _increment_view_count(db: AsyncSession, site_id: int) -> None:
         """Increment view count for analytics."""
         # For now, just log. In production, you'd store in analytics table
-        print(f"📊 Portfolio view: site_id={site_id}, timestamp={datetime.utcnow()}")
+        print(f"📊 Portfolio view: site_id={site_id}, timestamp={datetime.now(UTC)}")
         
         # Future: Store in analytics table
         # analytics = PortfolioAnalytics(site_id=site_id, event_type="view", timestamp=datetime.utcnow())
