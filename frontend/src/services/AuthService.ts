@@ -1,4 +1,13 @@
 /**
+ * Check if user is currently authenticated
+ *
+ * @returns true if access token exists in memory
+ */
+import { getAccessToken } from './api';
+export function isAuthenticated(): boolean {
+  return getAccessToken() !== null;
+}
+/**
  * Authentication Service - Real API Integration
  * 
  * Handles user authentication with backend API:
