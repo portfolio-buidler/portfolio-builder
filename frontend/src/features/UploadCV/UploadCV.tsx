@@ -4,7 +4,8 @@ import backgroundImage from '../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6
 import { UploadCVView } from './UploadCV.view'
 import { uploadCV } from '../../services/uploadService'
 import { toast } from 'react-toastify'
-import type { UploadCVViewProps, User } from './UploadCV.types'
+import type { UploadCVViewProps } from './UploadCV.types'
+import type { User } from '../../services/Auth.types'
 import { useResumeStore } from '../../store/resumeStore'
 import type { UploadProgressData, UploadStatus } from './UploadArea/UploadArea.types'
 

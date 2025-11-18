@@ -1,9 +1,13 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 from sqlalchemy import BigInteger, Boolean, CheckConstraint, Enum, ForeignKey, Integer, String, text, func, Index
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
-from app.shared.enums import ParseStatus  
+from app.shared.enums import ParseStatus
+
+if TYPE_CHECKING:
+    from app.db.models_user import User
 class Resume(Base):
     __tablename__ = "resumes"
 

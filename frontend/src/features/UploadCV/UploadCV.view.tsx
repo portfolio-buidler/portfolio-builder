@@ -73,7 +73,7 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
           <div className="upload-cv__auth-section">
             {user ? (
               <div className="upload-cv__user-info">
-                <span className="upload-cv__username">{user.fullName}</span>
+                <span className="upload-cv__username">{user.full_name}</span>
                 {onLogout && (
                   <button
                     type="button"
