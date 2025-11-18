@@ -1,6 +1,15 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9000';
+let API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9000';
+
+// Normalize: remove trailing '/api/v1' if someone included it in the env
+if (API_BASE_URL.endsWith('/api/v1')) {
+  API_BASE_URL = API_BASE_URL.replace(/\/api\/v1$/, '')
+}
+// Also remove trailing slash
+if (API_BASE_URL.endsWith('/')) {
+  API_BASE_URL = API_BASE_URL.slice(0, -1)
+}
 
 /**
  * Central Axios instance with automatic token management and refresh logic.
@@ -50,6 +59,19 @@ export const api = axios.create({
  */
 api.interceptors.request.use(
   (config: any) => {
+    // Normalize config.url to avoid double '/api/v1' in requests.
+    if (config && config.url && typeof config.url === 'string') {
+      // Replace '/api/v1/api/v1' => '/api/v1'
+      config.url = config.url.replace(/\/api\/v1\/api\/v1/g, '/api/v1');
+
+      // Remove leading '/api/v1' so baseURL doesn't duplicate it
+      if (config.url.startsWith('/api/v1/')) {
+        config.url = config.url.replace(/^\/api\/v1\//, '');
+      } else if (config.url === '/api/v1') {
+        config.url = '';
+      }
+    }
+
     if (accessToken && config.headers) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }

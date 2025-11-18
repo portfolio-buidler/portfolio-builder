@@ -6,6 +6,7 @@ import {
   loginUser, 
   isValidEmail
 } from '../../../services/AuthService'
+import { useAuthStore } from '../../../store/authStore'
 import backgroundImage from '../../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6c8.jpg'
 
 export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
@@ -56,6 +57,13 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
         const user = await loginUser({ email, password })
         
         console.log('[Login] Login successful:', user.email)
+
+        // Update global auth store with the fetched user
+        try {
+          useAuthStore.getState().setUser(user)
+        } catch (e) {
+          console.warn('[Login] Failed to set user in auth store', e)
+        }
         
         // Determine where to redirect
         const locationState = location.state as any
@@ -68,11 +76,13 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
           // If there's a pending upload, always go to upload page
           // The UploadCV component will handle the pending upload automatically
           if (hasPendingUpload) {
-            console.log('[Login] Redirecting to upload page to process pending CV')
-            navigate('/upload', { replace: true })
-          } else {
-            navigate(from, { replace: true })
-          }
+              console.log('[Login] Redirecting to upload page to process pending CV')
+              console.log('[Login] navigate -> /upload')
+              navigate('/upload', { replace: true })
+            } else {
+              console.log('[Login] navigate ->', from)
+              navigate(from, { replace: true })
+            }
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Invalid email or password')

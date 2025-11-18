@@ -52,7 +52,7 @@ export function validatePassword(password: string): { valid: boolean; error?: st
  */
 export async function registerUser(data: RegistrationData): Promise<void> {
   try {
-    await api.post('/api/v1/auth/register', {
+    await api.post('auth/register', {
       email: data.email,
       password: data.password,
       full_name: data.fullName,
@@ -76,7 +76,7 @@ export async function registerUser(data: RegistrationData): Promise<void> {
 export async function loginUser(credentials: LoginCredentials): Promise<User> {
   try {
     // Login and receive access token
-    const loginResponse = await api.post('/api/v1/auth/login', {
+    const loginResponse = await api.post('auth/login', {
       email: credentials.email,
       password: credentials.password,
     });
@@ -87,7 +87,7 @@ export async function loginUser(credentials: LoginCredentials): Promise<User> {
     setAccessToken(access_token);
     
     // Fetch user profile with the new token
-    const userResponse = await api.get('/api/v1/auth/me');
+    const userResponse = await api.get('auth/me');
     const user: User = userResponse.data;
     
     console.log('[AuthService] Login successful:', user.email);
@@ -107,7 +107,7 @@ export async function loginUser(credentials: LoginCredentials): Promise<User> {
  */
 export async function getCurrentUser(): Promise<User | null> {
   try {
-    const response = await api.get('/api/v1/auth/me');
+    const response = await api.get('auth/me');
     return response.data;
   } catch (error: any) {
     console.warn('[AuthService] Failed to get current user');
@@ -123,7 +123,7 @@ export async function getCurrentUser(): Promise<User | null> {
 export async function logoutUser(): Promise<void> {
   try {
     // Call logout endpoint to revoke refresh token
-    await api.post('/api/v1/auth/logout');
+    await api.post('auth/logout');
     console.log('[AuthService] Logout successful');
   } catch (error: any) {
     console.warn('[AuthService] Logout request failed:', error?.message);
@@ -142,7 +142,7 @@ export async function logoutUser(): Promise<void> {
  */
 export async function updateUserProfile(updates: Partial<User>): Promise<User> {
   try {
-    const response = await api.patch('/api/v1/auth/me', updates);
+    const response = await api.patch('auth/me', updates);
     console.log('[AuthService] Profile updated successfully');
     return response.data;
   } catch (error: any) {
@@ -166,7 +166,7 @@ export async function changePassword(
   revokeAllSessions: boolean = false
 ): Promise<void> {
   try {
-    await api.post('/auth/change-password', {
+    await api.post('auth/change-password', {
       old_password: oldPassword,
       new_password: newPassword,
       revoke_all_sessions: revokeAllSessions,

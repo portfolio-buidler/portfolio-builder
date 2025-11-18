@@ -1,9 +1,8 @@
-import axios from 'axios'
+import { api as mainApi } from './api'
 import type { UploadResponse } from '../features/UploadCV/UploadCV.types'
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:9000',
-})
+// Reuse central api instance (includes baseURL with /api/v1 and token handling)
+const api = mainApi
 
 export async function uploadCV(
   file: File,
@@ -13,7 +12,8 @@ export async function uploadCV(
   form.append('file', file)
 
 
-  const path = import.meta.env.VITE_UPLOAD_PATH || '/api/v1/resumes/upload'
+  // Default path (environment can override, but keep relative to baseURL without /api/v1)
+  const path = import.meta.env.VITE_UPLOAD_PATH || 'resumes/upload'
 
   const res = await api.post(path, form, {
     headers: { 'Content-Type': 'multipart/form-data' },
@@ -28,7 +28,7 @@ export async function uploadCV(
 
 export async function getUploadStatus(fileId: string): Promise<UploadResponse> {
 
-  const base = import.meta.env.VITE_UPLOAD_STATUS_PATH || '/api/v1/resumes/upload'
+  const base = import.meta.env.VITE_UPLOAD_STATUS_PATH || 'resumes/upload'
   const res = await api.get(`${base}/${encodeURIComponent(fileId)}/status`)
 
   console.log('[uploadService] getUploadStatus response:', res.data)

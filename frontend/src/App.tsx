@@ -12,6 +12,7 @@ function App() {
     <>
       <Routes>
         <Route path="/" element={<UploadCV />} />
+        <Route path="/upload" element={<UploadCV />} />
         <Route path="/login" element={<Login />} />
         <Route path="/registration" element={<Registration />} />
         <Route path="/preview" element={<Preview />} />
