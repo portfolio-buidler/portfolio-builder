@@ -5,9 +5,9 @@ applyTo: '**/backend/**/*.py, **/alembic/**/*.py, **/tests/**/*.py'
 
 # Backend Development Instructions (FastAPI + Python)
 
-> **Version**: 3.0  
-> **Last Updated**: October 2025  
-> **Maintainer**: Backend Team (Daniel)  
+> **Version**: 4.0  
+> **Last Updated**: November 2025  
+> **Maintainer**: Backend Team (Israel, Ido, Yarin)  
 > **Prerequisites**: Read [ARCHITECTURE.md](./ARCHITECTURE.md) for system overview
 
 ---
@@ -931,6 +931,483 @@ async def verify_file_size(file: UploadFile) -> None:
 
 ---
 
+### Complete EMMS Implementation (Sprint Task #1)
+
+The EMMS pattern provides **defense-in-depth** file upload security. Each layer catches different attack vectors:
+
+#### Layer 1: Extension Validation
+
+**Purpose**: Block obviously malicious files and double extensions
+
+```python
+import re
+from pathlib import Path
+
+ALLOWED_EXTENSIONS = {".pdf", ".docx"}
+
+def verify_extension(filename: str) -> tuple[bool, str, str | None]:
+    """
+    Verify file extension against whitelist.
+    
+    Returns: (is_valid, extension, error_message)
+    
+    Security checks:
+    - Whitelist validation (only .pdf, .docx)
+    - Double extension detection (.php.pdf)
+    - Case-insensitive matching
+    
+    Examples:
+        verify_extension("resume.pdf")        # (True, ".pdf", None)
+        verify_extension("resume.PDF")        # (True, ".pdf", None)
+        verify_extension("malicious.php.pdf") # (False, "", "Double extensions not allowed")
+        verify_extension("resume.exe")        # (False, ".exe", "File type not allowed")
+    """
+    filename_lower = filename.lower()
+    
+    # Check for double extensions (e.g., .php.pdf, .exe.docx)
+    # Count dots excluding the last extension
+    parts = filename_lower.split('.')
+    if len(parts) > 2:
+        # Check if any middle part looks like an extension
+        suspicious_parts = parts[1:-1]  # Everything between first and last dot
+        for part in suspicious_parts:
+            if part in ['php', 'exe', 'js', 'py', 'sh', 'bat', 'com', 'cmd']:
+                return False, "", "Double extensions not allowed"
+    
+    # Extract and validate extension
+    extension = Path(filename_lower).suffix
+    
+    if not extension:
+        return False, "", "File must have an extension"
+    
+    if extension not in ALLOWED_EXTENSIONS:
+        return False, extension, f"File type not allowed. Allowed types: {', '.join(ALLOWED_EXTENSIONS)}"
+    
+    return True, extension, None
+```
+
+#### Layer 2: MIME Type Verification
+
+**Purpose**: Validate Content-Type header
+
+```python
+ALLOWED_MIME_TYPES = {
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+}
+
+def verify_mime_type(file: UploadFile) -> tuple[bool, str, str | None]:
+    """
+    Verify MIME type from Content-Type header.
+    
+    Returns: (is_valid, mime_type, error_message)
+    
+    Security: Validates Content-Type header sent by client
+    Note: Can be spoofed, so combine with magic bytes check
+    """
+    mime_type = file.content_type
+    
+    if not mime_type:
+        return False, "", "Missing Content-Type header"
+    
+    if mime_type not in ALLOWED_MIME_TYPES:
+        return False, mime_type, f"MIME type not allowed: {mime_type}"
+    
+    return True, mime_type, None
+```
+
+#### Layer 3: Magic Bytes Inspection
+
+**Purpose**: Verify actual file content (cannot be spoofed)
+
+```python
+MAGIC_BYTES = {
+    "pdf": b"%PDF",
+    "docx": b"PK\x03\x04",  # ZIP signature (DOCX is a ZIP file)
+}
+
+async def verify_magic_bytes(file: UploadFile, expected_ext: str) -> tuple[bool, str | None]:
+    """
+    Verify file signature (magic bytes) matches expected type.
+    
+    Returns: (is_valid, error_message)
+    
+    Security: Reads actual file header to detect content type spoofing
+    
+    Examples:
+        - PDF must start with %PDF
+        - DOCX must start with PK (ZIP header)
+    """
+    # Read first 8 bytes
+    first_bytes = await file.read(8)
+    await file.seek(0)  # Reset for further processing
+    
+    # Determine expected magic bytes
+    ext_normalized = expected_ext.lstrip('.')
+    expected_magic = MAGIC_BYTES.get(ext_normalized)
+    
+    if not expected_magic:
+        return False, f"Unknown expected type: {expected_ext}"
+    
+    # Verify magic bytes
+    if not first_bytes.startswith(expected_magic):
+        return False, f"File content does not match extension {expected_ext}. Possible file type spoofing."
+    
+    return True, None
+```
+
+#### Layer 4: Size Validation (Streaming)
+
+**Purpose**: Prevent memory exhaustion attacks
+
+```python
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
+
+async def verify_size_streaming(file: UploadFile) -> tuple[bool, int, str | None]:
+    """
+    Validate file size using streaming to prevent memory exhaustion.
+    
+    Returns: (is_valid, size_bytes, error_message)
+    
+    Security: Reads file in chunks to handle large malicious uploads safely
+    
+    Memory safety: Never loads entire file into memory
+    """
+    size = 0
+    chunk_size = 8192  # 8 KB chunks
+    
+    try:
+        while chunk := await file.read(chunk_size):
+            size += len(chunk)
+            
+            # Check size on each chunk
+            if size > MAX_FILE_SIZE:
+                await file.seek(0)  # Reset for cleanup
+                return False, size, f"File too large: {size / (1024 * 1024):.2f} MB. Maximum: {MAX_FILE_SIZE / (1024 * 1024):.1f} MB"
+        
+        # Reset file pointer for further processing
+        await file.seek(0)
+        return True, size, None
+        
+    except Exception as e:
+        logger.exception("Error during file size validation")
+        return False, 0, f"File reading error: {str(e)}"
+```
+
+#### Additional: Macro Detection (DOCX)
+
+**Purpose**: Detect and reject macro-enabled documents
+
+```python
+async def check_for_macros(file: UploadFile) -> tuple[bool, str | None]:
+    """
+    Check if DOCX file contains macros (VBA code).
+    
+    Returns: (has_macros, error_message)
+    
+    Security: Macro-enabled documents (.docm) can execute arbitrary code
+    
+    Detection: Checks for vbaProject.bin inside the DOCX ZIP archive
+    """
+    try:
+        # Read file content
+        content = await file.read()
+        await file.seek(0)  # Reset
+        
+        # DOCX is a ZIP file - check for VBA project
+        if b"vbaProject.bin" in content:
+            return True, "Macro-enabled documents not allowed for security reasons"
+        
+        return False, None
+        
+    except Exception as e:
+        logger.exception("Error checking for macros")
+        return False, f"Error checking file: {str(e)}"
+```
+
+#### Master Validation Function
+
+**Purpose**: Orchestrate all validation layers
+
+```python
+from fastapi import HTTPException, status, UploadFile
+import logging
+
+logger = logging.getLogger(__name__)
+
+async def validate_upload_security(file: UploadFile) -> dict:
+    """
+    Complete EMMS validation pipeline for file uploads.
+    
+    Validates in order:
+    1. Extension (whitelist + double extension check)
+    2. MIME type (Content-Type header)
+    3. Magic bytes (actual file content)
+    4. Size (streaming validation)
+    5. Macros (DOCX only)
+    
+    Returns: Dict with validation details
+    
+    Raises:
+        HTTPException: 415 for type errors, 413 for size errors
+        
+    Usage:
+        ```python
+        @router.post("/upload")
+        async def upload_resume(file: UploadFile):
+            # Validate BEFORE processing
+            validation_result = await validate_upload_security(file)
+            
+            # Now safe to process
+            result = await process_file(file)
+            return result
+        ```
+    
+    Security: Defense-in-depth with 5 independent checks
+    """
+    logger.info("Starting file upload validation: %s", file.filename)
+    
+    # Step 1: Extension validation
+    is_valid_ext, ext, ext_error = verify_extension(file.filename)
+    if not is_valid_ext:
+        logger.warning("Extension validation failed: %s - %s", file.filename, ext_error)
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=ext_error or "Invalid file extension"
+        )
+    
+    logger.debug("Extension validation passed: %s", ext)
+    
+    # Step 2: MIME type validation
+    is_valid_mime, mime_type, mime_error = verify_mime_type(file)
+    if not is_valid_mime:
+        logger.warning("MIME type validation failed: %s - %s", file.filename, mime_error)
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=mime_error or "Invalid MIME type"
+        )
+    
+    logger.debug("MIME type validation passed: %s", mime_type)
+    
+    # Step 3: Magic bytes validation
+    is_valid_magic, magic_error = await verify_magic_bytes(file, ext)
+    if not is_valid_magic:
+        logger.warning("Magic bytes validation failed: %s - %s", file.filename, magic_error)
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=magic_error or "File content mismatch"
+        )
+    
+    logger.debug("Magic bytes validation passed")
+    
+    # Step 4: Size validation (streaming)
+    is_valid_size, size, size_error = await verify_size_streaming(file)
+    if not is_valid_size:
+        logger.warning("Size validation failed: %s - %s", file.filename, size_error)
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=size_error or "File too large"
+        )
+    
+    logger.debug("Size validation passed: %d bytes", size)
+    
+    # Step 5: Macro check (DOCX only)
+    if ext == ".docx":
+        has_macros, macro_error = await check_for_macros(file)
+        if has_macros:
+            logger.warning("Macro detection triggered: %s", file.filename)
+            raise HTTPException(
+                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                detail=macro_error or "Macro-enabled documents not allowed"
+            )
+        logger.debug("Macro check passed (no macros detected)")
+    
+    logger.info("File upload validation successful: %s (%d bytes)", file.filename, size)
+    
+    return {
+        "valid": True,
+        "filename": file.filename,
+        "extension": ext,
+        "mime_type": mime_type,
+        "size_bytes": size,
+        "validation_layers_passed": 5 if ext == ".docx" else 4
+    }
+```
+
+#### Integration Example
+
+**How to use in controller**:
+
+```python
+# features/resumes/controller.py
+
+from fastapi import UploadFile, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+from .security import validate_upload_security
+from .service import upload_and_parse_resume
+from .schemas import UploadResumeResponse
+
+async def upload_resume(
+    file: UploadFile,
+    db: AsyncSession
+) -> UploadResumeResponse:
+    """
+    Upload and parse resume with complete security validation.
+    
+    Security: EMMS pattern applied BEFORE any processing
+    """
+    # CRITICAL: Validate BEFORE processing
+    validation_result = await validate_upload_security(file)
+    
+    # File is now safe to process
+    result = await upload_and_parse_resume(file, db)
+    
+    return UploadResumeResponse(**result)
+```
+
+#### Testing Requirements
+
+**Minimum test cases** (15+ tests required):
+
+```python
+import pytest
+from fastapi import UploadFile
+from io import BytesIO
+
+# Extension validation tests
+async def test_valid_pdf_extension():
+    """Test .pdf extension passes validation"""
+    assert verify_extension("resume.pdf") == (True, ".pdf", None)
+
+async def test_valid_docx_extension():
+    """Test .docx extension passes validation"""
+    assert verify_extension("resume.docx") == (True, ".docx", None)
+
+async def test_double_extension_rejected():
+    """Test malicious double extension is rejected"""
+    is_valid, _, error = verify_extension("malicious.php.pdf")
+    assert is_valid is False
+    assert "Double extensions" in error
+
+async def test_invalid_extension_rejected():
+    """Test .exe, .zip, .js extensions are rejected"""
+    is_valid, ext, _ = verify_extension("malicious.exe")
+    assert is_valid is False
+    assert ext == ".exe"
+
+# Magic bytes tests
+async def test_pdf_magic_bytes_match():
+    """Test PDF with correct magic bytes passes"""
+    file = create_mock_file(b"%PDF-1.4...", "resume.pdf", "application/pdf")
+    is_valid, error = await verify_magic_bytes(file, ".pdf")
+    assert is_valid is True
+    assert error is None
+
+async def test_pdf_magic_bytes_mismatch():
+    """Test fake PDF (wrong magic bytes) is rejected"""
+    file = create_mock_file(b"FAKE DATA", "resume.pdf", "application/pdf")
+    is_valid, error = await verify_magic_bytes(file, ".pdf")
+    assert is_valid is False
+    assert "does not match" in error
+
+async def test_docx_magic_bytes_match():
+    """Test DOCX with correct ZIP header passes"""
+    file = create_mock_file(b"PK\x03\x04...", "resume.docx", "application/vnd...")
+    is_valid, error = await verify_magic_bytes(file, ".docx")
+    assert is_valid is True
+
+# Size validation tests
+async def test_file_within_size_limit():
+    """Test 4MB file passes 5MB limit"""
+    file = create_mock_file(b"x" * (4 * 1024 * 1024), "resume.pdf", "application/pdf")
+    is_valid, size, error = await verify_size_streaming(file)
+    assert is_valid is True
+    assert size == 4 * 1024 * 1024
+
+async def test_file_exceeds_size_limit():
+    """Test 6MB file fails 5MB limit"""
+    file = create_mock_file(b"x" * (6 * 1024 * 1024), "resume.pdf", "application/pdf")
+    is_valid, size, error = await verify_size_streaming(file)
+    assert is_valid is False
+    assert "too large" in error
+
+# Macro detection tests
+async def test_docx_without_macros_passes():
+    """Test clean DOCX without macros passes"""
+    file = create_mock_file(b"PK\x03\x04...clean content...", "resume.docx", "...")
+    has_macros, error = await check_for_macros(file)
+    assert has_macros is False
+
+async def test_docx_with_macros_rejected():
+    """Test macro-enabled DOCX is rejected"""
+    file = create_mock_file(b"...vbaProject.bin...", "resume.docm", "...")
+    has_macros, error = await check_for_macros(file)
+    assert has_macros is True
+    assert "Macro" in error
+
+# Integration test
+async def test_complete_validation_pipeline():
+    """Test full EMMS pipeline with valid file"""
+    file = create_valid_pdf_file()  # Helper that creates proper PDF
+    result = await validate_upload_security(file)
+    assert result["valid"] is True
+    assert result["extension"] == ".pdf"
+    assert result["validation_layers_passed"] == 4
+```
+
+#### Security Monitoring
+
+**Logging strategy**:
+
+```python
+# Log all validation failures for security monitoring
+logger.warning(
+    "Security validation failed: %s | Type: %s | User: %s | IP: %s",
+    failure_reason,
+    violation_type,  # "extension", "magic_bytes", "size", etc.
+    user_id or "anonymous",
+    request.client.host
+)
+
+# Metrics for monitoring dashboard
+security_validation_failures.labels(
+    violation_type=violation_type,
+    file_extension=ext
+).inc()
+```
+
+#### Security Best Practices
+
+**Do's**:
+- ✅ Always validate in all 4 (or 5) layers
+- ✅ Validate BEFORE any processing or storage
+- ✅ Use streaming for size validation
+- ✅ Reset file pointer after each read operation
+- ✅ Log all validation failures
+- ✅ Use specific HTTP status codes (415, 413)
+- ✅ Test all edge cases
+
+**Don'ts**:
+- ❌ Never skip any validation layer
+- ❌ Never trust file extension alone
+- ❌ Never trust MIME type alone
+- ❌ Never load entire file into memory for size check
+- ❌ Never process files before validation
+- ❌ Never expose detailed error messages to users (log internally)
+
+**When to Apply**:
+- Resume/CV uploads
+- Profile picture uploads
+- Document attachments
+- Portfolio file uploads
+- Any user-uploaded content
+
+**Cross-Reference**: 
+- Implementation guide: `docs/sprint/SPRINT_IMPLEMENTATION_GUIDE.md` → Task 1
+- Testing patterns: See [Testing Patterns](#testing-patterns) section below
+
+---
+
 ## Pydantic v2 Patterns
 
 ### Migration from v1 to v2
@@ -1819,9 +2296,9 @@ docker compose down                          # Stop all services
 
 ---
 
-**Version**: 3.0  
-**Last Updated**: October 2025  
-**Maintainer**: Backend Team (Daniel)  
+**Version**: 4.0  
+**Last Updated**: November 2025  
+**Maintainer**: Backend Team (Israel, Ido, Yarin)  
 **Next Review**: December 2025
 
 **Feedback**: Open PR with suggested improvements to this file

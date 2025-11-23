@@ -342,6 +342,496 @@ export const uploadResume = async (file: File, onProgress?: (p: number) => void)
 
 ---
 
+## Guest Upload with Temporary Storage (Sprint Task #3)
+
+### Pattern Overview
+
+Allow users to upload CV before authentication, with a 2-minute window to log in and save permanently. This improves conversion by letting users see value before committing to registration.
+
+### User Flow
+
+```
+1. Guest uploads CV → Temporary storage (2 min TTL)
+2. User sees preview/parsing results
+3. System shows auth prompt: "Save your work! Log in or create account"
+4. User authenticates within 2 minutes
+5. System claims temporary upload → Permanent storage
+6. Expired uploads auto-delete
+```
+
+### State Management (Zustand)
+
+**Upload Store** (`src/store/uploadStore.ts`):
+
+```typescript
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+interface UploadState {
+  // Temporary upload tracking
+  tempUploadId: string | null;
+  tempUploadExpiry: number | null;  // Unix timestamp (milliseconds)
+  pendingAuth: boolean;              // User needs to authenticate
+  
+  // Actions
+  setTempUpload: (tempId: string, expirySeconds: number) => void;
+  clearTempUpload: () => void;
+  isUploadExpired: () => boolean;
+  markPendingAuth: (pending: boolean) => void;
+}
+
+export const useUploadStore = create<UploadState>()(
+  persist(
+    (set, get) => ({
+      // Initial state
+      tempUploadId: null,
+      tempUploadExpiry: null,
+      pendingAuth: false,
+      
+      // Set temporary upload with TTL
+      setTempUpload: (tempId: string, expirySeconds: number) => {
+        const expiryTime = Date.now() + (expirySeconds * 1000);
+        set({
+          tempUploadId: tempId,
+          tempUploadExpiry: expiryTime,
+          pendingAuth: true,
+        });
+      },
+      
+      // Clear temporary upload
+      clearTempUpload: () => {
+        set({
+          tempUploadId: null,
+          tempUploadExpiry: null,
+          pendingAuth: false,
+        });
+      },
+      
+      // Check if upload expired
+      isUploadExpired: () => {
+        const { tempUploadExpiry } = get();
+        if (!tempUploadExpiry) return false;
+        return Date.now() > tempUploadExpiry;
+      },
+      
+      // Mark as needing authentication
+      markPendingAuth: (pending: boolean) => {
+        set({ pendingAuth: pending });
+      },
+    }),
+    {
+      name: 'portfolio-upload-storage',  // localStorage key
+      partialize: (state) => ({
+        // Only persist these fields
+        tempUploadId: state.tempUploadId,
+        tempUploadExpiry: state.tempUploadExpiry,
+        pendingAuth: state.pendingAuth,
+      }),
+    }
+  )
+);
+```
+
+### Backend API Endpoints
+
+**Guest Upload**:
+```typescript
+// POST /api/v1/resumes/upload/guest
+export const uploadGuestResume = async (file: File, onProgress?: (p: number) => void) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  const res = await api.post('/resumes/upload/guest', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    onUploadProgress: (evt: AxiosProgressEvent) => {
+      if (evt.total) onProgress?.(Math.round((evt.loaded * 100) / evt.total));
+    },
+  });
+  
+  return res.data as {
+    temp_id: string;
+    expiry_seconds: number;  // Usually 120 (2 minutes)
+    parsed_data: any;
+  };
+};
+```
+
+**Claim Upload After Auth**:
+```typescript
+// POST /api/v1/resumes/upload/guest/{temp_id}/claim
+export const claimGuestUpload = async (tempId: string) => {
+  const res = await api.post(`/resumes/upload/guest/${tempId}/claim`);
+  return res.data as {
+    resume_id: number;
+    status: string;
+    message: string;
+  };
+};
+```
+
+### Auth Prompt Modal Component
+
+**AuthPromptModal.tsx** (Logic):
+
+```typescript
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useUploadStore } from '@/store/uploadStore';
+import { AuthPromptModalView } from './AuthPromptModal.view';
+import type { AuthPromptModalProps } from './AuthPromptModal.types';
+
+export const AuthPromptModal: React.FC<AuthPromptModalProps> = ({ 
+  isOpen,
+  onClose,
+}) => {
+  const navigate = useNavigate();
+  const { tempUploadExpiry, clearTempUpload, isUploadExpired } = useUploadStore();
+  const [timeRemaining, setTimeRemaining] = useState<number>(0);
+
+  // Calculate time remaining
+  useEffect(() => {
+    if (!tempUploadExpiry || !isOpen) return;
+
+    const updateTimer = () => {
+      const remaining = Math.max(0, tempUploadExpiry - Date.now());
+      setTimeRemaining(Math.floor(remaining / 1000));  // Convert to seconds
+
+      if (remaining <= 0) {
+        clearTempUpload();
+        onClose?.();
+      }
+    };
+
+    updateTimer();  // Initial update
+    const interval = setInterval(updateTimer, 1000);  // Update every second
+
+    return () => clearInterval(interval);
+  }, [tempUploadExpiry, isOpen, clearTempUpload, onClose]);
+
+  // Format time as MM:SS
+  const formatTime = useCallback((seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }, []);
+
+  const handleRegister = useCallback(() => {
+    navigate('/register');
+  }, [navigate]);
+
+  const handleLogin = useCallback(() => {
+    navigate('/login');
+  }, [navigate]);
+
+  return (
+    <AuthPromptModalView
+      isOpen={isOpen}
+      timeRemaining={formatTime(timeRemaining)}
+      onRegister={handleRegister}
+      onLogin={handleLogin}
+      onClose={onClose}
+    />
+  );
+};
+```
+
+**AuthPromptModal.view.tsx** (View):
+
+```typescript
+import { AuthPromptModalViewProps } from './AuthPromptModal.types';
+import './AuthPromptModal.styles.scss';
+
+export const AuthPromptModalView: React.FC<AuthPromptModalViewProps> = ({
+  isOpen,
+  timeRemaining,
+  onRegister,
+  onLogin,
+  onClose,
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="auth-prompt-modal">
+      <div className="auth-prompt-modal__overlay" onClick={onClose} />
+      
+      <div className="auth-prompt-modal__content">
+        <button
+          className="auth-prompt-modal__close"
+          onClick={onClose}
+          aria-label="Close"
+        >
+          ×
+        </button>
+
+        <div className="auth-prompt-modal__header">
+          <h2 className="auth-prompt-modal__title">Save Your Work!</h2>
+          <p className="auth-prompt-modal__subtitle">
+            Your upload will expire in <strong>{timeRemaining}</strong>
+          </p>
+        </div>
+
+        <div className="auth-prompt-modal__body">
+          <p className="auth-prompt-modal__message">
+            Create a free account or log in to save your portfolio permanently.
+          </p>
+
+          <div className="auth-prompt-modal__countdown">
+            <div className="auth-prompt-modal__countdown-circle">
+              <span className="auth-prompt-modal__countdown-time">
+                {timeRemaining}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="auth-prompt-modal__actions">
+          <button
+            className="auth-prompt-modal__button auth-prompt-modal__button--primary"
+            onClick={onRegister}
+          >
+            Create Free Account
+          </button>
+          
+          <button
+            className="auth-prompt-modal__button auth-prompt-modal__button--secondary"
+            onClick={onLogin}
+          >
+            Log In
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+**AuthPromptModal.types.ts**:
+
+```typescript
+export interface AuthPromptModalProps {
+  isOpen: boolean;
+  onClose?: () => void;
+}
+
+export interface AuthPromptModalViewProps {
+  isOpen: boolean;
+  timeRemaining: string;  // Formatted as "MM:SS"
+  onRegister: () => void;
+  onLogin: () => void;
+  onClose?: () => void;
+}
+```
+
+### Upload Flow Integration
+
+**In UploadCV component**:
+
+```typescript
+import { useUploadStore } from '@/store/uploadStore';
+import { uploadGuestResume } from '@/services/uploadService';
+import { useAuthStore } from '@/store/authStore';
+
+export const UploadCV: React.FC = () => {
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const { setTempUpload } = useUploadStore();
+  const { isAuthenticated } = useAuthStore();
+
+  const handleFileSelect = async (file: File) => {
+    // Check if user is authenticated
+    if (isAuthenticated) {
+      // Normal authenticated upload
+      const result = await uploadResume(file);
+      // ... handle success
+    } else {
+      // Guest upload with temporary storage
+      const result = await uploadGuestResume(file);
+      
+      // Store temp ID and expiry
+      setTempUpload(result.temp_id, result.expiry_seconds);
+      
+      // Show preview with parsed data
+      setPreviewData(result.parsed_data);
+      
+      // Show auth prompt after user sees value
+      setTimeout(() => setShowAuthPrompt(true), 2000);  // 2 second delay
+    }
+  };
+
+  return (
+    <>
+      {/* Upload UI */}
+      <UploadAreaView onFileSelect={handleFileSelect} />
+      
+      {/* Auth prompt modal */}
+      <AuthPromptModal
+        isOpen={showAuthPrompt}
+        onClose={() => setShowAuthPrompt(false)}
+      />
+    </>
+  );
+};
+```
+
+### Claiming Upload After Authentication
+
+**In Login/Register success handlers**:
+
+```typescript
+import { claimGuestUpload } from '@/services/uploadService';
+import { useUploadStore } from '@/store/uploadStore';
+import { useNavigate } from 'react-router-dom';
+
+export const Login: React.FC = () => {
+  const navigate = useNavigate();
+  const { tempUploadId, pendingAuth, clearTempUpload, isUploadExpired } = useUploadStore();
+
+  const handleLoginSuccess = async (user: User) => {
+    // Check if there's a pending upload to claim
+    if (pendingAuth && tempUploadId && !isUploadExpired()) {
+      try {
+        const result = await claimGuestUpload(tempUploadId);
+        
+        // Clear temp upload state
+        clearTempUpload();
+        
+        // Show success message
+        showToast('Portfolio saved successfully!', 'success');
+        
+        // Navigate to preview with claimed resume
+        navigate(`/preview/${result.resume_id}`);
+      } catch (error) {
+        console.error('Failed to claim upload:', error);
+        showToast('Could not save upload. Please upload again.', 'error');
+        
+        // Clear expired/invalid temp upload
+        clearTempUpload();
+        
+        // Navigate to upload page
+        navigate('/upload');
+      }
+    } else {
+      // Normal login flow (no pending upload)
+      navigate('/dashboard');
+    }
+  };
+
+  // ... rest of login logic
+};
+```
+
+### Expiration Handling
+
+**Auto-cleanup on mount**:
+
+```typescript
+import { useEffect } from 'react';
+import { useUploadStore } from '@/store/uploadStore';
+
+export const App: React.FC = () => {
+  const { isUploadExpired, clearTempUpload } = useUploadStore();
+
+  useEffect(() => {
+    // Check for expired uploads on app mount
+    if (isUploadExpired()) {
+      clearTempUpload();
+      console.log('Cleared expired guest upload');
+    }
+  }, [isUploadExpired, clearTempUpload]);
+
+  return (
+    // ... app content
+  );
+};
+```
+
+### Security Considerations
+
+**Do's**:
+- ✅ Always validate file before temporary storage (use EMMS pattern)
+- ✅ Store temp ID in localStorage (survives refresh)
+- ✅ Check expiration on every access
+- ✅ Clear expired uploads immediately
+- ✅ Use short TTL (2 minutes recommended)
+- ✅ Show clear countdown to user
+- ✅ Verify user ownership when claiming
+
+**Don'ts**:
+- ❌ Never extend expiration time (security risk)
+- ❌ Never allow claiming without authentication
+- ❌ Never expose temp upload URLs to other users
+- ❌ Never store sensitive data in temp uploads
+
+### Testing Requirements
+
+```typescript
+describe('Guest Upload Flow', () => {
+  it('stores temp upload ID and expiry', async () => {
+    const { result } = renderHook(() => useUploadStore());
+    
+    result.current.setTempUpload('temp-123', 120);
+    
+    expect(result.current.tempUploadId).toBe('temp-123');
+    expect(result.current.pendingAuth).toBe(true);
+    expect(result.current.isUploadExpired()).toBe(false);
+  });
+
+  it('detects expired uploads', async () => {
+    const { result } = renderHook(() => useUploadStore());
+    
+    // Set upload with 0 second expiry
+    result.current.setTempUpload('temp-123', 0);
+    
+    // Wait a bit
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    expect(result.current.isUploadExpired()).toBe(true);
+  });
+
+  it('shows auth prompt after guest upload', async () => {
+    render(<UploadCV />);
+    
+    const file = new File(['content'], 'resume.pdf', { type: 'application/pdf' });
+    const input = screen.getByLabelText(/drop your cv/i);
+    
+    fireEvent.change(input, { target: { files: [file] } });
+    
+    await waitFor(() => {
+      expect(screen.getByText(/save your work/i)).toBeInTheDocument();
+    });
+  });
+
+  it('claims upload after successful login', async () => {
+    const { result: uploadStore } = renderHook(() => useUploadStore());
+    uploadStore.current.setTempUpload('temp-123', 120);
+    
+    render(<Login />);
+    
+    // Perform login
+    // ...
+    
+    await waitFor(() => {
+      expect(claimGuestUpload).toHaveBeenCalledWith('temp-123');
+      expect(uploadStore.current.tempUploadId).toBeNull();
+    });
+  });
+});
+```
+
+### User Experience Best Practices
+
+1. **Show value first**: Let users see parsing results before asking for auth
+2. **Clear communication**: Display countdown prominently
+3. **Easy conversion**: Make "Create Account" button primary
+4. **Graceful degradation**: Handle expired uploads gracefully
+5. **Preserve progress**: Don't lose work on page refresh (localStorage)
+6. **Quick auth**: Pre-fill email if captured during upload
+
+**Cross-Reference**:
+- Complete implementation: `docs/sprint/SPRINT_IMPLEMENTATION_GUIDE.md` → Task 3
+- Backend endpoints: See backend docs for temp storage API
+
+---
+
 ## Testing Patterns
 
 Vitest + RTL example:
@@ -401,5 +891,5 @@ test('upload flow', async ({ page }) => {
 
 ---
 
-Last Updated: October 2025
-Maintained By: Frontend Team (Natanel)
+Last Updated: November 2025
+Maintained By: Frontend Team (Netanel)
