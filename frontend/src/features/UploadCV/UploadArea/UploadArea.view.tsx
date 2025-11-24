@@ -62,69 +62,52 @@ export const UploadAreaView: React.FC<UploadAreaViewProps> = ({
           />
         ) : (
           <>
-            {/* Icon */}
-            {(() => {
-              let icon = '📜'
-              let msgText = ''
-              if (status === 'success') {
-                icon = '🎉'
-              } else if (status === 'error') {
-                const picked = pickErrorIconAndText(errorMessage)
-                icon = picked.icon
-                msgText = picked.text
-              }
-              return (
-                <>
-                  {status === 'idle' && (
-                    <img src={PaperIcon} className="upload-area__emoji-img" alt="" aria-hidden />
-                  )}
-                  {status === 'success' && (
-                    <img src={PartyIcon} className="upload-area__emoji-img" alt="" aria-hidden />
-                  )}
-                  {status === 'error' && (
-                    (() => {
-                      const picked = pickErrorIconAndText(errorMessage)
-                      const leading = picked.icon
-                      const src = leading === '🫣' ? PeekIcon : leading === '😔' ? SadIcon : DinoIcon
-                      return <img src={src} className="upload-area__emoji-img" alt="" aria-hidden />
-                    })()
-                  )}
-                </>
-              )
-            })()}
-
-            {/* Text */}
+            {/* Icon and Text */}
             {status === 'idle' && (
-              <div className="upload-area__text">
-                <p className="upload-area__headline">
-                  Drop & Drag or <span className="upload-area__link">Choose File</span> To Upload
-                </p>
-                <p className="upload-area__subline">Accept PDF or DOCX up to 5MB</p>
-              </div>
+              <>
+                <img src={PaperIcon} className="upload-area__emoji-img" alt="" aria-hidden />
+                <div className="upload-area__text">
+                  <p className="upload-area__headline">
+                    Drop & Drag or <span className="upload-area__link">Choose File</span> To Upload
+                  </p>
+                  <p className="upload-area__subline">Accept PDF or DOCX up to 5MB</p>
+                </div>
+              </>
             )}
 
             {status === 'success' && (
-              <div className="upload-area__text">
-                <p className="upload-area__headline">Upload complete!</p>
-              </div>
+              <>
+                <img src={PartyIcon} className="upload-area__emoji-img" alt="" aria-hidden />
+                <div className="upload-area__text">
+                  <p className="upload-area__headline">Upload complete!</p>
+                </div>
+              </>
             )}
 
             {status === 'error' && (
-              <div className="upload-area__text">
+              <>
                 {(() => {
-                  const { text: msgText } = pickErrorIconAndText(errorMessage)
-                  if (msgText.includes('/')) {
-                    const [line1, line2] = msgText.split('/')
-                    return (
-                      <>
-                        <p className="upload-area__headline">{line1.trim()}</p>
-                        <p className="upload-area__subline">{line2.trim()}</p>
-                      </>
-                    )
-                  }
-                  return <p className="upload-area__headline">{msgText}</p>
+                  const picked = pickErrorIconAndText(errorMessage)
+                  const leading = picked.icon
+                  const src = leading === '🫣' ? PeekIcon : leading === '😔' ? SadIcon : DinoIcon
+                  return <img src={src} className="upload-area__emoji-img" alt="" aria-hidden />
                 })()}
-              </div>
+                <div className="upload-area__text">
+                  {(() => {
+                    const { text: msgText } = pickErrorIconAndText(errorMessage)
+                    if (msgText.includes('/')) {
+                      const [line1, line2] = msgText.split('/')
+                      return (
+                        <>
+                          <p className="upload-area__headline">{line1.trim()}</p>
+                          <p className="upload-area__subline">{line2.trim()}</p>
+                        </>
+                      )
+                    }
+                    return <p className="upload-area__headline">{msgText}</p>
+                  })()}
+                </div>
+              </>
             )}
           </>
         )}
@@ -136,6 +119,7 @@ export const UploadAreaView: React.FC<UploadAreaViewProps> = ({
         className="upload-area__input sr-only"
         accept={accept}
         onChange={onFileInputChange}
+        aria-label="Upload CV file"
         aria-describedby="upload-instructions"
       />
 

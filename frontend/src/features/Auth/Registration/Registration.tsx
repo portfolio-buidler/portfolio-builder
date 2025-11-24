@@ -36,6 +36,33 @@ export const Registration: React.FC<RegistrationProps> = ({ onBack }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [isFormValid, setIsFormValid] = useState(false)
 
+  // Clear password error when user types a valid password
+  useEffect(() => {
+    if (password && errors.password) {
+      const passwordValidation = validatePassword(password)
+      if (passwordValidation.valid) {
+        setErrors(prev => {
+          const newErrors = { ...prev }
+          delete newErrors.password
+          return newErrors
+        })
+      }
+    }
+  }, [password, errors.password])
+
+  // Clear confirmPassword error when passwords match
+  useEffect(() => {
+    if (confirmPassword && errors.confirmPassword) {
+      if (password === confirmPassword) {
+        setErrors(prev => {
+          const newErrors = { ...prev }
+          delete newErrors.confirmPassword
+          return newErrors
+        })
+      }
+    }
+  }, [password, confirmPassword, errors.confirmPassword])
+
   // Update form validity when fields change
   useEffect(() => {
     const isValid = 

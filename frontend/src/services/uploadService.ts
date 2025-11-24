@@ -23,6 +23,31 @@ export async function uploadCV(
   return res.data as UploadResponse
 }
 
+/**
+ * Upload CV as a guest (unauthenticated user)
+ * 
+ * Creates a temporary upload with 2-minute TTL.
+ * User must authenticate and claim within 2 minutes or upload expires.
+ * 
+ * @param file - CV file to upload
+ * @param opts - Upload options including progress callback
+ * @returns Upload response with temp_id and expiry_seconds
+ */
+export async function uploadGuestCV(
+  file: File,
+  opts?: { onUploadProgress?: (evt: ProgressEvent) => void }
+): Promise<UploadResponse> {
+  const form = new FormData()
+  form.append('file', file)
+
+  const res = await api.post('resumes/upload/guest', form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    onUploadProgress: opts?.onUploadProgress,
+  })
+
+  return res.data as UploadResponse
+}
+
 export async function getUploadStatus(fileId: string): Promise<UploadResponse> {
 
   const base = import.meta.env.VITE_UPLOAD_STATUS_PATH || 'resumes/upload'

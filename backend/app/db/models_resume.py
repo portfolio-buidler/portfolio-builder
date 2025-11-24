@@ -12,10 +12,10 @@ class Resume(Base):
     __tablename__ = "resumes"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
-    user_id: Mapped[int | None] = mapped_column(
+    user_id: Mapped[int] = mapped_column(
         BigInteger,
         ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=True,
+        nullable=False,
         index=True
     )
     source_file_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)

@@ -9,6 +9,7 @@ import Registration from './features/Auth/Registration/Registration';
 
 import { useEffect } from 'react';
 import { useAuthStore } from './store/authStore';
+import { useResumeStore } from './store/resumeStore';
 import './App.scss';
 
 function App() {
@@ -26,6 +27,16 @@ function App() {
     // Try to restore session on app mount (uses refresh cookie to rotate token)
     void fetchUser();
   }, [fetchUser, markBootstrapped]);
+
+  // Clean up expired guest uploads on app mount
+  useEffect(() => {
+    const { isUploadExpired, clearTempUpload, tempUploadId } = useResumeStore.getState();
+    
+    if (tempUploadId && isUploadExpired()) {
+      console.log('[App] Clearing expired guest upload on mount');
+      clearTempUpload();
+    }
+  }, []);
 
   const renderLoading = (message = 'Loading...') => (
     <div className="app-loading" aria-busy="true">
@@ -51,6 +62,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/registration" element={<Registration />} />
         <Route path="/preview" element={<Preview />} />
+        <Route path="/preview/:resumeId" element={<Preview />} />
       </Routes>
       <ToastContainer position="top-right" autoClose={3000} />
     </>

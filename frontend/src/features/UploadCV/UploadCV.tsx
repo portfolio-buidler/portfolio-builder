@@ -2,7 +2,7 @@ import { useRef, useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import backgroundImage from '../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6c8.jpg'
 import { UploadCVView } from './UploadCV.view'
-import { uploadCV } from '../../services/uploadService'
+import { uploadCV, uploadGuestCV } from '../../services/uploadService'
 import { toast } from 'react-toastify'
 import type { UploadCVViewProps } from './UploadCV.types'
 import { useResumeStore } from '../../store/resumeStore'
@@ -17,7 +17,7 @@ function UploadCV() {
   const [isUploading, setIsUploading] = useState(false)
   const [progress, setProgress] = useState<UploadProgressData | undefined>(undefined)
   const startTimeRef = useRef<number | null>(null)
-  const { setResumeData } = useResumeStore()
+  const { setResumeData, setTempUpload } = useResumeStore()
   const [status, setStatus] = useState<UploadStatus>('idle')
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
   
@@ -75,6 +75,7 @@ function UploadCV() {
    * Upload handler with a specific file
    * Shows progress feedback regardless of authentication status
    * Includes duplicate upload prevention
+   * Uses guest upload for unauthenticated users (2-minute TTL)
    */
   const handleUploadWithFile = async (file: File) => {
     if (!file) return
@@ -92,33 +93,71 @@ function UploadCV() {
       setIsUploading(true)
       startTimeRef.current = Date.now()
       
-      const res = await uploadCV(file, {
-        onUploadProgress: (evt) => {
-          if (!evt.total) return
-          const loaded = evt.loaded || 0
-          const total = evt.total || file.size
-          const pct = Math.min(100, Math.round((loaded / total) * 100))
+      // Choose upload method based on authentication status
+      const res = isAuthenticated 
+        ? await uploadCV(file, {
+            onUploadProgress: (evt) => {
+              if (!evt.total) return
+              const loaded = evt.loaded || 0
+              const total = evt.total || file.size
+              const pct = Math.min(100, Math.round((loaded / total) * 100))
 
-          const now = Date.now()
-          const start = startTimeRef.current ?? now
-          const elapsedSec = (now - start) / 1000
-          const rate = loaded / Math.max(1, elapsedSec)
-          const remaining = total - loaded
-          const eta = rate > 0 ? Math.round(remaining / rate) : null
+              const now = Date.now()
+              const start = startTimeRef.current ?? now
+              const elapsedSec = (now - start) / 1000
+              const rate = loaded / Math.max(1, elapsedSec)
+              const remaining = total - loaded
+              const eta = rate > 0 ? Math.round(remaining / rate) : null
 
-          setProgress({
-            fileName: file.name,
-            fileSizeBytes: file.size,
-            uploadedBytes: loaded,
-            totalBytes: total,
-            percent: pct,
-            etaSeconds: eta,
+              setProgress({
+                fileName: file.name,
+                fileSizeBytes: file.size,
+                uploadedBytes: loaded,
+                totalBytes: total,
+                percent: pct,
+                etaSeconds: eta,
+              })
+            },
           })
-        },
-      })
+        : await uploadGuestCV(file, {
+            onUploadProgress: (evt) => {
+              if (!evt.total) return
+              const loaded = evt.loaded || 0
+              const total = evt.total || file.size
+              const pct = Math.min(100, Math.round((loaded / total) * 100))
+
+              const now = Date.now()
+              const start = startTimeRef.current ?? now
+              const elapsedSec = (now - start) / 1000
+              const rate = loaded / Math.max(1, elapsedSec)
+              const remaining = total - loaded
+              const eta = rate > 0 ? Math.round(remaining / rate) : null
+
+              setProgress({
+                fileName: file.name,
+                fileSizeBytes: file.size,
+                uploadedBytes: loaded,
+                totalBytes: total,
+                percent: pct,
+                etaSeconds: eta,
+              })
+            },
+          })
       
       toast.success(res.message || 'File uploaded successfully')
-      setResumeData(res)
+      
+      // For guest uploads, store temp ID with expiry
+      if (!isAuthenticated && (res as any).temp_id) {
+        const tempId = (res as any).temp_id
+        const expirySeconds = (res as any).expiry_seconds || 120 // Default 2 minutes
+        setTempUpload(tempId, expirySeconds)
+        console.log('[UploadCV] Guest upload stored:', { tempId, expirySeconds })
+        toast.info('Please login within 2 minutes to save your upload', { autoClose: 5000 })
+      } else {
+        // Authenticated upload - store in regular resume data
+        setResumeData(res)
+      }
+      
       setStatus('success')
       setErrorMessage(undefined)
       
@@ -171,12 +210,27 @@ function UploadCV() {
     // Check authentication before proceeding to preview
     if (!isAuthenticated) {
       toast.info('Please login to continue')
-      navigate('/login', { state: { from: '/upload' } })
+      // Pass hasPendingUpload flag to login page
+      navigate('/login', { 
+        state: { 
+          from: '/upload',
+          hasPendingUpload: true 
+        } 
+      })
       return
     }
 
-    // User is authenticated, proceed to preview
-    navigate('/preview')
+    // User is authenticated, get resumeId and navigate to preview
+    const { resumeData } = useResumeStore.getState()
+    const resumeId = resumeData?.data?.fileId
+    
+    if (resumeId) {
+      console.log('[UploadCV] Navigating to preview with resumeId:', resumeId)
+      navigate(`/preview/${resumeId}`)
+    } else {
+      console.warn('[UploadCV] No resumeId found, redirecting to /preview')
+      navigate('/preview')
+    }
   }
 
   const handleRetry = () => {

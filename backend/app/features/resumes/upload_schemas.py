@@ -13,6 +13,15 @@ class UploadResponse(BaseModel):
     error: str | None = None
     model_config = ConfigDict(strict=True)
 
+class GuestUploadResponse(BaseModel):
+    """Response for guest (unauthenticated) upload with temporary storage"""
+    success: bool
+    message: str
+    temp_id: str  # Temporary upload identifier
+    expiry_seconds: int  # TTL in seconds (typically 120 = 2 minutes)
+    data: UploadData | None = None  # Preview data for immediate display
+    model_config = ConfigDict(strict=True)
+
 class SimpleParsedResponse(BaseModel):
     # Flattened response shape expected by frontend preview
     name: str | None = None

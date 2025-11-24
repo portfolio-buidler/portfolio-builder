@@ -128,6 +128,11 @@
   color: var(--title-color);
 }
 
+.login-page__subtitle--error {
+  font-weight: 600;
+  color: var(--title-color);
+}
+
 .login-page__subtitle__error-icon {
   flex-shrink: 0;
   color: var(--text-muted);

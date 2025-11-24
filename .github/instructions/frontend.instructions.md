@@ -891,5 +891,63 @@ test('upload flow', async ({ page }) => {
 
 ---
 
+## 🚨 CRITICAL: User-Facing Messages - DO NOT DELETE
+
+**NEVER remove or modify these standardized user messages without explicit approval.**
+
+### UploadArea Component Messages
+
+These messages are **mandatory** and must always be present in the UploadArea component:
+
+#### Idle State (No file selected)
+```tsx
+// ✅ REQUIRED - Must always show
+<p className="upload-area__headline">
+  Drop & Drag or <span className="upload-area__link">Choose File</span> To Upload
+</p>
+<p className="upload-area__subline">Accept PDF or DOCX up to 5MB</p>
+```
+
+#### Success State (Upload complete)
+```tsx
+// ✅ REQUIRED - Must always show with 🎉 icon
+<img src={PartyIcon} className="upload-area__emoji-img" alt="" aria-hidden />
+<p className="upload-area__headline">Upload complete!</p>
+```
+
+#### Error State (Upload failed)
+```tsx
+// ✅ REQUIRED - Must show appropriate error icon and message
+// Icons: 🦖 (default), 😔 (sad), 🫣 (peek)
+{(() => {
+  const picked = pickErrorIconAndText(errorMessage)
+  const icon = picked.icon  // '🦖' | '😔' | '🫣'
+  const msgText = picked.text
+  
+  return (
+    <>
+      <img src={iconSrc} className="upload-area__emoji-img" alt="" aria-hidden />
+      <div className="upload-area__text">
+        <p className="upload-area__headline">{msgText}</p>
+      </div>
+    </>
+  )
+})()}
+```
+
+**Why These Messages Matter:**
+- **Consistency**: Users expect the same feedback across all upload interactions
+- **Accessibility**: Screen readers rely on these messages
+- **Branding**: The emoji icons and friendly tone are part of our UX identity
+- **Testing**: E2E tests depend on these exact text strings
+
+**Before Modifying:**
+1. ✅ Check if the message is in this critical list
+2. ✅ If yes, get explicit approval from UX/Product team
+3. ✅ Update E2E tests if text changes
+4. ✅ Update this documentation
+
+---
+
 Last Updated: November 2025
 Maintained By: Frontend Team (Netanel)

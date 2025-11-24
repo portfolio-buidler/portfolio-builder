@@ -17,7 +17,7 @@ export interface ResumeStoreState {
   setTempUpload: (tempId: string, expirySeconds: number) => void
   clearTempUpload: () => void
   isUploadExpired: () => boolean
-  claimGuestUpload: (tempId: string) => Promise<void>
+  claimGuestUpload: (tempId: string) => Promise<UploadResponse>
 }
 
 export const useResumeStore = create<ResumeStoreState>()(
@@ -68,6 +68,9 @@ export const useResumeStore = create<ResumeStoreState>()(
           tempUploadExpiry: null,
           resumeData: result,
         })
+        
+        // Return the result so caller can access resumeId
+        return result
       },
     }),
     {

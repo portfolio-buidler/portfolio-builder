@@ -112,12 +112,18 @@ api.interceptors.response.use(
         
         return api(originalRequest);
       } catch (refreshError) {
-        // Refresh failed - clear token and redirect to login
+        // Refresh failed - check if user had a previous session
+        const hadToken = accessToken !== null;
         clearAccessToken();
         
-        // Only redirect if not already on login/register pages
+        // Only redirect to login if:
+        // 1. User was previously authenticated (had a token)
+        // 2. Not already on login/register pages
+        // 
+        // This prevents redirect for unauthenticated visitors hitting protected routes
+        // but still redirects authenticated users whose session expired
         const currentPath = window.location.pathname;
-        if (!currentPath.includes('/login') && !currentPath.includes('/register')) {
+        if (hadToken && !currentPath.includes('/login') && !currentPath.includes('/register')) {
           window.location.href = '/login';
         }
         

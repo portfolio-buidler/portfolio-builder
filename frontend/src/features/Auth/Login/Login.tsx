@@ -86,11 +86,21 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
         if (tempUploadId && !isUploadExpired()) {
           console.log('[Login] Found valid guest upload, claiming:', tempUploadId)
           try {
-            await claimGuestUpload(tempUploadId)
-            console.log('[Login] Guest upload claimed successfully')
+            const claimedData = await claimGuestUpload(tempUploadId)
+            console.log('[Login] Guest upload claimed successfully:', claimedData)
             
-            // Redirect to preview/dashboard after successful claim
-            navigate('/upload', { replace: true, state: { uploadClaimed: true } })
+            // Extract resumeId from the claimed data
+            const resumeId = claimedData?.data?.fileId
+            
+            if (resumeId) {
+              // Redirect directly to preview with the claimed resume
+              console.log('[Login] Redirecting to preview with resumeId:', resumeId)
+              navigate(`/preview/${resumeId}`, { replace: true })
+            } else {
+              // Fallback to upload page if no resumeId
+              console.warn('[Login] No resumeId in claim response, redirecting to upload')
+              navigate('/upload', { replace: true })
+            }
             return
           } catch (claimError) {
             console.error('[Login] Failed to claim guest upload:', claimError)
