@@ -1,7 +1,7 @@
 
 import { Routes, Route } from 'react-router-dom';
 import UploadCV from './features/UploadCV/UploadCV';
-import Preview from './features/Preview/Preview';
+import Preview from './features/Preview/preview';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Login from './features/Auth/Login/Login';
@@ -9,6 +9,7 @@ import Registration from './features/Auth/Registration/Registration';
 
 import { useEffect } from 'react';
 import { useAuthStore } from './store/authStore';
+import './App.scss';
 
 function App() {
   const { fetchUser, isLoading, isBootstrapped, markBootstrapped } = useAuthStore();
@@ -27,11 +28,7 @@ function App() {
   }, [fetchUser, markBootstrapped]);
 
   const renderLoading = (message = 'Loading...') => (
-    <div
-      className="app-loading"
-      aria-busy="true"
-      style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', background: 'rgba(255,255,255,0.6)', zIndex: 9999 }}
-    >
+    <div className="app-loading" aria-busy="true">
       <div>{message}</div>
     </div>
   );

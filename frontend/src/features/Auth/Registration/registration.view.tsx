@@ -95,7 +95,7 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
                 <input
                   type="text"
                   id="registration-first-name"
-                  className={`registration-page__input ${errors.firstName ? 'registration-page__input--error' : ''}`}
+                  className="registration-page__input"
                   placeholder="First Name"
                   value={firstName}
                   onChange={(e) => onFirstNameChange(e.target.value)}
@@ -109,7 +109,7 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
                 <input
                   type="text"
                   id="registration-last-name"
-                  className={`registration-page__input ${errors.lastName ? 'registration-page__input--error' : ''}`}
+                  className="registration-page__input"
                   placeholder="Last Name"
                   value={lastName}
                   onChange={(e) => onLastNameChange(e.target.value)}
@@ -124,7 +124,7 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
               <input
                 type="email"
                 id="registration-email"
-                className={`registration-page__input ${errors.email ? 'registration-page__input--error' : ''}`}
+                className="registration-page__input"
                 placeholder="Email"
                 value={email}
                 onChange={(e) => onEmailChange(e.target.value)}
@@ -138,9 +138,7 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
               <input
                 type={showPassword ? 'text' : 'password'}
                 id="registration-password"
-                className={`registration-page__input registration-page__input--password ${
-                  errors.password ? 'registration-page__input--error' : ''
-                }`}
+                className="registration-page__input registration-page__input--password"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => onPasswordChange(e.target.value)}
@@ -152,16 +150,14 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
 
             {/* Password hint message moved here between password and confirm password */}
             <p className="registration-page__password-hint">
-              At least 8 characters, including a letter and a number.
+              At least 12 characters, including a letter and a number.
             </p>
 
             <div className="registration-page__input-group">
               <input
                 type={showPassword ? 'text' : 'password'}
                 id="registration-confirm-password"
-                className={`registration-page__input registration-page__input--confirm ${
-                  errors.confirmPassword ? 'registration-page__input--error' : ''
-                }`}
+                className="registration-page__input registration-page__input--confirm"
                 placeholder="Confirm Password"
                 value={confirmPassword}
                 onChange={(e) => onConfirmPasswordChange(e.target.value)}

@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import backgroundImage from '../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6c8.jpg'
 import { UploadCVView } from './UploadCV.view'
@@ -20,9 +20,40 @@ function UploadCV() {
   const { setResumeData } = useResumeStore()
   const [status, setStatus] = useState<UploadStatus>('idle')
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
+  
+  // Prevent duplicate uploads
+  const uploadInProgressRef = useRef(false)
 
   // Use global auth store instead of local state
   const { user, isAuthenticated, logout: authLogout } = useAuthStore()
+  
+  /**
+   * Explicit state machine for upload flow with memoized CTA enable/disable logic
+   * 
+   * State transitions:
+   * idle → validating → uploading → success | error
+   * error → idle (via retry)
+   * success → (navigate away)
+   */
+  const isCTAEnabled = useMemo(() => {
+    // Upload button enabled when: file selected + idle state + not uploading
+    if (status === 'idle' && selectedFile !== null && !isUploading) {
+      return true
+    }
+    
+    // Next button enabled when: success state + not uploading
+    if (status === 'success' && !isUploading) {
+      return true
+    }
+    
+    // Retry button enabled when: error state + not uploading
+    if (status === 'error' && !isUploading) {
+      return true
+    }
+    
+    // Disabled for all other states (uploading, validating, etc.)
+    return false
+  }, [status, selectedFile, isUploading])
 
   const onFileSelect = (file: File) => {
     setSelectedFile(file)
@@ -43,10 +74,19 @@ function UploadCV() {
   /**
    * Upload handler with a specific file
    * Shows progress feedback regardless of authentication status
+   * Includes duplicate upload prevention
    */
   const handleUploadWithFile = async (file: File) => {
     if (!file) return
+    
+    // Prevent duplicate uploads
+    if (uploadInProgressRef.current) {
+      console.warn('[UploadCV] Upload already in progress, ignoring duplicate request')
+      return
+    }
+    
     try {
+      uploadInProgressRef.current = true
       setStatus('uploading')
       setErrorMessage(undefined)
       setIsUploading(true)
@@ -93,6 +133,7 @@ function UploadCV() {
       setErrorMessage('🦖 Oops! We couldn\'t process that / Give it another shot')
     } finally {
       setIsUploading(false)
+      uploadInProgressRef.current = false // Reset duplicate upload guard
       if (file) {
         setProgress((prev) =>
           prev
@@ -196,6 +237,8 @@ function UploadCV() {
     onLogin: handleLogin,
     onRegister: handleRegister,
     onLogout: handleLogout,
+    // State machine CTA control
+    isCTAEnabled,
   }
 
   return <UploadCVView {...viewProps} />

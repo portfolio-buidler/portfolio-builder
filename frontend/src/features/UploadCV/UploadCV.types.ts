@@ -38,4 +38,5 @@ export interface UploadCVViewProps {
   onLogin: () => void
   onRegister: () => void
   onLogout?: () => void
+  isCTAEnabled: boolean // ✅ New: Explicit CTA enable/disable from state machine
 }

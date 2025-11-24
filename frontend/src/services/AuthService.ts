@@ -32,8 +32,8 @@ export function isValidEmail(email: string): boolean {
  * Password validation helper
  */
 export function validatePassword(password: string): { valid: boolean; error?: string } {
-  if (password.length < 8) {
-    return { valid: false, error: 'Password must be at least 8 characters long' };
+  if (password.length < 12) {
+    return { valid: false, error: 'Password must be at least 12 characters long' };
   }
   if (!/[a-zA-Z]/.test(password)) {
     return { valid: false, error: 'Password must contain at least one letter' };
