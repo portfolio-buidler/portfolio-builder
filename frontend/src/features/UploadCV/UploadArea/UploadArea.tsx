@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import type { UploadAreaProps, UploadProgressData } from './UploadArea.types'
 import { validateFile, ALLOWED_MIME_TYPES } from '../../../utils/fileValidation'
 import { toast } from 'react-toastify'

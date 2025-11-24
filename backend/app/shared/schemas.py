@@ -11,6 +11,7 @@ class APIModel(BaseModel):
         extras='forbid',
         populate_by_name=True,
         str_strip_whitespace=True,
+        from_attributes=True,  # Allow reading from SQLAlchemy models
     )
     
 # Generic API response model to ensure timestamps are included

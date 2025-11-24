@@ -1,7 +1,11 @@
 from datetime import datetime
-from sqlalchemy import BigInteger, String, ForeignKey, func, Index
+from typing import TYPE_CHECKING
+from sqlalchemy import BigInteger, String, ForeignKey, func, Index, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
+
+if TYPE_CHECKING:
+    from app.db.models_user import User
 
 
 class RefreshToken(Base):
@@ -23,9 +27,9 @@ class RefreshToken(Base):
     token_hash: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
 
     # Token lifecycle
-    issued_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
-    expires_at: Mapped[datetime] = mapped_column(nullable=False)
-    revoked_at: Mapped[datetime | None] = mapped_column(nullable=True, index=True)
+    issued_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
 
     # Metadata for security tracking
     user_agent: Mapped[str | None] = mapped_column(String(500), nullable=True)

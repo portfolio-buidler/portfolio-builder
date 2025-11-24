@@ -124,6 +124,15 @@ async def rate_limit_middleware(request: Request, call_next):
     Extracts user ID from headers or falls back to IP address.
     Enforces rate limits and returns 429 if exceeded.
     """
+    # Bypass for preflight, metadata, well-known endpoints, and auth endpoints
+    path = request.url.path or ""
+    if request.method in {"OPTIONS", "HEAD"} or \
+       path == "/favicon.ico" or \
+       path == "/robots.txt" or \
+       path.startswith("/.well-known/") or \
+       path in {"/api/v1/auth/me", "/api/v1/auth/refresh", "/api/v1/auth/login", "/api/v1/auth/logout"}:
+        return await call_next(request)
+
     # Get identifier (user ID from header or IP address)
     user_id = request.headers.get("X-User-Id")
     identifier = user_id if user_id else request.client.host

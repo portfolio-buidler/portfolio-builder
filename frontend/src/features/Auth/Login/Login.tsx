@@ -1,23 +1,12 @@
-/**
- * Login Component - Fixed Back Button
- * 
- * Back button behavior:
- * - Goes back in browser history (navigate(-1))
- * - This handles all cases naturally:
- *   - From Upload → Login → Back goes to Upload
- *   - From Registration → Login → Back goes to Registration
- */
-
 import { useState, useCallback, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { LoginView } from './Login.view'
 import type { LoginProps, LoginViewProps } from './Login.types'
 import { 
   loginUser, 
-  isValidEmail,
-  hasPendingUploadAfterAuth,
-  getTempCV 
+  isValidEmail
 } from '../../../services/AuthService'
+import { useAuthStore } from '../../../store/authStore'
 import backgroundImage from '../../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6c8.jpg'
 
 export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
@@ -29,24 +18,25 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [isFormValid, setIsFormValid] = useState(false)
 
   // Check if there's a pending upload
   const [hasPendingUpload, setHasPendingUpload] = useState(false)
 
+  // Update form validity when email or password changes
   useEffect(() => {
-    // Check for pending upload from location state or session storage
+    const isValid = email.trim().length > 0 && password.length > 0 && isValidEmail(email)
+    setIsFormValid(isValid)
+  }, [email, password])
+
+  useEffect(() => {
+    // Check for pending upload from location state only
     const locationState = location.state as any
     const pendingFromState = locationState?.hasPendingUpload
-    const pendingFromStorage = hasPendingUploadAfterAuth()
     
-    if (pendingFromState || pendingFromStorage) {
+    if (pendingFromState) {
       setHasPendingUpload(true)
-      
-      // Show info about pending upload
-      const tempCV = getTempCV()
-      if (tempCV) {
-        console.log('[Login] Pending CV upload detected:', tempCV.metadata.fileName)
-      }
+      console.log('[Login] Pending upload detected from location state')
     }
   }, [location])
 
@@ -67,6 +57,13 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
         const user = await loginUser({ email, password })
         
         console.log('[Login] Login successful:', user.email)
+
+        // Update global auth store with the fetched user
+        try {
+          useAuthStore.getState().setUser(user)
+        } catch (e) {
+          console.warn('[Login] Failed to set user in auth store', e)
+        }
         
         // Determine where to redirect
         const locationState = location.state as any
@@ -79,11 +76,13 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
           // If there's a pending upload, always go to upload page
           // The UploadCV component will handle the pending upload automatically
           if (hasPendingUpload) {
-            console.log('[Login] Redirecting to upload page to process pending CV')
-            navigate('/upload', { replace: true })
-          } else {
-            navigate(from, { replace: true })
-          }
+              console.log('[Login] Redirecting to upload page to process pending CV')
+              console.log('[Login] navigate -> /upload')
+              navigate('/upload', { replace: true })
+            } else {
+              console.log('[Login] navigate ->', from)
+              navigate(from, { replace: true })
+            }
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Invalid email or password')
@@ -134,6 +133,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
     error,
     isLoading,
     hasPendingUpload,
+    isFormValid,
     onEmailChange: setEmail,
     onPasswordChange: setPassword,
     onShowPasswordToggle: () => setShowPassword(!showPassword),

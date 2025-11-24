@@ -28,8 +28,8 @@ describe('fileValidation utility', () => {
     const res = validateFile(file)
     expect(res).toEqual({
       ok: false,
-      // Matches the current implementation (note the trailing comma after DOCX)
-      error: 'Invalid file type. Allowed types: PDF, DOCX,',
+      // Updated to match actual error message with emoji
+      error: '😔 Unsupported file type / Please upload a PDF or DOCX',
     })
   })
 
@@ -44,7 +44,7 @@ describe('fileValidation utility', () => {
     const res = validateFile(file)
     expect(res).toEqual({
       ok: false,
-      error: 'File is too large. Maximum allowed size is 5MB.',
+      error: '🫣 The file is too large / Please upload a file under 5MB',
     })
   })
 

@@ -1,19 +1,15 @@
-import { useRef, useState, useEffect, useCallback } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import backgroundImage from '../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6c8.jpg'
 import { UploadCVView } from './UploadCV.view'
 import { uploadCV } from '../../services/uploadService'
 import { toast } from 'react-toastify'
-import type { UploadCVViewProps, User } from './UploadCV.types'
+import type { UploadCVViewProps } from './UploadCV.types'
 import { useResumeStore } from '../../store/resumeStore'
 import type { UploadProgressData, UploadStatus } from './UploadArea/UploadArea.types'
 
-// Import authentication helpers
-import {
-  isAuthenticated,
-  getCurrentUser,
-  logoutUser,
-} from '../../services/AuthService'
+// Import authentication from store
+import { useAuthStore } from '../../store/authStore'
 
 function UploadCV() {
   const navigate = useNavigate()
@@ -21,47 +17,14 @@ function UploadCV() {
   const [isUploading, setIsUploading] = useState(false)
   const [progress, setProgress] = useState<UploadProgressData | undefined>(undefined)
   const startTimeRef = useRef<number | null>(null)
-  const { resumeData, setResumeData } = useResumeStore()
+  const { setResumeData } = useResumeStore()
   const [status, setStatus] = useState<UploadStatus>('idle')
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
 
-  // Authentication state
-  const [user, setUser] = useState<User | null>(null)
-  const [authChecked, setAuthChecked] = useState(false)
-
-  useEffect(() => {
-    console.log('[UploadCV] resumeData in global store:', resumeData)
-  }, [resumeData])
-
-  /**
-   * Check authentication on mount
-   */
-  useEffect(() => {
-    const checkAuth = async () => {
-      // Determine if user has a valid session
-      if (isAuthenticated()) {
-        try {
-          const currentUser = await getCurrentUser()
-          setUser(currentUser)
-        } catch (error) {
-          console.error('[UploadCV] Failed to get current user:', error)
-          setUser(null)
-        }
-      }
-      setAuthChecked(true)
-    }
-    checkAuth()
-  }, [])
+  // Use global auth store instead of local state
+  const { user, isAuthenticated, logout: authLogout } = useAuthStore()
 
   const onFileSelect = (file: File) => {
-    console.log('📁 File selected via file input:')
-    console.log('Name:', file.name)
-    console.log('Size:', file.size, 'bytes', `(${(file.size / 1024 / 1024).toFixed(2)} MB)`)
-    console.log('Type:', file.type)
-    console.log('Last Modified:', new Date(file.lastModified).toLocaleString())
-    console.log('Full File Object:', file)
-    console.log('---')
-    
     setSelectedFile(file)
     setProgress(undefined)
     // Reset status to idle when new file is selected
@@ -70,14 +33,6 @@ function UploadCV() {
   }
 
    const onDropFile = (file: File) => {
-    console.log('🎯 File dropped via drag & drop:')
-    console.log('Name:', file.name)
-    console.log('Size:', file.size, 'bytes', `(${(file.size / 1024 / 1024).toFixed(2)} MB)`)
-    console.log('Type:', file.type)
-    console.log('Last Modified:', new Date(file.lastModified).toLocaleString())
-    console.log('Full File Object:', file)
-    console.log('---')
-    
     setSelectedFile(file)
     setProgress(undefined)
     // Reset status to idle when new file is selected
@@ -123,12 +78,9 @@ function UploadCV() {
       })
       
       toast.success(res.message || 'File uploaded successfully')
-      console.log('Upload response:', res)
       setResumeData(res)
       setStatus('success')
       setErrorMessage(undefined)
-
-      console.log('[UploadCV] Simulated read back from store:', useResumeStore.getState().resumeData)
       
       // ✅ Don't auto-navigate - let user see success and click Next
       // Authentication check will happen when they click Next button
@@ -175,21 +127,14 @@ function UploadCV() {
    * This is where authentication check happens
    */
   const handleNext = () => {
-    if (!authChecked) {
-      console.log('[UploadCV] Auth not checked yet, waiting...')
-      return
-    }
-
     // Check authentication before proceeding to preview
-    if (!isAuthenticated()) {
-      console.log('[UploadCV] User not authenticated, redirecting to login')
+    if (!isAuthenticated) {
       toast.info('Please login to continue')
       navigate('/login', { state: { from: '/upload' } })
       return
     }
 
     // User is authenticated, proceed to preview
-    console.log('[UploadCV] User authenticated, proceeding to preview')
     navigate('/preview')
   }
 
@@ -214,9 +159,10 @@ function UploadCV() {
 
   const handleLogout = useCallback(async () => {
     try {
-      await logoutUser()
-      setUser(null)
+      // Use authStore logout which handles both backend call and state update
+      await authLogout()
       toast.success('Logged out successfully')
+      
       // Reset upload state
       setSelectedFile(null)
       setStatus('idle')
@@ -226,7 +172,7 @@ function UploadCV() {
       console.error('[UploadCV] Logout error:', error)
       toast.error('Failed to logout')
     }
-  }, [])
+  }, [authLogout])
 
 
   const viewProps: UploadCVViewProps = {

@@ -5,15 +5,17 @@ import type { RegistrationProps, RegistrationViewProps } from './Registration.ty
 import { 
   registerUser, 
   isValidEmail, 
-  validatePassword,
-  hasPendingUploadAfterAuth,
-  getTempCV 
+  validatePassword
 } from '../../../services/AuthService'
 import backgroundImage from '../../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6c8.jpg'
 
-export const Registration: React.FC<RegistrationProps> = ({ onRegistrationSuccess, onBack }) => {
+export const Registration: React.FC<RegistrationProps> = ({ onBack }) => {
   const navigate = useNavigate()
   const location = useLocation()
+  
+  // Extract hasPendingUpload from location state (if user came from upload page)
+  const locationState = location.state as { hasPendingUpload?: boolean, from?: string }
+  const hasPendingUpload = locationState?.hasPendingUpload || false
   
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -30,26 +32,22 @@ export const Registration: React.FC<RegistrationProps> = ({ onRegistrationSucces
     general?: string
   }>({})
   const [isLoading, setIsLoading] = useState(false)
+  const [isFormValid, setIsFormValid] = useState(false)
 
-  // Check if there's a pending upload
-  const [hasPendingUpload, setHasPendingUpload] = useState(false)
-
+  // Update form validity when fields change
   useEffect(() => {
-    // Check for pending upload from location state or session storage
-    const locationState = location.state as any
-    const pendingFromState = locationState?.hasPendingUpload
-    const pendingFromStorage = hasPendingUploadAfterAuth()
+    const isValid = 
+      firstName.trim().length > 0 &&
+      lastName.trim().length > 0 &&
+      email.trim().length > 0 &&
+      isValidEmail(email) &&
+      password.length > 0 &&
+      confirmPassword.length > 0 &&
+      password === confirmPassword &&
+      validatePassword(password).valid
     
-    if (pendingFromState || pendingFromStorage) {
-      setHasPendingUpload(true)
-      
-      // Show info about pending upload
-      const tempCV = getTempCV()
-      if (tempCV) {
-        console.log('[Registration] Pending CV upload detected:', tempCV.metadata.fileName)
-      }
-    }
-  }, [location])
+    setIsFormValid(isValid)
+  }, [firstName, lastName, email, password, confirmPassword])
 
   const validateForm = useCallback((): boolean => {
     const newErrors: typeof errors = {}
@@ -104,32 +102,27 @@ export const Registration: React.FC<RegistrationProps> = ({ onRegistrationSucces
       setIsLoading(true)
 
       try {
-        const user = await registerUser({
-          firstName: firstName.trim(),
-          lastName: lastName.trim(),
+        // Combine firstName and lastName into fullName
+        const fullName = `${firstName.trim()} ${lastName.trim()}`;
+        
+        await registerUser({
+          fullName,
           email: email.trim(),
           password,
         })
 
-        console.log('[Registration] Registration successful:', user.email)
+        console.log('[Registration] Registration successful, redirecting to login')
 
-        // Determine where to redirect
-        const locationState = location.state as any
-        const from = locationState?.from || '/upload'
-
-        // Success - call callback or navigate
-        if (onRegistrationSuccess) {
-          onRegistrationSuccess()
-        } else {
-          // If there's a pending upload, always go to upload page
-          // The UploadCV component will handle the pending upload automatically
-          if (hasPendingUpload) {
-            console.log('[Registration] Redirecting to upload page to process pending CV')
-            navigate('/upload', { replace: true })
-          } else {
-            navigate(from, { replace: true })
+        // After successful registration, redirect to login page
+        // User needs to login with their new credentials
+        navigate('/login', { 
+          replace: true,
+          state: {
+            from: location.state?.from || '/upload',
+            registrationSuccess: true,
+            email: email.trim() // Pre-fill email in login form
           }
-        }
+        })
       } catch (err) {
         setErrors({
           general: err instanceof Error ? err.message : 'Registration failed',
@@ -138,7 +131,7 @@ export const Registration: React.FC<RegistrationProps> = ({ onRegistrationSucces
         setIsLoading(false)
       }
     },
-    [firstName, lastName, email, password, validateForm, navigate, onRegistrationSuccess, location, hasPendingUpload]
+    [firstName, lastName, email, password, validateForm, navigate, location]
   )
 
   const handleBack = useCallback(() => {
@@ -170,6 +163,7 @@ export const Registration: React.FC<RegistrationProps> = ({ onRegistrationSucces
     errors,
     isLoading,
     hasPendingUpload,
+    isFormValid,
     onFirstNameChange: setFirstName,
     onLastNameChange: setLastName,
     onEmailChange: setEmail,

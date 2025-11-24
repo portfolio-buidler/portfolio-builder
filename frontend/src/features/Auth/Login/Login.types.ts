@@ -10,6 +10,7 @@ export interface LoginViewProps {
   error: string | null
   isLoading: boolean
   hasPendingUpload: boolean
+  isFormValid: boolean
   onEmailChange: (value: string) => void
   onPasswordChange: (value: string) => void
   onShowPasswordToggle: () => void

@@ -1,8 +1,13 @@
 from datetime import datetime
-from sqlalchemy import BigInteger, Boolean, String, func, Index
+from typing import TYPE_CHECKING
+from sqlalchemy import BigInteger, Boolean, String, func, Index, DateTime
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
+
+if TYPE_CHECKING:
+    from app.db.models_resume import Resume
+    from app.db.models_refresh_token import RefreshToken
 
 
 class User(Base):
@@ -29,8 +34,9 @@ class User(Base):
     is_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
 
     # Timestamps
-    created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
         server_default=func.now(), 
         onupdate=func.now(), 
         nullable=False

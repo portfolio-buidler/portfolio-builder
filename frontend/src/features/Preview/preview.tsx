@@ -13,11 +13,12 @@ import backgroundImage from '../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6
 import { PreviewView } from './Preview.view.tsx'
 import type { PreviewViewProps } from './Preview.types.ts'
 import PreviewArea from './PreviewArea/PreviewArea.tsx'
-import { isAuthenticated } from '../../services/AuthService.ts'
+import { useAuthStore } from '../../store/authStore'
 
 function Preview() {
   const navigate = useNavigate()
   const [isChecking, setIsChecking] = useState(true)
+  const { user, fetchUser } = useAuthStore()
 
   /**
    * Check authentication on mount
@@ -25,16 +26,18 @@ function Preview() {
    */
   useEffect(() => {
     const checkAuth = async () => {
-      if (!isAuthenticated()) {
-        console.log('[Preview] User not authenticated, redirecting to login')
-        navigate('/login', { state: { from: '/preview' }, replace: true })
-        return
-      }
-      console.log('[Preview] User authenticated')
+      await fetchUser()
       setIsChecking(false)
     }
     checkAuth()
-  }, [navigate])
+  }, [fetchUser])
+
+  useEffect(() => {
+    if (!isChecking && !user) {
+      console.log('[Preview] User not authenticated, redirecting to login')
+      navigate('/login', { state: { from: '/preview' }, replace: true })
+    }
+  }, [isChecking, user, navigate])
 
   // Show nothing while checking authentication
   if (isChecking) {

@@ -1,6 +1,6 @@
-
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom' 
 import UploadCV from '../../features/UploadCV/UploadCV'
 import { useResumeStore } from '../../store/resumeStore'
 
@@ -50,10 +50,14 @@ describe('UploadCV integration', () => {
 
     ;(uploadCV as unknown as Mocked<typeof uploadCV>).mockResolvedValue(mockResponse)
 
-    render(<UploadCV />)
+    render(
+      <MemoryRouter>
+        <UploadCV />
+      </MemoryRouter>
+    )
 
     // Initially CTA should be disabled (no file selected)
-    const cta = screen.getByRole('button', { name: /let's do it!/i }) as HTMLButtonElement
+    const cta = screen.getByRole('button', { name: /next/i }) as HTMLButtonElement
     expect(cta).toBeDisabled()
 
     // Select a valid file through the hidden input
@@ -81,13 +85,17 @@ describe('UploadCV integration', () => {
     }
     ;(uploadCV as unknown as Mocked<typeof uploadCV>).mockRejectedValue(error)
 
-    render(<UploadCV />)
+    render(
+      <MemoryRouter>
+        <UploadCV />
+      </MemoryRouter>
+    )
 
     const input = document.getElementById('file-input') as HTMLInputElement
     const file = createFile('cv.pdf', 'application/pdf')
     fireEvent.change(input, { target: { files: [file] } })
 
-    const cta = screen.getByRole('button', { name: /let's do it!/i }) as HTMLButtonElement
+    const cta = screen.getByRole('button', { name: /next/i }) as HTMLButtonElement
     fireEvent.click(cta)
 
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Upload failed due to server error'))
