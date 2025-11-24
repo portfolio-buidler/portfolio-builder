@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import type { UploadCVViewProps } from './UploadCV.types'
 import './UploadCV.styles.scss'
 import UploadArea from './UploadArea/UploadArea'
@@ -21,7 +21,16 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
   onLogin,
   onRegister,
   onLogout,
+  isCTAEnabled, // ✅ Explicit CTA control from state machine
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  // Set CSS variable via DOM API to avoid inline styles
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.style.setProperty('--uploadcv-bg', `url(${backgroundUrl})`)
+    }
+  }, [backgroundUrl])
   /**
    * Handle Next/Try Again button click
    * Different behavior based on current status:
@@ -29,10 +38,12 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
    * - success: Proceed to next step (auth check + navigation)
    * - idle + ready: Start upload
    * - uploading: Do nothing
+   * 
+   * Button state controlled by isCTAEnabled from parent state machine
    */
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    // Prevent action during upload
-    if (isUploading) {
+    // Prevent action if not enabled by state machine
+    if (!isCTAEnabled) {
       e.preventDefault()
       return
     }
@@ -61,8 +72,8 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
 
   return (
     <div
+      ref={containerRef}
       className="upload-cv"
-      style={{ ['--uploadcv-bg' as any]: `url(${backgroundUrl})` }}
       data-ready={ready}
     >
       <div className="upload-cv__container">
@@ -126,9 +137,7 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
               (status === 'error' ? ' upload-cv__cta--error' : '')
             }
             onClick={handleClick}
-            aria-disabled={isUploading || (!ready && status === 'idle') || undefined}
-            disabled={isUploading || (!ready && status === 'idle') || undefined}
-            aria-busy={isUploading || undefined}
+            disabled={!isCTAEnabled}
           >
             {status === 'error' ? (
               <>

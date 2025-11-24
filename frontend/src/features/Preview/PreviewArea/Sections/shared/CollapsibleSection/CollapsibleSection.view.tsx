@@ -22,19 +22,10 @@ export const CollapsibleSectionView = React.forwardRef<HTMLElement, CollapsibleS
     },
     ref
   ) => {
-    // Inline style only when expanded in view mode. Otherwise let CSS drive it.
-    const contentStyle = React.useMemo<React.CSSProperties>(() => {
-      if (isEditing) return {}
-      if (!isExpanded) return {}
-      // Use the saved height if we have it and it's bigger than collapsed
-      const h = Math.max(0, savedExpandedHeight | 0)
-      if (h > 110) {
-        return { maxHeight: `${h}px` }
-      }
-      // Otherwise let CSS handle it (max-height: none)
-      return {}
-    }, [isEditing, isExpanded, savedExpandedHeight])
-
+    // stable id for aria-controls/aria-labelledby
+    const uid = React.useId()
+    const contentId = `collapsible-content-${uid}`
+    const toggleId = `collapsible-toggle-${uid}`
     // Custom default messages for each section
     let placeholderText = '';
     let emptyPlaceholder = '';
@@ -73,8 +64,11 @@ export const CollapsibleSectionView = React.forwardRef<HTMLElement, CollapsibleS
 
         <div
           ref={contentRef}
+          id={contentId}
+          role="region"
+          aria-labelledby={toggleId}
           className="collapsible-section__content"
-          style={contentStyle}
+          data-saved-height={isExpanded && !isEditing && savedExpandedHeight > 110 ? savedExpandedHeight : undefined}
         >
           {isEditing ? (
             <textarea
@@ -101,7 +95,9 @@ export const CollapsibleSectionView = React.forwardRef<HTMLElement, CollapsibleS
           className="preview-section__toggle"
           onClick={(e) => { e.stopPropagation(); if (!isEditing) onToggle() }}
           aria-label={isExpanded ? `Collapse ${title.toLowerCase()}` : `Expand ${title.toLowerCase()}`}
-          aria-expanded={isExpanded}
+          id={toggleId}
+          aria-controls={contentId}
+          {...(typeof isExpanded === 'boolean' ? { 'aria-expanded': isExpanded } : {})}
         />
       </section>
     )

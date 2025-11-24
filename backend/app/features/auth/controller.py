@@ -8,7 +8,7 @@ This module handles:
 - Calling service layer functions
 """
 
-from fastapi import Response, Request, Depends
+from fastapi import Response, Request, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
@@ -19,7 +19,7 @@ from app.core.security import (
     hash_password,
     verify_password,
 )
-from app.core.errors import AuthenticationError
+from app.core.errors import AuthenticationError, ConflictError
 from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES
 from app.db.models_user import User
 from app.features.auth.schemas import (
@@ -52,13 +52,21 @@ async def register(
         UserPublic: Created user profile
     
     Raises:
-        HTTPException 400: If email already exists
+        HTTPException 409: If email already exists
+        HTTPException 422: If validation fails
     """
     try:
         user = await service.register_user(db, data)
         return UserPublic.model_validate(user)
     except ValueError as e:
-        raise AuthenticationError(str(e))
+        # Check if it's a duplicate email error
+        if "already registered" in str(e).lower():
+            raise ConflictError(str(e))
+        # Otherwise, it's a validation error
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(e)
+        )
 
 
 # ============================================================================

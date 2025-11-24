@@ -232,20 +232,6 @@
     transition: background-color 5000s ease-in-out 0s;
   }
 
-  /* Error state modifier */
-  &--error {
-    background: #FF3B304D;
-    border: 1px solid #FF3B30;
-    box-shadow: inset 1px 1px 2px 0px #FFFFFF4D, inset -3px -3px 3px 0px #DDDDDD26;
-    
-    &:-webkit-autofill,
-    &:-webkit-autofill:hover,
-    &:-webkit-autofill:focus,
-    &:-webkit-autofill:active {
-      -webkit-box-shadow: 0 0 0 30px #FF3B304D inset, inset 1px 1px 2px 0px #FFFFFF4D, inset -3px -3px 3px 0px #DDDDDD26 !important;
-      -webkit-text-fill-color: var(--title-color) !important;
-    }
-  }
 }
 
 /* Password hint message - positioned between password and confirm password */
@@ -276,8 +262,8 @@
     border: 2px solid #354052;
     background: #35405233;
     accent-color: var(--title-color);
-    appearance: none;
     -webkit-appearance: none;
+    appearance: none;
     transition: all 200ms ease;
 
     &:checked {
@@ -310,6 +296,7 @@
   line-height: 22px;
   letter-spacing: 0%;
   color: #354052;
+  -webkit-user-select: none;
   user-select: none;
   text-shadow: 0px 0px 4px #00000040;
 }

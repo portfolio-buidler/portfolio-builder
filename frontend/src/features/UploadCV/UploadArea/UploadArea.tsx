@@ -1,20 +1,20 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 import type { UploadAreaProps, UploadProgressData } from './UploadArea.types'
 import { validateFile, ALLOWED_MIME_TYPES } from '../../../utils/fileValidation'
-import { toast } from 'react-toastify'
 import { UploadAreaView } from './UploadArea.view'
-import axios from 'axios'
 
 
 function UploadArea({ onFileSelect, onDropFile, isUploading, onCancelUpload, progress: externalProgress, status, errorMessage, onStatusChange }: UploadAreaProps) {
   const [dragOver, setDragOver] = useState(false)
   const [file, setFile] = useState<File | null>(null)
-  const [uploadedBytes, setUploadedBytes] = useState(0)
-  const [totalBytes, setTotalBytes] = useState(0)
-  const [percent, setPercent] = useState(0)
-  const [etaSeconds, setEtaSeconds] = useState<number | null>(null)
 
-  const startTimeRef = useRef<number | null>(null)
+  // Note: The following state variables are kept for potential future use with internal upload progress tracking
+  // Currently, upload progress is managed externally via the parent component
+  const uploadedBytes = 0
+  const totalBytes = 0
+  const percent = 0
+  const etaSeconds: number | null = null
+
   const abortControllerRef = useRef<AbortController | null>(null)
 
   const accept = useMemo(() => ALLOWED_MIME_TYPES.join(','), [])
@@ -31,63 +31,8 @@ function UploadArea({ onFileSelect, onDropFile, isUploading, onCancelUpload, pro
     }
   }, [file, uploadedBytes, totalBytes, percent, etaSeconds])
 
-  const beginUpload = useCallback(
-    (selected: File) => {
-      if (abortControllerRef.current) return
-
-      const controller = new AbortController()
-      abortControllerRef.current = controller
-
-      startTimeRef.current = Date.now()
-      setUploadedBytes(0)
-      setTotalBytes(selected.size)
-      setPercent(0)
-      setEtaSeconds(null)
-
-      const form = new FormData()
-      form.append('file', selected)
-
-      axios
-        .post('/api/upload', form, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-          signal: controller.signal,
-          onUploadProgress: (evt: ProgressEvent) => {
-            if (!evt.total) return
-            const loaded = evt.loaded
-            const total = evt.total
-
-            setUploadedBytes(loaded)
-            setTotalBytes(total)
-
-            const pct = Math.min(100, Math.round((loaded / total) * 100))
-            setPercent(pct)
-
-            const now = Date.now()
-            const start = startTimeRef.current ?? now
-            const elapsedSec = (now - start) / 1000
-            const rate = loaded / Math.max(1, elapsedSec) // bytes/sec
-            const remaining = total - loaded
-            const eta = rate > 0 ? Math.round(remaining / rate) : null
-            setEtaSeconds(eta)
-          },
-        })
-        .then(() => {
-          setPercent(100)
-          setUploadedBytes(selected.size)
-          setEtaSeconds(0)
-        })
-        .catch((err: any) => {
-          if (err?.code === 'ERR_CANCELED' || err?.name === 'CanceledError' || err?.name === 'AbortError') {
-            return
-          }
-          toast.error('Upload failed. Please try again.')
-        })
-        .finally(() => {
-          abortControllerRef.current = null
-        })
-    },
-    []
-  )
+  // Note: beginUpload function removed - upload is now handled by parent component via uploadService
+  // to avoid duplicate requests. See commented useEffect below for reference.
 
   const validateAndSetFile = useCallback(
     (f: File | null, triggerCallbacks: { select?: boolean; drop?: boolean } = {}) => {

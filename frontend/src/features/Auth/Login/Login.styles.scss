@@ -123,12 +123,12 @@
   min-height: 1.5rem;
 }
 
-.login-page__subtitle--error {
+.login-page__subtitle--normal {
   font-weight: 600;
-  color: #FF3B30;
+  color: var(--title-color);
 }
 
-.login-page__subtitle--normal {
+.login-page__subtitle--error {
   font-weight: 600;
   color: var(--title-color);
 }
@@ -299,8 +299,8 @@
     border: 2px solid #354052;
     background: #35405233;
     accent-color: var(--title-color);
-    appearance: none;
     -webkit-appearance: none;
+    appearance: none;
     transition: all 200ms ease;
 
     &:checked {
@@ -333,6 +333,7 @@
   line-height: 22px;
   letter-spacing: 0%;
   color: #354052;
+  -webkit-user-select: none;
   user-select: none;
   text-shadow: 0px 0px 4px #00000040;
 }

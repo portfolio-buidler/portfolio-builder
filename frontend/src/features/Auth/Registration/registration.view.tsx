@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import type { RegistrationViewProps } from './Registration.types.ts'
 import './Registration.styles.scss'
 
@@ -24,10 +24,18 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
   onLoginClick,
   backgroundUrl,
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.style.setProperty('--registration-bg', `url(${backgroundUrl})`)
+    }
+  }, [backgroundUrl])
+
   return (
     <div
+      ref={containerRef}
       className="registration-page"
-      style={{ ['--registration-bg' as any]: `url(${backgroundUrl})` }}
     >
       {/* Logo fixed at top-left of viewport - outside container */}
       <h1 className="registration-page__logo">Portify.</h1>
@@ -87,14 +95,13 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
                 <input
                   type="text"
                   id="registration-first-name"
-                  className={`registration-page__input ${errors.firstName ? 'registration-page__input--error' : ''}`}
+                  className="registration-page__input"
                   placeholder="First Name"
                   value={firstName}
                   onChange={(e) => onFirstNameChange(e.target.value)}
                   disabled={isLoading}
                   autoComplete="given-name"
                   aria-label="First name"
-                  aria-invalid={!!errors.firstName}
                 />
               </div>
 
@@ -102,14 +109,13 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
                 <input
                   type="text"
                   id="registration-last-name"
-                  className={`registration-page__input ${errors.lastName ? 'registration-page__input--error' : ''}`}
+                  className="registration-page__input"
                   placeholder="Last Name"
                   value={lastName}
                   onChange={(e) => onLastNameChange(e.target.value)}
                   disabled={isLoading}
                   autoComplete="family-name"
                   aria-label="Last name"
-                  aria-invalid={!!errors.lastName}
                 />
               </div>
             </div>
@@ -118,14 +124,13 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
               <input
                 type="email"
                 id="registration-email"
-                className={`registration-page__input ${errors.email ? 'registration-page__input--error' : ''}`}
+                className="registration-page__input"
                 placeholder="Email"
                 value={email}
                 onChange={(e) => onEmailChange(e.target.value)}
                 disabled={isLoading}
                 autoComplete="email"
                 aria-label="Email address"
-                aria-invalid={!!errors.email}
               />
             </div>
 
@@ -133,38 +138,32 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
               <input
                 type={showPassword ? 'text' : 'password'}
                 id="registration-password"
-                className={`registration-page__input registration-page__input--password ${
-                  errors.password ? 'registration-page__input--error' : ''
-                }`}
+                className="registration-page__input registration-page__input--password"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => onPasswordChange(e.target.value)}
                 disabled={isLoading}
                 autoComplete="new-password"
                 aria-label="Password"
-                aria-invalid={!!errors.password}
               />
             </div>
 
             {/* Password hint message moved here between password and confirm password */}
             <p className="registration-page__password-hint">
-              At least 8 characters, including a letter and a number.
+              At least 12 characters, including a letter and a number.
             </p>
 
             <div className="registration-page__input-group">
               <input
                 type={showPassword ? 'text' : 'password'}
                 id="registration-confirm-password"
-                className={`registration-page__input registration-page__input--confirm ${
-                  errors.confirmPassword ? 'registration-page__input--error' : ''
-                }`}
+                className="registration-page__input registration-page__input--confirm"
                 placeholder="Confirm Password"
                 value={confirmPassword}
                 onChange={(e) => onConfirmPasswordChange(e.target.value)}
                 disabled={isLoading}
                 autoComplete="new-password"
                 aria-label="Confirm password"
-                aria-invalid={!!errors.confirmPassword}
               />
             </div>
 

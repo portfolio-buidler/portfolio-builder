@@ -14,8 +14,10 @@ function makeTempFile(path = 'cv.pdf', content = 'resume content') {
  * Setup auth mocking for authenticated tests
  * Mocks /auth/me to return a logged-in user
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function setupAuthMock(page: any) {
   // Mock /auth/me to simulate logged-in user
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await page.route('**/auth/me', async (route: any) => {
     await route.fulfill({
       status: 200,
@@ -30,6 +32,7 @@ async function setupAuthMock(page: any) {
   })
 
   // Mock /auth/logout to simulate successful logout
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await page.route('**/auth/logout', async (route: any) => {
     await route.fulfill({
       status: 200,

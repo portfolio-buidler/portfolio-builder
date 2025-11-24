@@ -15,12 +15,15 @@ interface ImportMeta {
 
 // Explicit module declarations to help TypeScript resolve dependencies
 declare module 'axios' {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const axios: any
   export default axios
 }
 
 declare module 'react-toastify' {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export const toast: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export const ToastContainer: any
 }
 

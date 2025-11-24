@@ -152,7 +152,7 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
     el.style.overflow = 'visible'
     
     // Force reflow to ensure styles are applied
-    el.offsetHeight
+    void el.offsetHeight
     
     const measured = el.scrollHeight
     

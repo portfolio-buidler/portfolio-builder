@@ -4,6 +4,7 @@ import { CollapsibleSection } from '../shared/CollapsibleSection'
 import type { CollapsibleSectionProps } from '../shared/CollapsibleSection'
 import './ProjectsSection.styles.scss'
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ProjectsSectionProps extends Omit<CollapsibleSectionProps, 'fieldLabels'> {
   // Projects-specific props can be added here if needed
 }

@@ -7,6 +7,8 @@ import {
   isValidEmail, 
   validatePassword
 } from '../../../services/AuthService'
+import { useResumeStore } from '../../../store/resumeStore'
+import { mapBackendError } from '../../../utils/errorMapping'
 import backgroundImage from '../../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6c8.jpg'
 
 export const Registration: React.FC<RegistrationProps> = ({ onBack }) => {
@@ -33,6 +35,33 @@ export const Registration: React.FC<RegistrationProps> = ({ onBack }) => {
   }>({})
   const [isLoading, setIsLoading] = useState(false)
   const [isFormValid, setIsFormValid] = useState(false)
+
+  // Clear password error when user types a valid password
+  useEffect(() => {
+    if (password && errors.password) {
+      const passwordValidation = validatePassword(password)
+      if (passwordValidation.valid) {
+        setErrors(prev => {
+          const newErrors = { ...prev }
+          delete newErrors.password
+          return newErrors
+        })
+      }
+    }
+  }, [password, errors.password])
+
+  // Clear confirmPassword error when passwords match
+  useEffect(() => {
+    if (confirmPassword && errors.confirmPassword) {
+      if (password === confirmPassword) {
+        setErrors(prev => {
+          const newErrors = { ...prev }
+          delete newErrors.confirmPassword
+          return newErrors
+        })
+      }
+    }
+  }, [password, confirmPassword, errors.confirmPassword])
 
   // Update form validity when fields change
   useEffect(() => {
@@ -113,6 +142,10 @@ export const Registration: React.FC<RegistrationProps> = ({ onBack }) => {
 
         console.log('[Registration] Registration successful, redirecting to login')
 
+        // Check if there's a pending guest upload
+        const { tempUploadId } = useResumeStore.getState()
+        const hasPendingUpload = !!tempUploadId
+
         // After successful registration, redirect to login page
         // User needs to login with their new credentials
         navigate('/login', { 
@@ -120,13 +153,26 @@ export const Registration: React.FC<RegistrationProps> = ({ onBack }) => {
           state: {
             from: location.state?.from || '/upload',
             registrationSuccess: true,
-            email: email.trim() // Pre-fill email in login form
+            email: email.trim(), // Pre-fill email in login form
+            hasPendingUpload, // Pass along pending upload info
           }
         })
       } catch (err) {
-        setErrors({
-          general: err instanceof Error ? err.message : 'Registration failed',
-        })
+        const mappedError = mapBackendError(err, 'register')
+        
+        // Check if we have field-specific errors
+        if (mappedError.fieldErrors) {
+          setErrors({
+            general: mappedError.message,
+            ...mappedError.fieldErrors,
+          })
+        } else {
+          setErrors({
+            general: mappedError.message,
+          })
+        }
+        // Don't navigate on error - stay on registration page
+        return
       } finally {
         setIsLoading(false)
       }
@@ -144,7 +190,7 @@ export const Registration: React.FC<RegistrationProps> = ({ onBack }) => {
 
   const handleLoginClick = useCallback(() => {
     // Navigate to login, preserving the pending upload state
-    const locationState = location.state as any
+    const locationState = location.state as { from?: string; hasPendingUpload?: boolean };
     navigate('/login', { 
       state: { 
         from: locationState?.from || '/upload',

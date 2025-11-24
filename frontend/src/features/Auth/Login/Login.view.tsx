@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import type { LoginViewProps } from './Login.types'
 import './Login.styles.scss'
 
@@ -20,10 +20,18 @@ export const LoginView: React.FC<LoginViewProps> = ({
   onSignUpClick,
   backgroundUrl,
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.style.setProperty('--login-bg', `url(${backgroundUrl})`)
+    }
+  }, [backgroundUrl])
+
   return (
     <div
+      ref={containerRef}
       className="login-page"
-      style={{ ['--login-bg' as any]: `url(${backgroundUrl})` }}
     >
       {/* Logo fixed at top-left of viewport - outside container */}
       <h1 className="login-page__logo">Portify.</h1>
@@ -80,14 +88,13 @@ export const LoginView: React.FC<LoginViewProps> = ({
               <input
                 type="email"
                 id="login-email"
-                className={`login-page__input ${error ? 'login-page__input--error' : ''}`}
+                className="login-page__input"
                 placeholder="Email"
                 value={email}
                 onChange={(e) => onEmailChange(e.target.value)}
                 disabled={isLoading}
                 autoComplete="email"
                 aria-label="Email address"
-                aria-invalid={!!error}
               />
             </div>
 
@@ -95,14 +102,13 @@ export const LoginView: React.FC<LoginViewProps> = ({
               <input
                 type={showPassword ? 'text' : 'password'}
                 id="login-password"
-                className={`login-page__input login-page__input--password ${error ? 'login-page__input--error' : ''}`}
+                className="login-page__input login-page__input--password"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => onPasswordChange(e.target.value)}
                 disabled={isLoading}
                 autoComplete="current-password"
                 aria-label="Password"
-                aria-invalid={!!error}
               />
             </div>
 

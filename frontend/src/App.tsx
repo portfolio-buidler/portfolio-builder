@@ -1,7 +1,7 @@
 
 import { Routes, Route } from 'react-router-dom';
 import UploadCV from './features/UploadCV/UploadCV';
-import Preview from './features/Preview/Preview';
+import Preview from './features/Preview/preview';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Login from './features/Auth/Login/Login';
@@ -9,6 +9,8 @@ import Registration from './features/Auth/Registration/Registration';
 
 import { useEffect } from 'react';
 import { useAuthStore } from './store/authStore';
+import { useResumeStore } from './store/resumeStore';
+import './App.scss';
 
 function App() {
   const { fetchUser, isLoading, isBootstrapped, markBootstrapped } = useAuthStore();
@@ -21,17 +23,25 @@ function App() {
         markBootstrapped();
         return;
       }
-    } catch {}
+    } catch {
+      // localStorage may not be available in some contexts
+    }
     // Try to restore session on app mount (uses refresh cookie to rotate token)
     void fetchUser();
   }, [fetchUser, markBootstrapped]);
 
+  // Clean up expired guest uploads on app mount
+  useEffect(() => {
+    const { isUploadExpired, clearTempUpload, tempUploadId } = useResumeStore.getState();
+    
+    if (tempUploadId && isUploadExpired()) {
+      console.log('[App] Clearing expired guest upload on mount');
+      clearTempUpload();
+    }
+  }, []);
+
   const renderLoading = (message = 'Loading...') => (
-    <div
-      className="app-loading"
-      aria-busy="true"
-      style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', background: 'rgba(255,255,255,0.6)', zIndex: 9999 }}
-    >
+    <div className="app-loading" aria-busy="true">
       <div>{message}</div>
     </div>
   );
@@ -54,6 +64,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/registration" element={<Registration />} />
         <Route path="/preview" element={<Preview />} />
+        <Route path="/preview/:resumeId" element={<Preview />} />
       </Routes>
       <ToastContainer position="top-right" autoClose={3000} />
     </>

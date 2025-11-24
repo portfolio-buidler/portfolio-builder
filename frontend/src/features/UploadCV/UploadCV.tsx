@@ -1,8 +1,8 @@
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import backgroundImage from '../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6c8.jpg'
 import { UploadCVView } from './UploadCV.view'
-import { uploadCV } from '../../services/uploadService'
+import { uploadCV, uploadGuestCV } from '../../services/uploadService'
 import { toast } from 'react-toastify'
 import type { UploadCVViewProps } from './UploadCV.types'
 import { useResumeStore } from '../../store/resumeStore'
@@ -17,12 +17,43 @@ function UploadCV() {
   const [isUploading, setIsUploading] = useState(false)
   const [progress, setProgress] = useState<UploadProgressData | undefined>(undefined)
   const startTimeRef = useRef<number | null>(null)
-  const { setResumeData } = useResumeStore()
+  const { setResumeData, setTempUpload } = useResumeStore()
   const [status, setStatus] = useState<UploadStatus>('idle')
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
+  
+  // Prevent duplicate uploads
+  const uploadInProgressRef = useRef(false)
 
   // Use global auth store instead of local state
   const { user, isAuthenticated, logout: authLogout } = useAuthStore()
+  
+  /**
+   * Explicit state machine for upload flow with memoized CTA enable/disable logic
+   * 
+   * State transitions:
+   * idle → validating → uploading → success | error
+   * error → idle (via retry)
+   * success → (navigate away)
+   */
+  const isCTAEnabled = useMemo(() => {
+    // Upload button enabled when: file selected + idle state + not uploading
+    if (status === 'idle' && selectedFile !== null && !isUploading) {
+      return true
+    }
+    
+    // Next button enabled when: success state + not uploading
+    if (status === 'success' && !isUploading) {
+      return true
+    }
+    
+    // Retry button enabled when: error state + not uploading
+    if (status === 'error' && !isUploading) {
+      return true
+    }
+    
+    // Disabled for all other states (uploading, validating, etc.)
+    return false
+  }, [status, selectedFile, isUploading])
 
   const onFileSelect = (file: File) => {
     setSelectedFile(file)
@@ -43,56 +74,106 @@ function UploadCV() {
   /**
    * Upload handler with a specific file
    * Shows progress feedback regardless of authentication status
+   * Includes duplicate upload prevention
+   * Uses guest upload for unauthenticated users (2-minute TTL)
    */
   const handleUploadWithFile = async (file: File) => {
     if (!file) return
+    
+    // Prevent duplicate uploads
+    if (uploadInProgressRef.current) {
+      console.warn('[UploadCV] Upload already in progress, ignoring duplicate request')
+      return
+    }
+    
     try {
+      uploadInProgressRef.current = true
       setStatus('uploading')
       setErrorMessage(undefined)
       setIsUploading(true)
       startTimeRef.current = Date.now()
       
-      const res = await uploadCV(file, {
-        onUploadProgress: (evt) => {
-          if (!evt.total) return
-          const loaded = evt.loaded || 0
-          const total = evt.total || file.size
-          const pct = Math.min(100, Math.round((loaded / total) * 100))
+      // Choose upload method based on authentication status
+      const res = isAuthenticated 
+        ? await uploadCV(file, {
+            onUploadProgress: (evt) => {
+              if (!evt.total) return
+              const loaded = evt.loaded || 0
+              const total = evt.total || file.size
+              const pct = Math.min(100, Math.round((loaded / total) * 100))
 
-          const now = Date.now()
-          const start = startTimeRef.current ?? now
-          const elapsedSec = (now - start) / 1000
-          const rate = loaded / Math.max(1, elapsedSec)
-          const remaining = total - loaded
-          const eta = rate > 0 ? Math.round(remaining / rate) : null
+              const now = Date.now()
+              const start = startTimeRef.current ?? now
+              const elapsedSec = (now - start) / 1000
+              const rate = loaded / Math.max(1, elapsedSec)
+              const remaining = total - loaded
+              const eta = rate > 0 ? Math.round(remaining / rate) : null
 
-          setProgress({
-            fileName: file.name,
-            fileSizeBytes: file.size,
-            uploadedBytes: loaded,
-            totalBytes: total,
-            percent: pct,
-            etaSeconds: eta,
+              setProgress({
+                fileName: file.name,
+                fileSizeBytes: file.size,
+                uploadedBytes: loaded,
+                totalBytes: total,
+                percent: pct,
+                etaSeconds: eta,
+              })
+            },
           })
-        },
-      })
+        : await uploadGuestCV(file, {
+            onUploadProgress: (evt) => {
+              if (!evt.total) return
+              const loaded = evt.loaded || 0
+              const total = evt.total || file.size
+              const pct = Math.min(100, Math.round((loaded / total) * 100))
+
+              const now = Date.now()
+              const start = startTimeRef.current ?? now
+              const elapsedSec = (now - start) / 1000
+              const rate = loaded / Math.max(1, elapsedSec)
+              const remaining = total - loaded
+              const eta = rate > 0 ? Math.round(remaining / rate) : null
+
+              setProgress({
+                fileName: file.name,
+                fileSizeBytes: file.size,
+                uploadedBytes: loaded,
+                totalBytes: total,
+                percent: pct,
+                etaSeconds: eta,
+              })
+            },
+          })
       
       toast.success(res.message || 'File uploaded successfully')
-      setResumeData(res)
+      
+      // For guest uploads, store temp ID with expiry
+      if (!isAuthenticated && (res as { temp_id?: string }).temp_id) {
+        const tempId = (res as { temp_id: string }).temp_id
+        const expirySeconds = (res as { expiry_seconds?: number }).expiry_seconds || 120 // Default 2 minutes
+        setTempUpload(tempId, expirySeconds)
+        console.log('[UploadCV] Guest upload stored:', { tempId, expirySeconds })
+        toast.info('Please login within 2 minutes to save your upload', { autoClose: 5000 })
+      } else {
+        // Authenticated upload - store in regular resume data
+        setResumeData(res)
+      }
+      
       setStatus('success')
       setErrorMessage(undefined)
       
       // ✅ Don't auto-navigate - let user see success and click Next
       // Authentication check will happen when they click Next button
       
-    } catch (err: any) {
-      const msg = err?.response?.data?.detail || err?.message || 'Upload failed'
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { detail?: string } }; message?: string };
+      const msg = error?.response?.data?.detail || error?.message || 'Upload failed'
       console.error('❌ Upload error:', err)
       toast.error(String(msg))
       setStatus('error')
       setErrorMessage('🦖 Oops! We couldn\'t process that / Give it another shot')
     } finally {
       setIsUploading(false)
+      uploadInProgressRef.current = false // Reset duplicate upload guard
       if (file) {
         setProgress((prev) =>
           prev
@@ -130,12 +211,27 @@ function UploadCV() {
     // Check authentication before proceeding to preview
     if (!isAuthenticated) {
       toast.info('Please login to continue')
-      navigate('/login', { state: { from: '/upload' } })
+      // Pass hasPendingUpload flag to login page
+      navigate('/login', { 
+        state: { 
+          from: '/upload',
+          hasPendingUpload: true 
+        } 
+      })
       return
     }
 
-    // User is authenticated, proceed to preview
-    navigate('/preview')
+    // User is authenticated, get resumeId and navigate to preview
+    const { resumeData } = useResumeStore.getState()
+    const resumeId = resumeData?.data?.fileId
+    
+    if (resumeId) {
+      console.log('[UploadCV] Navigating to preview with resumeId:', resumeId)
+      navigate(`/preview/${resumeId}`)
+    } else {
+      console.warn('[UploadCV] No resumeId found, redirecting to /preview')
+      navigate('/preview')
+    }
   }
 
   const handleRetry = () => {
@@ -196,6 +292,8 @@ function UploadCV() {
     onLogin: handleLogin,
     onRegister: handleRegister,
     onLogout: handleLogout,
+    // State machine CTA control
+    isCTAEnabled,
   }
 
   return <UploadCVView {...viewProps} />

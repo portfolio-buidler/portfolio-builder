@@ -54,10 +54,10 @@ export const api = axios.create({
   },
 });
 
-/**
- * Request interceptor: Inject access token into Authorization header
+/** * Request interceptor: Inject access token into Authorization header
  */
 api.interceptors.request.use(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (config: any) => {
     // Normalize config.url to avoid double '/api/v1' in requests.
     if (config && config.url && typeof config.url === 'string') {
@@ -77,7 +77,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error: any) => {
+  (error: unknown) => {
     return Promise.reject(error);
   }
 );
@@ -86,12 +86,15 @@ api.interceptors.request.use(
  * Response interceptor: Handle 401 errors and auto-refresh tokens
  */
 api.interceptors.response.use(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (response: any) => response,
-  async (error: any) => {
-    const originalRequest = error.config;
+  async (error: unknown) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const err = error as any;
+    const originalRequest = err.config;
 
     // Check if error is 401 and we haven't already retried
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (err.response?.status === 401 && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
@@ -112,12 +115,18 @@ api.interceptors.response.use(
         
         return api(originalRequest);
       } catch (refreshError) {
-        // Refresh failed - clear token and redirect to login
+        // Refresh failed - check if user had a previous session
+        const hadToken = accessToken !== null;
         clearAccessToken();
         
-        // Only redirect if not already on login/register pages
+        // Only redirect to login if:
+        // 1. User was previously authenticated (had a token)
+        // 2. Not already on login/register pages
+        // 
+        // This prevents redirect for unauthenticated visitors hitting protected routes
+        // but still redirects authenticated users whose session expired
         const currentPath = window.location.pathname;
-        if (!currentPath.includes('/login') && !currentPath.includes('/register')) {
+        if (hadToken && !currentPath.includes('/login') && !currentPath.includes('/register')) {
           window.location.href = '/login';
         }
         

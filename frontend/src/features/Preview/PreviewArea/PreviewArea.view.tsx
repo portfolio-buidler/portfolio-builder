@@ -269,7 +269,6 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
               className="preview-area__history-btn preview-area__history-btn--undo"
               onClick={onUndo}
               disabled={!undoAvailable}
-              aria-disabled={!undoAvailable || undefined}
               aria-label="Undo last change"
             />
             <button
@@ -277,7 +276,6 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
               className="preview-area__history-btn preview-area__history-btn--redo"
               onClick={onRedo}
               disabled={!redoAvailable}
-              aria-disabled={!redoAvailable || undefined}
               aria-label="Redo last change"
             />
           </div>
@@ -288,7 +286,6 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
             className="preview-area__next"
             onClick={isNextEnabled ? onNext : undefined}
             disabled={!isNextEnabled}
-            aria-disabled={!isNextEnabled || undefined}
             aria-label="Proceed to next step"
           >
             <span className="preview-area__next-text">Next</span>

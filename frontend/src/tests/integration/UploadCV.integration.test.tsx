@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom' 
 import UploadCV from '../../features/UploadCV/UploadCV'
 import { useResumeStore } from '../../store/resumeStore'
+import { useAuthStore } from '../../store/authStore'
 
 // Mock toast
 vi.mock('react-toastify', () => ({
@@ -13,10 +14,9 @@ import { toast } from 'react-toastify'
 // Mock upload service
 vi.mock('../../services/uploadService', () => ({
   uploadCV: vi.fn(),
+  uploadGuestCV: vi.fn(), // ensure both functions are available for auth & guest paths
 }))
-import { uploadCV } from '../../services/uploadService'
-
-type Mocked<T> = T & { mockResolvedValue: (...args: any[]) => any; mockRejectedValue: (...args: any[]) => any }
+import { uploadCV, uploadGuestCV } from '../../services/uploadService'
 
 const createFile = (name: string, type: string, size = 100) => {
   const blob = new Blob(['x'.repeat(size)], { type })
@@ -49,6 +49,20 @@ describe('UploadCV integration', () => {
     }
 
     ;(uploadCV as unknown as Mocked<typeof uploadCV>).mockResolvedValue(mockResponse)
+    // Set auth state to emulate authenticated user
+    useAuthStore.getState().setUser({
+      id: 1,
+      email: 'test@example.com',
+      full_name: 'Test User',
+      headline: null,
+      location: null,
+      timezone: null,
+      languages: null,
+      phone: null,
+      created_at: new Date().toISOString(),
+      updated_at: null,
+    })
+    ;(uploadGuestCV as unknown as Mocked<typeof uploadGuestCV>).mockResolvedValue(mockResponse)
 
     render(
       <MemoryRouter>
@@ -83,7 +97,10 @@ describe('UploadCV integration', () => {
     const error = {
       response: { data: { detail: 'Upload failed due to server error' } },
     }
-    ;(uploadCV as unknown as Mocked<typeof uploadCV>).mockRejectedValue(error)
+    ;(uploadGuestCV as unknown as Mocked<typeof uploadGuestCV>).mockRejectedValue(error)
+
+    // Ensure guest user state (unauthenticated)
+    useAuthStore.getState().setUser(null)
 
     render(
       <MemoryRouter>

@@ -247,7 +247,7 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
       setEditingItem({ type: 'technology', index: lastTechIndex })
       setEditValue('')
     }
-  }, [skillsData.languages.length, skillsData.technologies.length])
+  }, [skillsData.languages, skillsData.technologies])
 
   /**
    * Focus input when editing starts

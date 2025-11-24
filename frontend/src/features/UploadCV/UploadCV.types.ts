@@ -10,7 +10,7 @@ export interface UploadResponse {
   message: string
   data?: {
     fileId: string
-    extractedData?: any
+    extractedData?: Record<string, unknown>
   }
   error?: string
 }
@@ -38,4 +38,5 @@ export interface UploadCVViewProps {
   onLogin: () => void
   onRegister: () => void
   onLogout?: () => void
+  isCTAEnabled: boolean // ✅ New: Explicit CTA enable/disable from state machine
 }

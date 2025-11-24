@@ -22,11 +22,21 @@
     position: fixed;
     /* Using inset avoids 100vw/100vh overflow issues that can trigger scrollbars */
     inset: 0;
-    background-image: var(--preview-bg);
+    background-image: none; /* we render a <img> background for dynamic images */
     background-size: 100% 100%; /* stretch to fill the visual viewport */
     background-position: center center; /* kept for consistency */
     background-repeat: no-repeat;
     z-index: 0;
+  }
+
+  .preview__bg-img {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    pointer-events: none;
   }
 
   &__title {
@@ -79,11 +89,12 @@
     overflow-x: hidden;
     position: relative;
     
-    /* Hide native scrollbar */
-    scrollbar-width: none; /* Firefox */
+    /* Hide native scrollbar for all browsers */
     -ms-overflow-style: none; /* IE/Edge */
     &::-webkit-scrollbar {
-      display: none; /* Chrome/Safari/Opera */
+      display: none; /* Chrome/Safari/Opera/Firefox */
+      width: 0;
+      height: 0;
     }
 
     &__scroll-indicator {

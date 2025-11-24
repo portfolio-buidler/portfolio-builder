@@ -29,6 +29,10 @@ export const SkillsSectionView: React.FC<SkillsSectionViewProps> = ({
   isExpanded,
   onToggleExpanded
 }) => {
+  const uid = React.useId()
+  const contentId = `skills-content-${uid}`
+  const toggleId = `skills-toggle-${uid}`
+
   return (
     <section
       className="preview-section preview-section--skills"
@@ -46,6 +50,9 @@ export const SkillsSectionView: React.FC<SkillsSectionViewProps> = ({
 
       <div 
         ref={contentRef}
+        id={contentId}
+        role="region"
+        aria-labelledby={toggleId}
         className="preview-section__content"
       >
         {/* Languages Row */}
@@ -185,7 +192,9 @@ export const SkillsSectionView: React.FC<SkillsSectionViewProps> = ({
         className="preview-section__toggle"
         onClick={(e) => { e.stopPropagation(); if (onToggleExpanded) onToggleExpanded() }}
         aria-label={isExpanded ? `Collapse ${title.toLowerCase()}` : `Expand ${title.toLowerCase()}`}
-        aria-expanded={isExpanded}
+        id={toggleId}
+        aria-controls={contentId}
+        {...(typeof isExpanded === 'boolean' ? { 'aria-expanded': isExpanded } : {})}
       />
     </section>
   )

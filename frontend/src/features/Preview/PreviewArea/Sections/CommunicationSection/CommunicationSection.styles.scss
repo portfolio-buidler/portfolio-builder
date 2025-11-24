@@ -45,11 +45,12 @@ $toggle-transition: 0.3s;
       max-height: 400px;
       overflow-y: auto;
       overflow-x: hidden;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
+      -ms-overflow-style: none; /* IE/Edge */
 
       &::-webkit-scrollbar {
-        display: none;
+        display: none; /* Chrome/Safari/Opera/Firefox */
+        width: 0;
+        height: 0;
       }
     }
 

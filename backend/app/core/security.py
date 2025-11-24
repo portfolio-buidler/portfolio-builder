@@ -165,3 +165,36 @@ async def get_current_user(
         raise AuthenticationError("User not found or inactive")
     
     return user
+
+
+async def get_current_user_optional(
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    FastAPI dependency to get the current authenticated user (optional).
+    
+    Returns User object if authenticated, None otherwise.
+    Does not raise error if credentials are missing or invalid.
+    """
+    if not credentials:
+        return None
+    
+    token = credentials.credentials
+    try:
+        payload = decode_access_token(token)
+        user_id = payload["user_id"]
+    except InvalidTokenError:
+        return None
+    
+    # Import here to avoid circular dependency
+    from app.db.models_user import User
+    
+    # Use async query with SQLAlchemy 2.0 style
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    
+    if not user or not user.is_active:
+        return None
+    
+    return user
