@@ -1,0 +1,17 @@
+# Browsers that we support
+# This configuration supports all modern browsers with webkit/blink fallbacks
+
+# Modern browsers (last 2 versions)
+last 2 Chrome versions
+last 2 Firefox versions
+last 2 Safari versions
+last 2 Edge versions
+
+# Mobile browsers
+last 2 iOS versions
+last 2 Android versions
+
+# Still include some older versions for broader support
+> 0.5%
+not dead
+not IE 11

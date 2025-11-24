@@ -194,7 +194,7 @@ export const SkillsSectionView: React.FC<SkillsSectionViewProps> = ({
         aria-label={isExpanded ? `Collapse ${title.toLowerCase()}` : `Expand ${title.toLowerCase()}`}
         id={toggleId}
         aria-controls={contentId}
-        aria-expanded={isExpanded}
+        {...(typeof isExpanded === 'boolean' ? { 'aria-expanded': isExpanded } : {})}
       />
     </section>
   )
