@@ -1,12 +1,16 @@
-/**
- * Authentication Store - Global State Management
- * 
- * Manages authentication state using Zustand with automatic session restoration.
- */
 
 import { create } from 'zustand';
 import type { User } from '../services/Auth.types';
 import { getCurrentUser, logoutUser } from '../services/AuthService';
+
+// Module-level variable for synchronous promise deduplication
+// This ensures concurrent calls to fetchUser() return the same promise
+let inFlightFetchPromise: Promise<void> | null = null;
+
+// Exposed for testing purposes only
+export const __resetInFlightPromise = () => {
+  inFlightFetchPromise = null;
+};
 
 interface AuthStore {
   // State
@@ -25,7 +29,7 @@ interface AuthStore {
   clearError: () => void;
 }
 
-export const useAuthStore = create<AuthStore>((set, get) => ({
+export const useAuthStore = create<AuthStore>((set) => ({
   // Initial state
   user: null,
   isAuthenticated: false,
@@ -44,11 +48,12 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     }),
 
   // Fetch current user from API
-  fetchUser: async () => {
+  // FIXED: Changed from `async () =>` to `() =>` for proper Promise deduplication
+  fetchUser: () => {
     // Deduplication: if a fetch is already in progress, return that promise
-    const state = get();
-    if (state._fetchPromise) {
-      return state._fetchPromise;
+    // Uses module-level variable for synchronous check (not Zustand state)
+    if (inFlightFetchPromise) {
+      return inFlightFetchPromise;
     }
     
     // Create new fetch promise
@@ -77,10 +82,14 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
           error: message,
           _fetchPromise: null,
         });
+      } finally {
+        // Clear in-flight promise after completion (success or error)
+        inFlightFetchPromise = null;
       }
     })();
 
-    // Store promise for deduplication
+    // Store promise synchronously for deduplication
+    inFlightFetchPromise = fetchPromise;
     set({ _fetchPromise: fetchPromise });
     
     return fetchPromise;
