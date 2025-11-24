@@ -30,3 +30,19 @@ export async function getUploadStatus(fileId: string): Promise<UploadResponse> {
 
   return res.data as UploadResponse
 }
+
+/**
+ * Claim a guest upload after authentication
+ * 
+ * Converts a temporary guest upload into a permanent authenticated upload.
+ * Must be called within 2 minutes of guest upload (before TTL expires).
+ * 
+ * @param tempId - Temporary upload ID from guest upload response
+ * @returns Upload response with permanent resume data
+ * @throws Error if temp upload expired, not found, or already claimed
+ */
+export async function claimGuestUpload(tempId: string): Promise<UploadResponse> {
+  const res = await api.post(`resumes/upload/guest/${encodeURIComponent(tempId)}/claim`)
+  return res.data as UploadResponse
+}
+

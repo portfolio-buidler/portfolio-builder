@@ -7,6 +7,8 @@ import {
   isValidEmail, 
   validatePassword
 } from '../../../services/AuthService'
+import { useResumeStore } from '../../../store/resumeStore'
+import { mapBackendError } from '../../../utils/errorMapping'
 import backgroundImage from '../../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6c8.jpg'
 
 export const Registration: React.FC<RegistrationProps> = ({ onBack }) => {
@@ -113,6 +115,10 @@ export const Registration: React.FC<RegistrationProps> = ({ onBack }) => {
 
         console.log('[Registration] Registration successful, redirecting to login')
 
+        // Check if there's a pending guest upload
+        const { tempUploadId } = useResumeStore.getState()
+        const hasPendingUpload = !!tempUploadId
+
         // After successful registration, redirect to login page
         // User needs to login with their new credentials
         navigate('/login', { 
@@ -120,13 +126,26 @@ export const Registration: React.FC<RegistrationProps> = ({ onBack }) => {
           state: {
             from: location.state?.from || '/upload',
             registrationSuccess: true,
-            email: email.trim() // Pre-fill email in login form
+            email: email.trim(), // Pre-fill email in login form
+            hasPendingUpload, // Pass along pending upload info
           }
         })
       } catch (err) {
-        setErrors({
-          general: err instanceof Error ? err.message : 'Registration failed',
-        })
+        const mappedError = mapBackendError(err, 'register')
+        
+        // Check if we have field-specific errors
+        if (mappedError.fieldErrors) {
+          setErrors({
+            general: mappedError.message,
+            ...mappedError.fieldErrors,
+          })
+        } else {
+          setErrors({
+            general: mappedError.message,
+          })
+        }
+        // Don't navigate on error - stay on registration page
+        return
       } finally {
         setIsLoading(false)
       }

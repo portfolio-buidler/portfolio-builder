@@ -31,3 +31,12 @@ class InvalidTokenError(AuthenticationError):
     """Token is invalid or malformed."""
     def __init__(self, detail: str = "Invalid token"):
         super().__init__(detail=detail)
+
+
+class ConflictError(HTTPException):
+    """Conflict error - 409 Conflict."""
+    def __init__(self, detail: str = "Resource conflict"):
+        super().__init__(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=detail
+        )

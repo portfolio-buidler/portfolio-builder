@@ -92,16 +92,30 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     try {
       await logoutUser();
       
+      // Clear auth state
       set({
         user: null,
         isAuthenticated: false,
         isLoading: false,
         isBootstrapped: true,
       });
+      
+      // Clear all related stores
+      const { useResumeStore } = await import('./resumeStore');
+      useResumeStore.getState().clearResumeData();
+      useResumeStore.getState().clearTempUpload();
+      
+      // Set manual logout sentinel to prevent auto-restore on next page load
+      try {
+        localStorage.setItem('auth:manualLogout', 'true');
+      } catch (e) {
+        console.error('[authStore] Failed to set localStorage flag:', e);
+      }
+      
     } catch (error: any) {
       const message = error?.message || 'Logout failed';
       
-      // Still clear user even if logout request fails
+      // Still clear user and stores even if logout request fails
       set({
         user: null,
         isAuthenticated: false,
@@ -109,6 +123,17 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         isBootstrapped: true,
         error: message,
       });
+      
+      // Clear stores even on error
+      const { useResumeStore } = await import('./resumeStore');
+      useResumeStore.getState().clearResumeData();
+      useResumeStore.getState().clearTempUpload();
+      
+      try {
+        localStorage.setItem('auth:manualLogout', 'true');
+      } catch (e) {
+        console.error('[authStore] Failed to set localStorage flag:', e);
+      }
     }
   },
 

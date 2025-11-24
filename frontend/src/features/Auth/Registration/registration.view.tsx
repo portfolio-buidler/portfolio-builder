@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import type { RegistrationViewProps } from './Registration.types.ts'
 import './Registration.styles.scss'
 
@@ -24,10 +24,18 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
   onLoginClick,
   backgroundUrl,
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.style.setProperty('--registration-bg', `url(${backgroundUrl})`)
+    }
+  }, [backgroundUrl])
+
   return (
     <div
+      ref={containerRef}
       className="registration-page"
-      style={{ ['--registration-bg' as any]: `url(${backgroundUrl})` }}
     >
       {/* Logo fixed at top-left of viewport - outside container */}
       <h1 className="registration-page__logo">Portify.</h1>
@@ -94,7 +102,6 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
                   disabled={isLoading}
                   autoComplete="given-name"
                   aria-label="First name"
-                  aria-invalid={!!errors.firstName}
                 />
               </div>
 
@@ -109,7 +116,6 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
                   disabled={isLoading}
                   autoComplete="family-name"
                   aria-label="Last name"
-                  aria-invalid={!!errors.lastName}
                 />
               </div>
             </div>
@@ -125,7 +131,6 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
                 disabled={isLoading}
                 autoComplete="email"
                 aria-label="Email address"
-                aria-invalid={!!errors.email}
               />
             </div>
 
@@ -142,7 +147,6 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
                 disabled={isLoading}
                 autoComplete="new-password"
                 aria-label="Password"
-                aria-invalid={!!errors.password}
               />
             </div>
 
@@ -164,7 +168,6 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
                 disabled={isLoading}
                 autoComplete="new-password"
                 aria-label="Confirm password"
-                aria-invalid={!!errors.confirmPassword}
               />
             </div>
 

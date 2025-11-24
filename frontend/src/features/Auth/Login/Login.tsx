@@ -7,6 +7,8 @@ import {
   isValidEmail
 } from '../../../services/AuthService'
 import { useAuthStore } from '../../../store/authStore'
+import { useResumeStore } from '../../../store/resumeStore'
+import { mapBackendError } from '../../../utils/errorMapping'
 import backgroundImage from '../../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6c8.jpg'
 
 export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
@@ -30,13 +32,26 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
   }, [email, password])
 
   useEffect(() => {
-    // Check for pending upload from location state only
+    // Check for pending upload from location state OR localStorage
     const locationState = location.state as any
     const pendingFromState = locationState?.hasPendingUpload
     
-    if (pendingFromState) {
+    // Pre-fill email if coming from registration
+    if (locationState?.email) {
+      setEmail(locationState.email)
+      console.log('[Login] Pre-filled email from registration')
+    }
+    
+    // Also check resumeStore for tempUploadId (survives refresh via persist)
+    const { tempUploadId, isUploadExpired } = useResumeStore.getState()
+    const hasTempUpload = tempUploadId && !isUploadExpired()
+    
+    if (pendingFromState || hasTempUpload) {
       setHasPendingUpload(true)
-      console.log('[Login] Pending upload detected from location state')
+      console.log('[Login] Pending upload detected:', { 
+        fromState: pendingFromState, 
+        fromStore: hasTempUpload 
+      })
     }
   }, [location])
 
@@ -65,6 +80,29 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
           console.warn('[Login] Failed to set user in auth store', e)
         }
         
+        // Check for guest upload to claim
+        const { tempUploadId, isUploadExpired, claimGuestUpload, clearTempUpload } = useResumeStore.getState()
+        
+        if (tempUploadId && !isUploadExpired()) {
+          console.log('[Login] Found valid guest upload, claiming:', tempUploadId)
+          try {
+            await claimGuestUpload(tempUploadId)
+            console.log('[Login] Guest upload claimed successfully')
+            
+            // Redirect to preview/dashboard after successful claim
+            navigate('/upload', { replace: true, state: { uploadClaimed: true } })
+            return
+          } catch (claimError) {
+            console.error('[Login] Failed to claim guest upload:', claimError)
+            // Clear expired/invalid temp upload
+            clearTempUpload()
+            // Continue with normal login flow
+          }
+        } else if (tempUploadId && isUploadExpired()) {
+          console.log('[Login] Guest upload expired, clearing')
+          clearTempUpload()
+        }
+        
         // Determine where to redirect
         const locationState = location.state as any
         const from = locationState?.from || '/upload'
@@ -85,7 +123,8 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
             }
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Invalid email or password')
+        const mappedError = mapBackendError(err, 'login')
+        setError(mappedError.message)
       } finally {
         setIsLoading(false)
       }
