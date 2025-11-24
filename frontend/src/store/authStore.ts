@@ -65,8 +65,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
           isBootstrapped: true,
           _fetchPromise: null,
         });
-      } catch (error: any) {
-        const message = error?.message || 'Failed to fetch user';
+      } catch (error: unknown) {
+        const err = error as { message?: string };
+        const message = err?.message || 'Failed to fetch user';
         
         set({
           user: null,
@@ -112,8 +113,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         console.error('[authStore] Failed to set localStorage flag:', e);
       }
       
-    } catch (error: any) {
-      const message = error?.message || 'Logout failed';
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      const message = err?.message || 'Logout failed';
       
       // Still clear user and stores even if logout request fails
       set({

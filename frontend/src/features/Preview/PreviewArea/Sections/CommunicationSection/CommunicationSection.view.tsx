@@ -2,7 +2,7 @@
 import React from 'react'
 import type { CommunicationSectionViewProps } from './CommunicationSection.types'
 import questionMarkIcon from '../../../../../assets/icons/PreviewPage/question-mark.svg'
-import { getLinkLabel } from './CommunicationSection'
+import { getLinkLabel } from './utils'
 import './CommunicationSection.styles.scss'
 
 /**
@@ -32,6 +32,10 @@ export const CommunicationSectionView: React.FC<CommunicationSectionViewProps> =
   isExpanded,
   onToggleExpanded
 }) => {
+  const uid = React.useId()
+  const contentId = `communication-content-${uid}`
+  const toggleId = `communication-toggle-${uid}`
+
   return (
     <section
       className="preview-section preview-section--communication"
@@ -49,6 +53,9 @@ export const CommunicationSectionView: React.FC<CommunicationSectionViewProps> =
 
       <div 
         ref={contentRef}
+        id={contentId}
+        role="region"
+        aria-labelledby={toggleId}
         className="preview-section__content"
       >
         {/* Mobile Row */}
@@ -244,6 +251,8 @@ export const CommunicationSectionView: React.FC<CommunicationSectionViewProps> =
         className="preview-section__toggle"
         onClick={(e) => { e.stopPropagation(); if (onToggleExpanded) onToggleExpanded() }}
         aria-label={isExpanded ? `Collapse ${title.toLowerCase()}` : `Expand ${title.toLowerCase()}`}
+        id={toggleId}
+        aria-controls={contentId}
         aria-expanded={isExpanded}
       />
     </section>

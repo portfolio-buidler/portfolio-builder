@@ -10,7 +10,7 @@ export const UploadProgressView: React.FC<UploadProgressViewProps> = ({
   onCancel,
 }) => {
   return (
-    <div className="upload-progress" role="status" aria-live="polite" aria-atomic>
+    <div className="upload-progress" role="status" aria-live="polite" aria-atomic="true">
       <div className="upload-progress__header">
         <div className="upload-progress__meta">
           <div className="upload-progress__name" title={fileName}>{fileName}</div>
@@ -48,7 +48,13 @@ export const UploadProgressView: React.FC<UploadProgressViewProps> = ({
       </div>
 
       <div className="upload-progress__bar" aria-label="Upload progress">
-        <div className="upload-progress__bar-fill" style={{ width: `${percent}%` }} />
+        <progress
+          className="upload-progress__progress"
+          value={percent}
+          max={100}
+          
+          aria-label="Upload progress"
+        />
       </div>
     </div>
   )

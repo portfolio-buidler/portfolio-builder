@@ -57,8 +57,9 @@ export async function registerUser(data: RegistrationData): Promise<void> {
       password: data.password,
       full_name: data.fullName,
     });
-  } catch (error: any) {
-    const message = error?.response?.data?.detail || 'Registration failed';
+  } catch (error: unknown) {
+    const err = error as { response?: { data?: { detail?: string } }; message?: string };
+    const message = err?.response?.data?.detail || 'Registration failed';
     console.error('[AuthService] Registration error:', message);
     throw new Error(message);
   }
@@ -96,8 +97,9 @@ export async function loginUser(credentials: LoginCredentials): Promise<User> {
     const user: User = userResponse.data;
     
     return user;
-  } catch (error: any) {
-    const message = error?.response?.data?.detail || 'Login failed';
+  } catch (error: unknown) {
+    const err = error as { response?: { data?: { detail?: string } }; message?: string };
+    const message = err?.response?.data?.detail || 'Login failed';
     console.error('[AuthService] Login error:', message);
     clearAccessToken();
     throw new Error(message);
@@ -113,7 +115,7 @@ export async function getCurrentUser(): Promise<User | null> {
   try {
     const response = await api.get('auth/me');
     return response.data;
-  } catch (error: any) {
+  } catch {
     console.warn('[AuthService] Failed to get current user');
     return null;
   }
@@ -128,8 +130,9 @@ export async function logoutUser(): Promise<void> {
   try {
     // Call logout endpoint to revoke refresh token + clear cookie
     await api.post('auth/logout');
-  } catch (error: any) {
-    console.warn('[AuthService] Logout: backend request failed:', error?.message);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    console.warn('[AuthService] Logout: backend request failed:', err?.message);
   } finally {
     // Always clear local token and set manual logout sentinel
     clearAccessToken();
@@ -152,8 +155,9 @@ export async function updateUserProfile(updates: Partial<User>): Promise<User> {
   try {
     const response = await api.patch('auth/me', updates);
     return response.data;
-  } catch (error: any) {
-    const message = error?.response?.data?.detail || 'Profile update failed';
+  } catch (error: unknown) {
+    const err = error as { response?: { data?: { detail?: string } }; message?: string };
+    const message = err?.response?.data?.detail || 'Profile update failed';
     console.error('[AuthService] Profile update error:', message);
     throw new Error(message);
   }
@@ -183,8 +187,9 @@ export async function changePassword(
     if (revokeAllSessions) {
       clearAccessToken();
     }
-  } catch (error: any) {
-    const message = error?.response?.data?.detail || 'Password change failed';
+  } catch (error: unknown) {
+    const err = error as { response?: { data?: { detail?: string } }; message?: string };
+    const message = err?.response?.data?.detail || 'Password change failed';
     console.error('[AuthService] Password change error:', message);
     throw new Error(message);
   }

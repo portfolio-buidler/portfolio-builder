@@ -42,7 +42,7 @@ const PreviewArea: React.FC = () => {
   }
 
   // Build initial sections with hydrated content
-  const getInitialSections = (): PreviewSection[] => {
+  const getInitialSections = React.useCallback((): PreviewSection[] => {
     const aboutContent = hydratedData?.about || ''
     const educationContent = hydratedData?.education || ''
     const experienceContent = hydratedData?.experience || ''
@@ -52,7 +52,7 @@ const PreviewArea: React.FC = () => {
       {
         id: 'about',
         title: 'About Me',
-        content: aboutContent ? <p style={{ whiteSpace: 'pre-wrap' }}>{aboutContent}</p> : '',
+        content: aboutContent ? <p className="preview-section__about-content">{aboutContent}</p> : '',
         required: true,
         complete: aboutContent.length > 0,
       },
@@ -92,7 +92,7 @@ const PreviewArea: React.FC = () => {
         complete: projectsContent.length > 0,
       },
     ]
-  }
+  }, [hydratedData])
 
   /* ========================================================================
      STATE
@@ -150,7 +150,7 @@ const PreviewArea: React.FC = () => {
         communication: hydratedData.communication,
       })
     }
-  }, [hydratedData, hasHydrated, markAsHydrated])
+  }, [hydratedData, hasHydrated, markAsHydrated, getInitialSections])
 
   /* ========================================================================
      COMPUTED VALUES
@@ -183,7 +183,7 @@ const PreviewArea: React.FC = () => {
      ======================================================================== */
 
   const handlePageBack = React.useCallback(() => {
-    navigate(-1)
+    navigate('/upload')
   }, [navigate])
 
   const handleNext = React.useCallback(() => {
@@ -265,7 +265,7 @@ const PreviewArea: React.FC = () => {
         return {
           ...section,
           content:
-            sectionId === 'about' ? <p style={{ whiteSpace: 'pre-wrap' }}>{content}</p> : content,
+            sectionId === 'about' ? <p className="preview-section__about-content">{content}</p> : content,
           complete: content.trim().length > 0,
         }
       })

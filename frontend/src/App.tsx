@@ -23,7 +23,9 @@ function App() {
         markBootstrapped();
         return;
       }
-    } catch {}
+    } catch {
+      // localStorage may not be available in some contexts
+    }
     // Try to restore session on app mount (uses refresh cookie to rotate token)
     void fetchUser();
   }, [fetchUser, markBootstrapped]);

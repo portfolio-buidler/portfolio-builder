@@ -35,6 +35,7 @@ export interface CommunicationData {
 /**
  * Container component props (currently no props needed)
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface PreviewAreaProps {}
 
 /**

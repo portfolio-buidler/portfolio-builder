@@ -147,9 +147,9 @@ function UploadCV() {
       toast.success(res.message || 'File uploaded successfully')
       
       // For guest uploads, store temp ID with expiry
-      if (!isAuthenticated && (res as any).temp_id) {
-        const tempId = (res as any).temp_id
-        const expirySeconds = (res as any).expiry_seconds || 120 // Default 2 minutes
+      if (!isAuthenticated && (res as { temp_id?: string }).temp_id) {
+        const tempId = (res as { temp_id: string }).temp_id
+        const expirySeconds = (res as { expiry_seconds?: number }).expiry_seconds || 120 // Default 2 minutes
         setTempUpload(tempId, expirySeconds)
         console.log('[UploadCV] Guest upload stored:', { tempId, expirySeconds })
         toast.info('Please login within 2 minutes to save your upload', { autoClose: 5000 })
@@ -164,8 +164,9 @@ function UploadCV() {
       // ✅ Don't auto-navigate - let user see success and click Next
       // Authentication check will happen when they click Next button
       
-    } catch (err: any) {
-      const msg = err?.response?.data?.detail || err?.message || 'Upload failed'
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { detail?: string } }; message?: string };
+      const msg = error?.response?.data?.detail || error?.message || 'Upload failed'
       console.error('❌ Upload error:', err)
       toast.error(String(msg))
       setStatus('error')

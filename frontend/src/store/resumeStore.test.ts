@@ -116,7 +116,7 @@ describe('resumeStore - Temporary Upload Storage', () => {
       status: 'parsed',
       message: 'Success',
       parsed_data: { contact: { name: 'Test' } },
-    } as any)
+    })
     
     // Check localStorage
     const stored = localStorage.getItem('portfolio-resume-storage')

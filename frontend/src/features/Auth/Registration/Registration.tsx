@@ -190,7 +190,7 @@ export const Registration: React.FC<RegistrationProps> = ({ onBack }) => {
 
   const handleLoginClick = useCallback(() => {
     // Navigate to login, preserving the pending upload state
-    const locationState = location.state as any
+    const locationState = location.state as { from?: string; hasPendingUpload?: boolean };
     navigate('/login', { 
       state: { 
         from: locationState?.from || '/upload',

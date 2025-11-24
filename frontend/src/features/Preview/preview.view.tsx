@@ -56,14 +56,17 @@ export const PreviewView: React.FC<PreviewViewProps> = ({ backgroundUrl, preview
     mo.observe(container, { childList: true, subtree: true })
 
     return () => {
-      container.removeEventListener('scroll', onScroll as any)
+      container.removeEventListener('scroll', onScroll as EventListener)
       window.removeEventListener('resize', onResize)
       mo.disconnect()
     }
   }, [])
 
   return (
-    <div className="preview" style={{ ['--preview-bg' as any]: `url(${backgroundUrl})` }}>
+    <div className="preview">
+      {backgroundUrl && (
+        <img className="preview__bg-img" src={backgroundUrl} alt="" aria-hidden />
+      )}
       <div className="preview__container">
         <h1 className="preview__title">Portify.</h1>
         <div className="preview__body" ref={bodyRef}>

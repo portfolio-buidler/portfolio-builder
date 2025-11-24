@@ -33,7 +33,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
 
   useEffect(() => {
     // Check for pending upload from location state OR localStorage
-    const locationState = location.state as any
+    const locationState = location.state as { hasPendingUpload?: boolean; email?: string; from?: string };
     const pendingFromState = locationState?.hasPendingUpload
     
     // Pre-fill email if coming from registration
@@ -114,7 +114,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
         }
         
         // Determine where to redirect
-        const locationState = location.state as any
+        const locationState = location.state as { from?: string };
         const from = locationState?.from || '/upload'
         
         // Success - call callback or navigate
@@ -166,7 +166,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
 
   const handleSignUpClick = useCallback(() => {
     // Navigate to registration, preserving the pending upload state
-    const locationState = location.state as any
+    const locationState = location.state as { from?: string; hasPendingUpload?: boolean };
     navigate('/registration', { 
       state: { 
         from: locationState?.from || '/upload',

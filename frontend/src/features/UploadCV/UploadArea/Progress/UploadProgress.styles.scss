@@ -87,8 +87,8 @@
   margin: 0;
   box-shadow: none;       /* no shadows */
   border-radius: 0;       /* no rounded frame */
-  appearance: none;       /* reset native styles */
   -webkit-appearance: none;
+  appearance: none;       /* reset native styles */
   box-sizing: content-box;
   width: 20px;            /* match icon bounds */
   height: 20px;
@@ -125,12 +125,30 @@
   overflow: hidden;
 }
 
-.upload-progress__bar-fill {
+.upload-progress__bar progress {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
   height: 100%;
-  width: 0%;
+  border: none;
+  background: transparent;
+}
+
+.upload-progress__bar progress::-webkit-progress-bar {
+  background: rgba(53, 64, 82, 0.15);
+  border-radius: 999px;
+}
+
+.upload-progress__bar progress::-webkit-progress-value {
   background: linear-gradient(90deg, rgba(59,130,246,1) 0%, rgba(37,99,235,1) 100%);
   border-radius: 999px;
   transition: width 200ms ease;
+}
+
+/* Firefox */
+.upload-progress__bar progress::-moz-progress-bar {
+  background: linear-gradient(90deg, rgba(59,130,246,1) 0%, rgba(37,99,235,1) 100%);
+  border-radius: 999px;
 }
 
 .upload-progress__done {

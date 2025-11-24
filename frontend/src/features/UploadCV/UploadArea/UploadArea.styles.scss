@@ -8,6 +8,7 @@
   margin-right: 0;
   height: 20.75rem;  
   border-radius: var(--radius-2xl);
+  -webkit-backdrop-filter: blur(var(--blur-md, 12px)); /* Safari */
   backdrop-filter: blur(var(--blur-md, 12px));
   background-color: var(--glass-bg-accent);
   border: 1px solid var(--border-overlay-30);

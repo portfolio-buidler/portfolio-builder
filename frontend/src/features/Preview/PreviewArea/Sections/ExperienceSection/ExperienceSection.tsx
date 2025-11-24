@@ -3,6 +3,7 @@ import { CollapsibleSection } from '../shared/CollapsibleSection'
 import type { CollapsibleSectionProps } from '../shared/CollapsibleSection'
 import './ExperienceSection.styles.scss'
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ExperienceSectionProps extends Omit<CollapsibleSectionProps, 'fieldLabels'> {
   // Experience-specific props can be added here if needed
 }

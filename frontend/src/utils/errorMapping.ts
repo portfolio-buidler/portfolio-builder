@@ -33,7 +33,7 @@ export interface MappedError {
  * @returns Mapped error with message and optional field errors
  */
 export function mapBackendError(
-  error: any,
+  error: unknown,
   context?: 'login' | 'register' | 'upload' | 'general'
 ): MappedError {
   // Handle non-axios errors
@@ -162,7 +162,7 @@ type AxiosLikeError = {
 }
 
 function isAxiosError(error: unknown): error is AxiosLikeError {
-  return typeof error === 'object' && error !== null && 'isAxiosError' in (error as any)
+  return typeof error === 'object' && error !== null && 'isAxiosError' in (error as Record<string, unknown>)
 }
 
 /**
