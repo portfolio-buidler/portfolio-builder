@@ -5,19 +5,11 @@ import os
 
 TEST_DB_NAME = "test_migrations_db"
 
-# Determine host dynamically at runtime
-def get_db_host():
-    # If running in GitHub Actions, force localhost
-    if os.getenv("CI") == "true":
-        return "localhost"
-    # Otherwise rely on config or env var, defaulting to 'db' (for docker-compose)
-    return os.getenv("POSTGRES_HOST", "db")
+# Use the imported POSTGRES_HOST which comes from config.py
+# config.py gets it from os.getenv("POSTGRES_HOST", "db")
 
-db_host = get_db_host()
-
-# Construct URLs using the dynamic host
-SYNC_DB_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{db_host}:{POSTGRES_PORT}/{TEST_DB_NAME}"
-ASYNC_DB_URL = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{db_host}:{POSTGRES_PORT}/{TEST_DB_NAME}"
+SYNC_DB_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{TEST_DB_NAME}"
+ASYNC_DB_URL = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{TEST_DB_NAME}"
 
 def get_alembic_config():
     """
