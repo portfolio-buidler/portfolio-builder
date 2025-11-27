@@ -2,11 +2,9 @@ import pytest
 import sqlalchemy
 from sqlalchemy import create_engine, text
 from app.tests.utils_migrations import SYNC_DB_URL, TEST_DB_NAME, run_upgrade, run_downgrade
-from app.core.config import POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, POSTGRES_PORT
-
+from app.core.config import POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, POSTGRES_PORT, POSTGRES_HOST
 # Main Admin URL to create/drop the test database
-ADMIN_DB_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@db:{POSTGRES_PORT}/{POSTGRES_DB}"
-
+ADMIN_DB_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
 
 @pytest.fixture(scope="module")
 def setup_migration_db():
