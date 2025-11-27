@@ -80,11 +80,13 @@ def downgrade() -> None:
     op.drop_index('ix_site_builds_site', table_name='site_builds')
     op.drop_table('site_builds')
 
-    op.drop_check_constraint('ck_portfolio_sites_build_version_pos', table_name='portfolio_sites')
+    # FIX: Use drop_constraint instead of drop_check_constraint
+    op.drop_constraint('ck_portfolio_sites_build_version_pos', table_name='portfolio_sites', type_='check')
     op.drop_index('ux_portfolio_sites_slug', table_name='portfolio_sites')
     op.drop_index('ix_portfolio_sites_user', table_name='portfolio_sites')
     op.drop_table('portfolio_sites')
 
-    op.drop_check_constraint('ck_portfolios_draft_version_pos', table_name='portfolios_draft')
+    # FIX: Use drop_constraint instead of drop_check_constraint
+    op.drop_constraint('ck_portfolios_draft_version_pos', table_name='portfolios_draft', type_='check')
     op.drop_index('ix_portfolios_draft_user', table_name='portfolios_draft')
     op.drop_table('portfolios_draft')

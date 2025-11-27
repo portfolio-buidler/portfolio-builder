@@ -2,7 +2,12 @@
 import os
 from pathlib import Path
 
-
+# This reads the values from your .env file into Python variables
+POSTGRES_USER = os.getenv("POSTGRES_USER", "portfolio")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "portfolio_password")
+POSTGRES_DB = os.getenv("POSTGRES_DB", "portfolio_db")
+POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
+# -----------------------
 SECRET_KEY: str = os.getenv("SECRET_KEY", "")
 if not SECRET_KEY:
     raise ValueError("SECRET_KEY required")

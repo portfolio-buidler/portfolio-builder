@@ -50,10 +50,19 @@ def do_run_migrations(connection: Connection) -> None:
 
 async def run_migrations_online() -> None:
     """Create async engine, open one connection, run migrations, dispose."""
-    url = os.getenv("ALEMBIC_DATABASE_URL") or os.getenv("DATABASE_URL")
+    # FIX: Check config first (for tests), then env vars
+    config_url = context.config.get_main_option("sqlalchemy.url")
+
+    if config_url:
+        url = config_url
+    else:
+        url = os.getenv("ALEMBIC_DATABASE_URL") or os.getenv("DATABASE_URL")
+
     connectable = create_async_engine(url, poolclass=pool.NullPool)
+
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)
+
     await connectable.dispose()
 
 
