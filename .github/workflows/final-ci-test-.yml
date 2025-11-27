@@ -36,7 +36,8 @@ jobs:
       POSTGRES_DB: portfolio_db
       POSTGRES_PORT: 5432
       SECRET_KEY: ${{ secrets.CI_SECRET_KEY }}
-
+      UPLOAD_DIR: "uploads"
+      
       # 2. Connection strings dynamically built from secrets
       DATABASE_URL: postgresql+asyncpg://portfolio_test:${{ secrets.CI_DB_PASSWORD }}@localhost:5432/portfolio_db
       ALEMBIC_DATABASE_URL: postgresql+asyncpg://portfolio_test:${{ secrets.CI_DB_PASSWORD }}@localhost:5432/portfolio_db
