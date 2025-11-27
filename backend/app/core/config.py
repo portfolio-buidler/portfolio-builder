@@ -7,6 +7,7 @@ POSTGRES_USER = os.getenv("POSTGRES_USER", "portfolio")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "portfolio_password")
 POSTGRES_DB = os.getenv("POSTGRES_DB", "portfolio_db")
 POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
+POSTGRES_HOST = os.getenv("POSTGRES_HOST", "db")
 # -----------------------
 SECRET_KEY: str = os.getenv("SECRET_KEY", "")
 if not SECRET_KEY:
