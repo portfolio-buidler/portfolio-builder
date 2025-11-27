@@ -5,10 +5,11 @@ import os
 
 TEST_DB_NAME = "test_migrations_db"
 
-# Sync URL for setup/teardown (creating the DB)
-SYNC_DB_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{TEST_DB_NAME}"
-# Async URL for Alembic execution (since env.py uses create_async_engine)
-ASYNC_DB_URL = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{TEST_DB_NAME}"
+db_host = os.getenv("POSTGRES_HOST", "db")
+
+# Use the local db_host variable
+SYNC_DB_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{db_host}:{POSTGRES_PORT}/{TEST_DB_NAME}"
+ASYNC_DB_URL = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{db_host}:{POSTGRES_PORT}/{TEST_DB_NAME}"
 
 def get_alembic_config():
     """
