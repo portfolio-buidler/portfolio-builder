@@ -231,7 +231,7 @@
   background: #9B4D4E33;
   border: none;
   border-radius: var(--radius-xl);
-  transition: border-color 200ms ease;
+  transition: border-color 200ms ease, background 200ms ease;
   box-sizing: border-box;
   box-shadow: inset 1px 1px 2px 0px #FFFFFF4D, inset -3px -3px 3px 0px #DDDDDD26;
 

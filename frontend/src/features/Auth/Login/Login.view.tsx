@@ -65,7 +65,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                   <path d="M12 8V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                   <circle cx="12" cy="16" r="1" fill="currentColor" />
                 </svg>
-                <span className="login-page__subtitle--error">{error}</span>
+                <span className="login-page__subtitle--error">Invalid Email Or Password</span>
               </>
             ) : hasPendingUpload 
               ? 'Login to continue with your upload' 
@@ -83,12 +83,12 @@ export const LoginView: React.FC<LoginViewProps> = ({
             </div>
           )}
 
-          <form onSubmit={onSubmit} className="login-page__form">
+          <form onSubmit={onSubmit} className="login-page__form" noValidate>
             <div className="login-page__input-group">
               <input
                 type="email"
                 id="login-email"
-                className="login-page__input"
+                className={`login-page__input${error ? ' login-page__input--error' : ''}`}
                 placeholder="Email"
                 value={email}
                 onChange={(e) => onEmailChange(e.target.value)}
@@ -102,7 +102,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
               <input
                 type={showPassword ? 'text' : 'password'}
                 id="login-password"
-                className="login-page__input login-page__input--password"
+                className={`login-page__input login-page__input--password${error ? ' login-page__input--error' : ''}`}
                 placeholder="Password"
                 value={password}
                 onChange={(e) => onPasswordChange(e.target.value)}
