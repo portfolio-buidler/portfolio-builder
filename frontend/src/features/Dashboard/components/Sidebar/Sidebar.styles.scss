@@ -1,0 +1,376 @@
+// Sidebar.styles.scss
+// Profile/Settings Card - Glassmorphism Style
+// Based on Figma specs: 320-360px width, auto height
+
+@use '../../../../styles/tokens/colors';
+@use '../../../../styles/tokens/typography';
+@use '../../../../styles/tokens/spacing';
+@use '../../../../styles/tokens/radii';
+
+// =============================================================================
+// DESIGN REFERENCE (Figma)
+// Screen: 1512x982, Sidebar: 304x355
+// Using fixed rem values for consistent positioning
+// =============================================================================
+
+// =============================================================================
+// MAIN CARD CONTAINER
+// =============================================================================
+.dashboard-sidebar {
+  display: flex;
+  flex-direction: column;
+  
+  // Sizing: fixed width with responsive constraints
+  width: 280px;
+  height: auto;
+  
+  // Padding: 20px base
+  padding: 20px 24px;
+  
+  // Corner radius: unified 20px
+  border-radius: 20px;
+  
+  // ==========================================================================
+  // GLASSMORPHISM BACKGROUND
+  // Linear gradient pink↔purple with opacity for glass effect
+  // ==========================================================================
+  background: 
+    linear-gradient(
+      135deg,
+      rgba(255, 200, 210, 0.70) 0%,
+      rgba(200, 180, 230, 0.40) 100%
+    ),
+    rgba(155, 77, 78, 0.2);
+  
+  // Background blur for glass effect
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  
+  // Optional stroke: 1px white with 25% opacity
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  
+  // ==========================================================================
+  // SHADOWS (Glassmorphism/Neumorphism)
+  // ==========================================================================
+  box-shadow: 
+    // Drop shadow: external, subtle elevation
+    0 8px 24px 0 rgba(0, 0, 0, 0.20),
+    // Inner shadow: top-left highlight
+    inset 1px 1px 2px 0 rgba(255, 255, 255, 0.30),
+    // Inner shadow: bottom-right depth
+    inset -3px -3px 3px 0 rgba(221, 221, 221, 0.15);
+  
+  // Positioning - fixed, aligned with toolbar/content start
+  position: fixed;
+  left: 1.25rem;
+  top: 100px; // Aligned with main content padding-top
+  z-index: 10;
+
+  // ==========================================================================
+  // HEADER: PROFILE SECTION
+  // Horizontal auto-layout with avatar + text
+  // ==========================================================================
+  &__user {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px; // 8-12px gap between avatar and text
+    padding-bottom: 16px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(53, 64, 82, 0.08);
+  }
+
+  // Avatar: 36px circle (32-40px range)
+  &__avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--avatar-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  // Avatar initials
+  &__avatar-initials {
+    font-family: var(--font-family-base);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--avatar-text);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  // User info: vertical layout with 2-4px gap
+  &__user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  // User name: 16-18px, Semi-bold
+  &__user-name {
+    font-family: var(--font-family-base);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--title-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+  }
+
+  // User plan: 12-14px, Regular, ~60% opacity
+  &__user-plan {
+    font-family: var(--font-family-base);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--title-color);
+    opacity: 0.6;
+    text-transform: capitalize;
+    line-height: 1.2;
+  }
+
+  // ==========================================================================
+  // NAVIGATION: SETTINGS LIST
+  // Vertical auto-layout with 8-12px gap between items
+  // ==========================================================================
+  &__nav {
+    flex: 1;
+    padding: 8px 0;
+  }
+
+  &__menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px; // 8-12px vertical gap between items
+  }
+
+  &__menu-item {
+    margin: 0;
+    padding: 0;
+  }
+
+  // Menu button: horizontal layout, icon + text
+  &__menu-btn {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px; // 8-12px gap between icon and text
+    padding: 10px 8px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 180ms ease;
+    text-align: left;
+
+    // Hover: subtle background
+    &:hover {
+      background: rgba(255, 255, 255, 0.15);
+      
+      .dashboard-sidebar__menu-icon {
+        opacity: 0.8;
+      }
+    }
+
+    // Active state
+    &--active {
+      background: rgba(255, 255, 255, 0.20);
+
+      .dashboard-sidebar__menu-label {
+        font-weight: 500;
+        color: var(--title-color);
+      }
+
+      .dashboard-sidebar__menu-icon {
+        opacity: 1;
+      }
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 2px;
+    }
+  }
+
+  // Menu icon: 18px outline style (16-20px range)
+  &__menu-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: var(--title-color);
+    opacity: 0.6;
+    transition: opacity 180ms ease;
+
+    svg {
+      width: 18px;
+      height: 18px;
+      stroke-width: 1.5;
+    }
+  }
+
+  // Menu label: 14-16px
+  &__menu-label {
+    font-family: var(--font-family-base);
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text-body);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all 180ms ease;
+  }
+
+  // ==========================================================================
+  // BOTTOM AREA: Help + Save Button
+  // ==========================================================================
+  
+  // Help Link: 12-14px, ~60% opacity, left aligned
+  &__help {
+    font-family: var(--font-family-base);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--title-color);
+    opacity: 0.6;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    text-align: left;
+    transition: opacity 180ms ease;
+    margin-top: 16px; // Larger gap to separate from list (16-20px)
+    margin-bottom: 12px;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 2px;
+      border-radius: 6px;
+    }
+  }
+
+  // ==========================================================================
+  // SAVE BUTTON: Primary Action
+  // Full width pill, 44-48px height, unified brand green
+  // ==========================================================================
+  &__save {
+    width: 100%;
+    height: 46px; // 44-48px
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    // Unified brand green (same as portfolio-green)
+    background: var(--brand-500, #34C759);
+    border: none;
+    
+    // Pill shape: high border-radius
+    border-radius: 999px;
+    
+    // Text: white, Semi-bold, 14-16px
+    font-family: var(--font-family-base);
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+    letter-spacing: 0.3px;
+    
+    cursor: pointer;
+    transition: all 180ms ease;
+    
+    // Subtle drop shadow for emphasis
+    box-shadow: 0 4px 12px 0 rgba(52, 199, 89, 0.25);
+
+    &:hover:not(:disabled) {
+      background: var(--brand-600, #2cab4f);
+      box-shadow: 0 6px 16px 0 rgba(52, 199, 89, 0.35);
+      transform: translateY(-1px);
+    }
+
+    &:active:not(:disabled) {
+      background: var(--brand-700, #1f8a40);
+      transform: translateY(0);
+      box-shadow: 0 2px 8px 0 rgba(52, 199, 89, 0.20);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 
+        0 4px 12px 0 rgba(52, 199, 89, 0.25),
+        0 0 0 3px rgba(52, 199, 89, 0.40);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+  }
+}
+
+// =============================================================================
+// RESPONSIVE ADJUSTMENTS
+// =============================================================================
+
+@media (max-width: 1280px) {
+  .dashboard-sidebar {
+    width: 260px;
+    left: 1rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .dashboard-sidebar {
+    width: 240px;
+    padding: 18px 20px;
+    left: 0.75rem;
+    top: 90px; // Aligned with main content padding-top at this breakpoint
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-sidebar {
+    // Mobile: slide-out drawer mode
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+    width: 85vw;
+    max-width: 320px;
+    border-radius: 0;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    padding: 24px;
+    padding-top: 72px; // Space for close button area
+    transform: translateX(-100%);
+    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+
+    &--open {
+      transform: translateX(0);
+    }
+  }
+}
+
+

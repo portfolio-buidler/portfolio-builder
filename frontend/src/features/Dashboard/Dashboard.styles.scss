@@ -1,0 +1,230 @@
+// Dashboard.styles.scss
+@use '../../styles/tokens/colors';
+@use '../../styles/tokens/typography';
+@use '../../styles/tokens/spacing';
+@use '../../styles/tokens/radii';
+@use '../../styles/tokens/zindex';
+@use '../../styles/mixins/mq' as mq;
+
+.dashboard {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
+  font-family: var(--font-family-base);
+
+  /* Hide scrollbar but keep scrolling */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Background - Light gray for portfolio card to float on */
+  &::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: var(--dashboard-bg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    z-index: 0;
+  }
+
+  /* Alternative solid background for portfolio view */
+  &--portfolio-view::before {
+    background-image: none;
+    background-color: var(--portfolio-bg, #f7fafc);
+  }
+
+  /* Mobile Menu Toggle - Hidden on desktop */
+  &__menu-toggle {
+    display: none;
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1001;
+    width: 44px;
+    height: 44px;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    color: var(--title-color);
+    transition: all 200ms ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      background: rgba(255, 255, 255, 1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--brand-500);
+      outline-offset: 2px;
+    }
+  }
+
+  /* Mobile Overlay */
+  &__overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    animation: fadeIn 200ms ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Logo */
+  &__logo {
+    position: fixed;
+    top: 2rem;
+    left: 1.5rem;
+    font-family: 'Poppins', var(--font-family-base);
+    font-size: 40px;
+    font-weight: 700;
+    font-style: normal;
+    line-height: 1.2;
+    color: var(--title-color);
+    letter-spacing: 0%;
+    text-transform: capitalize;
+    margin: 0;
+    z-index: var(--z-fixed, 100);
+  }
+
+  /* Main Content Area */
+  &__main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-left: 320px; /* Sidebar width (280px) + gap (40px) */
+    padding: var(--space-6);
+    padding-top: 100px; /* Space for logo */
+    padding-bottom: var(--space-8);
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+  }
+
+  /* Content Container */
+  &__content {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-6);
+    background: var(--portfolio-bg, #f7fafc);
+    border-radius: var(--radius-2xl, 20px);
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+  .dashboard {
+    &__main {
+      margin-left: 280px;
+      padding: var(--space-4);
+      padding-top: 90px;
+    }
+
+    &__logo {
+      font-size: 32px;
+      top: 1.5rem;
+      left: 1rem;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    flex-direction: column;
+
+    &__menu-toggle {
+      display: flex;
+    }
+
+    &__overlay {
+      display: block;
+    }
+
+    &__main {
+      margin-left: 0;
+      padding: var(--space-3);
+      padding-top: 80px;
+      padding-bottom: var(--space-6);
+    }
+
+    &__logo {
+      font-size: 28px;
+      top: 1rem;
+      left: 1rem;
+    }
+
+    &__content {
+      max-width: 100%;
+      padding: var(--space-3);
+    }
+  }
+}
+
+/* Animation utilities for edit mode */
+@keyframes pulse-edit {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(52, 199, 89, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.2);
+  }
+}
+
+.editing-pulse {
+  animation: pulse-edit 2s infinite;
+}
+
+/* Glass card base style (reusable) */
+.glass-card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-2xl);
+  box-shadow: 
+    0 4px 30px rgba(0, 0, 0, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+/* Utility class for edit mode indicator */
+.edit-indicator {
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border: 2px dashed rgba(52, 199, 89, 0.4);
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 200ms ease;
+  }
+
+  &:hover::after,
+  &:focus-within::after {
+    opacity: 1;
+  }
+}
+

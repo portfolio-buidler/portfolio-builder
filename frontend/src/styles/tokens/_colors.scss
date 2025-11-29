@@ -12,6 +12,24 @@
   --brand-600: #2cab4f;
   --brand-700: #1f8a40;
 
+  /* Mint/Sage accent colors (for header strip, project card accents) */
+  --mint-400: #8FBC8F;
+  --mint-500: #6AAB6A;
+  --mint-600: #5A9A5A;
+  --sage-light: #C5E6D0;
+  --sage-accent: #A8D5BA;
+  --sage-muted: #B5CDB8;
+
+  /* Portfolio page specific colors - unified with brand */
+  --portfolio-green: var(--brand-500, #34C759);        /* Main brand green for cards/buttons */
+  --portfolio-green-dark: var(--brand-600, #2cab4f);   /* Darker green hover state */
+  --portfolio-green-light: var(--brand-500, #34C759);  /* Lighter green accents */
+  --portfolio-bg: #f7fafc;           /* Page background (off-white/light gray) */
+  --portfolio-card-bg: #ffffff;      /* Main card background */
+  --portfolio-placeholder: #e2e8f0;  /* Gray placeholder for images */
+  --portfolio-text-dark: #1a202c;    /* Dark text for headlines */
+  --portfolio-text-body: #2d3748;    /* Body text color */
+
   /* Grayscale ramp */
   --gray-50: #f9fafb;
   --gray-100: #f3f4f6;
@@ -72,6 +90,10 @@
   --success-500: #22C55E;
   --success-600: #16A34A;
   --success-700: #15803D;
+
+  /* Teal/Cyan colors for avatar */
+  --avatar-bg: #7DD3C7;
+  --avatar-text: #1F6B64;
 
   /* Button colors */
   --button-primary: #354052;

@@ -1,10 +1,12 @@
 /* tokens/_radii.scss
-   Radius tokens. */
+   Radius tokens - unified scale for consistency. */
 
 :root {
-  --radius-sm: 2px;
-  --radius-md: 6px;
-  --radius-lg: 10px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
   --radius-xl: 16px;
-  --radius-2xl: 20px; /* approximates Tailwind 2xl */
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
+  --radius-full: 999px; /* Pill/capsule shape */
 }

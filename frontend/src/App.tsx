@@ -2,6 +2,7 @@
 import { Routes, Route } from 'react-router-dom';
 import UploadCV from './features/UploadCV/UploadCV';
 import Preview from './features/Preview/preview';
+import Dashboard from './features/Dashboard/Dashboard';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Login from './features/Auth/Login/Login';
@@ -65,6 +66,7 @@ function App() {
         <Route path="/registration" element={<Registration />} />
         <Route path="/preview" element={<Preview />} />
         <Route path="/preview/:resumeId" element={<Preview />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
       <ToastContainer position="top-right" autoClose={3000} />
     </>

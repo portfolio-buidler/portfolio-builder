@@ -187,7 +187,7 @@ const PreviewArea: React.FC = () => {
   }, [navigate])
 
   const handleNext = React.useCallback(() => {
-    navigate('/next-step')
+    navigate('/dashboard')
   }, [navigate])
 
   /* ========================================================================

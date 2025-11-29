@@ -1,0 +1,603 @@
+// ResumePreview.styles.scss
+// One-page resume/portfolio site design
+// Clean, organized with clear hierarchy
+
+@use '../../../../styles/tokens/colors';
+@use '../../../../styles/tokens/typography';
+@use '../../../../styles/tokens/spacing';
+@use '../../../../styles/tokens/radii';
+
+/* ==========================================================================
+   PAGE WRAPPER - Gray background with floating white card
+   ========================================================================== */
+
+.resume-preview {
+  /* Main white card container floating on gray background */
+  background: var(--portfolio-card-bg, #ffffff);
+  padding: 48px 56px;
+  max-width: 1100px;
+  margin: 0 auto;
+  border-radius: var(--radius-3xl, 24px);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  position: relative;
+
+  /* Edit mode cursor indicator */
+  &--edit {
+    [contenteditable="true"] {
+      cursor: text;
+      outline: none;
+      border-radius: 4px;
+      transition: background-color 200ms ease;
+
+      &:hover {
+        background: rgba(47, 133, 90, 0.05);
+      }
+
+      &:focus {
+        background: rgba(47, 133, 90, 0.08);
+        box-shadow: 0 0 0 2px rgba(47, 133, 90, 0.3);
+      }
+    }
+  }
+
+  /* ==========================================================================
+     HEADER - Branding + Contact Button
+     ========================================================================== */
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  &__header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__name {
+    font-family: var(--font-family-base);
+    font-size: 36px;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+
+    /* Two-tone name styling */
+    .name-first {
+      color: var(--portfolio-text-dark, #1a202c);
+    }
+    
+    .name-last {
+      color: var(--portfolio-green, #2f855a);
+    }
+  }
+
+  &__title {
+    font-family: var(--font-family-base);
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--portfolio-text-body, #2d3748);
+    margin: 0;
+    text-transform: lowercase;
+  }
+
+  &__contact-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 28px;
+    background: var(--portfolio-green);
+    border: none;
+    border-radius: var(--radius-full, 999px); /* Capsule shape */
+    font-family: var(--font-family-base);
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+    cursor: pointer;
+    transition: all 200ms ease;
+    white-space: nowrap;
+
+    &:hover {
+      background: var(--portfolio-green-dark, #276749);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(47, 133, 90, 0.3);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(47, 133, 90, 0.4);
+    }
+  }
+
+  /* ==========================================================================
+     HERO SECTION - Image + Pitch Text (Two Columns)
+     ========================================================================== */
+
+  &__hero {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 40px;
+    align-items: flex-start;
+    margin-bottom: 48px;
+  }
+
+  &__about-image {
+    width: 280px;
+    height: 320px;
+    border-radius: var(--radius-lg, 12px);
+    overflow: hidden;
+    flex-shrink: 0;
+    background: var(--portfolio-placeholder, #e2e8f0);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__about-image-placeholder {
+    width: 100%;
+    height: 100%;
+    background: var(--portfolio-placeholder, #e2e8f0);
+  }
+
+  &__hero-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  &__headline {
+    font-family: var(--font-family-base);
+    font-size: 32px;
+    font-weight: 400;
+    color: var(--portfolio-text-dark, #1a202c);
+    margin: 0;
+    line-height: 1.35;
+
+    /* Bold/highlighted portion */
+    strong, .highlight {
+      font-weight: 700;
+      color: var(--portfolio-text-dark, #1a202c);
+    }
+  }
+
+  /* About Description */
+  &__description {
+    p {
+      font-family: var(--font-family-base);
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--portfolio-text-body, #2d3748);
+      line-height: 1.7;
+      margin: 0;
+    }
+  }
+
+  /* ==========================================================================
+     PROJECTS SECTION - Grid of Project Cards
+     ========================================================================== */
+
+  &__projects {
+    margin-bottom: 48px;
+  }
+
+  &__projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+  }
+
+  /* ==========================================================================
+     FOOTER SECTION - Education & Skills (Side by Side)
+     ========================================================================== */
+
+  &__footer-section {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 48px;
+    margin-bottom: 48px;
+  }
+
+  &__section-title {
+    font-family: var(--font-family-base);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--portfolio-text-dark, #1a202c);
+    margin: 0 0 16px 0;
+  }
+
+  /* Education */
+  &__education {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__education-item {
+    margin-bottom: 16px;
+  }
+
+  &__education-degree {
+    font-family: var(--font-family-base);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--portfolio-text-dark, #1a202c);
+    margin: 0 0 8px 0;
+  }
+
+  &__education-details {
+    margin: 0;
+    padding-left: 20px;
+    list-style-type: disc;
+
+    li {
+      font-family: var(--font-family-base);
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--portfolio-text-body, #2d3748);
+      line-height: 1.6;
+      margin-bottom: 4px;
+    }
+  }
+
+  /* Skills */
+  &__skills {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__skills-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__skill-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 14px;
+    background: var(--portfolio-placeholder, #e2e8f0);
+    border-radius: var(--radius-full, 999px);
+    font-family: var(--font-family-base);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--portfolio-text-body, #2d3748);
+    transition: background 150ms ease;
+
+    &:hover {
+      background: #cbd5e0;
+    }
+  }
+
+  /* ==========================================================================
+     WORK EXPERIENCE - Full Width Green Block
+     ========================================================================== */
+
+  &__work-experience {
+    background: var(--portfolio-green);
+    border-radius: var(--radius-2xl, 20px);
+    padding: 32px 40px;
+    color: white;
+  }
+
+  &__work-experience &__section-title {
+    color: white;
+    margin-bottom: 24px;
+  }
+
+  &__experience-item {
+    margin-bottom: 24px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__experience-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    gap: 16px;
+  }
+
+  &__experience-role {
+    font-family: var(--font-family-base);
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+  }
+
+  &__experience-company {
+    font-family: var(--font-family-base);
+    font-size: 15px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 4px 0 0 0;
+  }
+
+  &__experience-years {
+    font-family: var(--font-family-base);
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.75);
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  &__experience-description {
+    font-family: var(--font-family-base);
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.7;
+    margin: 12px 0 0 0;
+    white-space: pre-wrap;
+  }
+
+  &__experience-achievements {
+    margin: 12px 0 0 20px;
+    padding: 0;
+    list-style-type: disc;
+
+    li {
+      font-family: var(--font-family-base);
+      font-size: 13px;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.9);
+      line-height: 1.6;
+      margin-bottom: 4px;
+    }
+  }
+}
+
+/* ==========================================================================
+   PROJECT CARD - Gray Top, Green Bottom
+   ========================================================================== */
+
+.project-card {
+  border-radius: var(--radius-xl, 16px);
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Top part - Gray placeholder for image */
+  &__image {
+    width: 100%;
+    height: 140px;
+    overflow: hidden;
+    background: var(--portfolio-placeholder, #e2e8f0);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__image-placeholder {
+    width: 100%;
+    height: 100%;
+    background: var(--portfolio-placeholder, #e2e8f0);
+  }
+
+  /* Bottom part - Green with white text */
+  &__content {
+    background: var(--portfolio-green, #2f855a);
+    padding: 16px 20px;
+    color: white;
+  }
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    gap: 12px;
+  }
+
+  &__name {
+    font-family: var(--font-family-base);
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+    flex: 1;
+  }
+
+  &__year {
+    font-family: var(--font-family-base);
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.75);
+    flex-shrink: 0;
+  }
+
+  &__description {
+    font-family: var(--font-family-base);
+    font-size: 13px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.5;
+    margin: 0 0 12px 0;
+  }
+
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  &__tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-full, 999px);
+    font-family: var(--font-family-base);
+    font-size: 11px;
+    font-weight: 500;
+    color: white;
+    transition: background 150ms ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVE STYLES
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+  .resume-preview {
+    padding: 40px 40px;
+    margin: 16px;
+    max-width: calc(100% - 32px);
+
+    &__hero {
+      grid-template-columns: 220px 1fr;
+      gap: 32px;
+    }
+
+    &__about-image {
+      width: 220px;
+      height: 260px;
+    }
+
+    &__headline {
+      font-size: 28px;
+    }
+
+    &__footer-section {
+      gap: 32px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .resume-preview {
+    padding: 32px 24px;
+    border-radius: 16px;
+
+    &__header {
+      flex-direction: column;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    &__name {
+      font-size: 28px;
+    }
+
+    &__hero {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    &__about-image {
+      width: 100%;
+      max-width: 280px;
+      height: 320px;
+      margin: 0 auto;
+    }
+
+    &__headline {
+      font-size: 24px;
+      text-align: center;
+    }
+
+    &__description {
+      text-align: center;
+    }
+
+    &__footer-section {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+
+    &__projects-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    &__work-experience {
+      padding: 24px;
+      border-radius: 16px;
+    }
+
+    &__experience-header {
+      flex-direction: column;
+      gap: 4px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .resume-preview {
+    padding: 24px 16px;
+    margin: 8px;
+    border-radius: 12px;
+
+    &__name {
+      font-size: 24px;
+    }
+
+    &__headline {
+      font-size: 20px;
+    }
+
+    &__about-image {
+      max-width: 200px;
+      height: 240px;
+    }
+
+    &__contact-btn {
+      width: 100%;
+    }
+
+    &__projects-grid {
+      grid-template-columns: 1fr;
+    }
+
+    &__work-experience {
+      padding: 20px 16px;
+    }
+
+    &__experience-role {
+      font-size: 16px;
+    }
+  }
+
+  .project-card {
+    &__image {
+      height: 120px;
+    }
+
+    &__content {
+      padding: 14px 16px;
+    }
+
+    &__name {
+      font-size: 14px;
+    }
+  }
+}
