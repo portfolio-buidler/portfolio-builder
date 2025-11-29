@@ -31,6 +31,14 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
     setIsFormValid(isValid)
   }, [email, password])
 
+  // Clear error when user starts typing again
+  useEffect(() => {
+    if (error) {
+      setError(null)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [email, password])
+
   useEffect(() => {
     // Check for pending upload from location state OR localStorage
     const locationState = location.state as { hasPendingUpload?: boolean; email?: string; from?: string };

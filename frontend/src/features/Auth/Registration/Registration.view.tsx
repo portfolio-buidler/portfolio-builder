@@ -32,6 +32,20 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
     }
   }, [backgroundUrl])
 
+  // Check if there are any field errors
+  const hasFieldErrors = !!(errors.firstName || errors.lastName || errors.email || errors.password || errors.confirmPassword || errors.general)
+  
+  // Get the first error message to display
+  const getErrorMessage = () => {
+    if (errors.general) return errors.general
+    if (errors.firstName) return errors.firstName
+    if (errors.lastName) return errors.lastName
+    if (errors.email) return errors.email
+    if (errors.password) return errors.password
+    if (errors.confirmPassword) return errors.confirmPassword
+    return null
+  }
+
   return (
     <div
       ref={containerRef}
@@ -62,12 +76,21 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
             Registration
           </h2>
           <p className="registration-page__subtitle">
-            {hasPendingUpload 
+            {hasFieldErrors ? (
+              <>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="registration-page__subtitle__error-icon">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+                  <path d="M12 8V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <circle cx="12" cy="16" r="1" fill="currentColor" />
+                </svg>
+                <span className="registration-page__subtitle--error">{getErrorMessage()}</span>
+              </>
+            ) : hasPendingUpload 
               ? 'Create an account to continue with your upload' 
               : <span className="registration-page__subtitle--normal">Create your account</span>}
           </p>
 
-          {hasPendingUpload && (
+          {hasPendingUpload && !hasFieldErrors && (
             <div className="registration-page__info-banner" role="status">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="registration-page__info-icon">
                 <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2" />
@@ -78,24 +101,13 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
             </div>
           )}
 
-          {errors.general && (
-            <div className="registration-page__error" role="alert">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="registration-page__error-icon">
-                <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2" />
-                <path d="M10 6V11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <circle cx="10" cy="14" r="1" fill="currentColor" />
-              </svg>
-              <span className="registration-page__error-text">{errors.general}</span>
-            </div>
-          )}
-
-          <form onSubmit={onSubmit} className="registration-page__form">
+          <form onSubmit={onSubmit} className="registration-page__form" noValidate>
             <div className="registration-page__name-row">
               <div className="registration-page__input-group">
                 <input
                   type="text"
                   id="registration-first-name"
-                  className="registration-page__input"
+                  className={`registration-page__input${errors.firstName ? ' registration-page__input--error' : ''}`}
                   placeholder="First Name"
                   value={firstName}
                   onChange={(e) => onFirstNameChange(e.target.value)}
@@ -109,7 +121,7 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
                 <input
                   type="text"
                   id="registration-last-name"
-                  className="registration-page__input"
+                  className={`registration-page__input${errors.lastName ? ' registration-page__input--error' : ''}`}
                   placeholder="Last Name"
                   value={lastName}
                   onChange={(e) => onLastNameChange(e.target.value)}
@@ -124,7 +136,7 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
               <input
                 type="email"
                 id="registration-email"
-                className="registration-page__input"
+                className={`registration-page__input${errors.email ? ' registration-page__input--error' : ''}`}
                 placeholder="Email"
                 value={email}
                 onChange={(e) => onEmailChange(e.target.value)}
@@ -138,7 +150,7 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
               <input
                 type={showPassword ? 'text' : 'password'}
                 id="registration-password"
-                className="registration-page__input registration-page__input--password"
+                className={`registration-page__input registration-page__input--password${errors.password ? ' registration-page__input--error' : ''}`}
                 placeholder="Password"
                 value={password}
                 onChange={(e) => onPasswordChange(e.target.value)}
@@ -157,7 +169,7 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({
               <input
                 type={showPassword ? 'text' : 'password'}
                 id="registration-confirm-password"
-                className="registration-page__input registration-page__input--confirm"
+                className={`registration-page__input registration-page__input--confirm${errors.confirmPassword ? ' registration-page__input--error' : ''}`}
                 placeholder="Confirm Password"
                 value={confirmPassword}
                 onChange={(e) => onConfirmPasswordChange(e.target.value)}

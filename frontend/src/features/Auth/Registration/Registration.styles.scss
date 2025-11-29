@@ -116,12 +116,25 @@
   color: var(--text-muted);
   margin: 0 0 var(--space-6) 0;
   padding-left: var(--space-12);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   min-height: 1.5rem;
 }
 
 .registration-page__subtitle--normal {
   font-weight: 600;
   color: var(--title-color);
+}
+
+.registration-page__subtitle--error {
+  font-weight: 600;
+  color: var(--title-color);
+}
+
+.registration-page__subtitle__error-icon {
+  flex-shrink: 0;
+  color: var(--text-muted);
 }
 
 .registration-page__info-banner {
@@ -204,7 +217,7 @@
   background: #9B4D4E33;
   border: none;
   border-radius: var(--radius-xl);
-  transition: border-color 200ms ease;
+  transition: border-color 200ms ease, background 200ms ease;
   box-sizing: border-box;
   box-shadow: inset 1px 1px 2px 0px #FFFFFF4D, inset -3px -3px 3px 0px #DDDDDD26;
 
@@ -232,6 +245,20 @@
     transition: background-color 5000s ease-in-out 0s;
   }
 
+  /* Error state modifier */
+  &--error {
+    background: #FF3B304D;
+    border: 1px solid #FF3B30;
+    box-shadow: inset 1px 1px 2px 0px #FFFFFF4D, inset -3px -3px 3px 0px #DDDDDD26;
+    
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus,
+    &:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 30px #FF3B304D inset, inset 1px 1px 2px 0px #FFFFFF4D, inset -3px -3px 3px 0px #DDDDDD26 !important;
+      -webkit-text-fill-color: var(--title-color) !important;
+    }
+  }
 }
 
 /* Password hint message - positioned between password and confirm password */

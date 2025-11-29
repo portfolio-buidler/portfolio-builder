@@ -35,34 +35,7 @@ export const Registration: React.FC<RegistrationProps> = ({ onBack }) => {
   }>({})
   const [isLoading, setIsLoading] = useState(false)
   const [isFormValid, setIsFormValid] = useState(false)
-
-  // Clear password error when user types a valid password
-  useEffect(() => {
-    if (password && errors.password) {
-      const passwordValidation = validatePassword(password)
-      if (passwordValidation.valid) {
-        setErrors(prev => {
-          const newErrors = { ...prev }
-          delete newErrors.password
-          return newErrors
-        })
-      }
-    }
-  }, [password, errors.password])
-
-  // Clear confirmPassword error when passwords match
-  useEffect(() => {
-    if (confirmPassword && errors.confirmPassword) {
-      if (password === confirmPassword) {
-        setErrors(prev => {
-          const newErrors = { ...prev }
-          delete newErrors.confirmPassword
-          return newErrors
-        })
-      }
-    }
-  }, [password, confirmPassword, errors.confirmPassword])
-
+  
   // Update form validity when fields change
   useEffect(() => {
     const isValid = 
@@ -199,6 +172,27 @@ export const Registration: React.FC<RegistrationProps> = ({ onBack }) => {
     })
   }, [navigate, location, hasPendingUpload])
 
+  // Simple handlers for field changes
+  const handleFirstNameChange = useCallback((value: string) => {
+    setFirstName(value)
+  }, [])
+
+  const handleLastNameChange = useCallback((value: string) => {
+    setLastName(value)
+  }, [])
+
+  const handleEmailChange = useCallback((value: string) => {
+    setEmail(value)
+  }, [])
+
+  const handlePasswordChange = useCallback((value: string) => {
+    setPassword(value)
+  }, [])
+
+  const handleConfirmPasswordChange = useCallback((value: string) => {
+    setConfirmPassword(value)
+  }, [])
+
   const viewProps: RegistrationViewProps = {
     firstName,
     lastName,
@@ -210,11 +204,11 @@ export const Registration: React.FC<RegistrationProps> = ({ onBack }) => {
     isLoading,
     hasPendingUpload,
     isFormValid,
-    onFirstNameChange: setFirstName,
-    onLastNameChange: setLastName,
-    onEmailChange: setEmail,
-    onPasswordChange: setPassword,
-    onConfirmPasswordChange: setConfirmPassword,
+    onFirstNameChange: handleFirstNameChange,
+    onLastNameChange: handleLastNameChange,
+    onEmailChange: handleEmailChange,
+    onPasswordChange: handlePasswordChange,
+    onConfirmPasswordChange: handleConfirmPasswordChange,
     onShowPasswordToggle: () => setShowPassword(!showPassword),
     onSubmit: handleSubmit,
     onBack: handleBack,
