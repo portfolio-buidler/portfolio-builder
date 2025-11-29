@@ -133,6 +133,7 @@ export const UploadCVView: React.FC<UploadCVViewProps> = ({
             type="button"
             className={
               `upload-cv__cta` +
+              (isCTAEnabled && !isUploading && status !== 'error' ? ' upload-cv__cta--ready' : '') +
               (isUploading ? ' upload-cv__cta--loading' : '') +
               (status === 'error' ? ' upload-cv__cta--error' : '')
             }

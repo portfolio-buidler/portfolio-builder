@@ -221,39 +221,51 @@
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-normal);
     transition: background-color 200ms ease, color 200ms ease, opacity 200ms ease;
+    border: none;
 
-    
-    background: var(--brand-500);
+    // Default state: Gray (like login button before form is valid)
+    background: var(--Grays-Gray, #8E8E93);
     color: #fff;
     cursor: pointer;
 
-    &[aria-disabled='true'] {
-      background: #8E8E93;
-      cursor: not-allowed;
+    &:hover {
+      background: #6c6c70;
     }
 
-    &:not([aria-disabled='true']):hover {
-      background: var(--brand-600);
-    }
-
-    &:not([aria-disabled='true']):active {
-      background: var(--brand-700);
+    &:active:not(:disabled) {
+      background: #545456;
     }
 
     &:focus-visible {
       outline: none;
-      box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.4);
+      box-shadow: 0 0 0 3px rgba(142, 142, 147, 0.4);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+
+  // Ready state - green when file is selected and CTA is enabled
+  &__cta--ready {
+    background: var(--brand-500) !important;
+    
+    &:hover {
+      background: var(--brand-600) !important;
+    }
+
+    &:active {
+      background: var(--brand-700) !important;
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.4) !important;
     }
   }
 
   &__cta--loading {
     cursor: progress;
-    background: var(--brand-500);
-  }
-
-  &__cta--loading[aria-disabled='true'] {
-    background: var(--brand-500);
-    cursor: progress;
+    background: var(--brand-500) !important;
   }
 
   &__cta--error {
