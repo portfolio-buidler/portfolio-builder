@@ -21,11 +21,11 @@
   flex-direction: column;
   
   // Sizing: fixed width with responsive constraints
-  width: 280px;
+  width: 260px;
   height: auto;
   
-  // Padding: 20px base
-  padding: 20px 24px;
+  // Padding: 16px base (more compact)
+  padding: 16px 20px;
   
   // Corner radius: unified 20px
   border-radius: 20px;
@@ -117,16 +117,18 @@
     min-width: 0;
   }
 
-  // User name: 16-18px, Semi-bold
+  // User name: Poppins Bold 20px
   &__user-name {
-    font-family: var(--font-family-base);
-    font-size: 16px;
-    font-weight: 600;
+    font-family: 'Poppins', var(--font-family-base);
+    font-size: 20px;
+    font-weight: 700;
     color: var(--title-color);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    line-height: 1.3;
+    line-height: 100%;
+    text-transform: capitalize;
+    letter-spacing: 0;
   }
 
   // User plan: 12-14px, Regular, ~60% opacity
@@ -252,11 +254,11 @@
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: 8px;
+    padding: 6px 8px;
     text-align: left;
     transition: opacity 180ms ease;
-    margin-top: 16px; // Larger gap to separate from list (16-20px)
-    margin-bottom: 12px;
+    margin-top: 8px; // Reduced gap
+    margin-bottom: 8px; // Reduced spacing before save button
 
     &:hover {
       opacity: 1;
@@ -271,11 +273,11 @@
 
   // ==========================================================================
   // SAVE BUTTON: Primary Action
-  // Full width pill, 44-48px height, unified brand green
+  // Full width pill, 36px height, unified brand green
   // ==========================================================================
   &__save {
     width: 100%;
-    height: 46px; // 44-48px
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -287,9 +289,9 @@
     // Pill shape: high border-radius
     border-radius: 999px;
     
-    // Text: white, Semi-bold, 14-16px
+    // Text: white, Semi-bold, 14px
     font-family: var(--font-family-base);
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
     color: white;
     letter-spacing: 0.3px;
@@ -334,15 +336,15 @@
 
 @media (max-width: 1280px) {
   .dashboard-sidebar {
-    width: 260px;
+    width: 250px;
     left: 1rem;
   }
 }
 
 @media (max-width: 1024px) {
   .dashboard-sidebar {
-    width: 240px;
-    padding: 18px 20px;
+    width: 230px;
+    padding: 14px 18px;
     left: 0.75rem;
     top: 158px; // Aligned with portfolio content (90px padding + 44px toolbar + 24px margin)
   }

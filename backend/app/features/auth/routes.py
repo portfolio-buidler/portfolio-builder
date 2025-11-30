@@ -89,6 +89,7 @@ async def refresh_endpoint(
 async def logout_endpoint(
     request: Request,
     response: Response,
+    user=Depends(get_current_user),
     db=Depends(get_db)
 ):
     """Logout and revoke refresh token."""

@@ -13,39 +13,45 @@ def make_pdf_bytes(text: str = "Hello") -> bytes:
     return base
 
 
-def test_upload_pdf_success(monkeypatch):
-    """Upload synthetic PDF; accept 201/422/500; validate JSON on 201."""
+def test_guest_upload_pdf_success(monkeypatch):
+    """Upload synthetic PDF via guest endpoint; accept 201/422/500; validate JSON on 201."""
     pdf_bytes = make_pdf_bytes("Sample CV")
     files = {"file": ("cv.pdf", pdf_bytes, "application/pdf")}
-    resp = client.post("/resumes/upload", files=files)
+    resp = client.post("/api/v1/resumes/upload/guest", files=files)
     assert resp.status_code in (201, 422, 500)
     if resp.status_code == 201:
         body = resp.json()
-        assert body["success"] is True
-        assert body["data"]["fileId"]
-        assert "extractedData" in body["data"]
+        assert "temp_id" in body or "data" in body
 
 
-def test_upload_wrong_mime():
-    """Upload .txt -> expect 415 (MIME rejected early)."""
+def test_guest_upload_wrong_mime():
+    """Upload .txt via guest endpoint -> expect 415 (MIME rejected early)."""
     files = {"file": ("cv.txt", b"plain text", "text/plain")}
-    resp = client.post("/resumes/upload", files=files)
+    resp = client.post("/api/v1/resumes/upload/guest", files=files)
     assert resp.status_code == 415
     body = resp.json()
     assert "Unsupported" in body["detail"]
 
 
-def test_upload_empty_pdf(monkeypatch):
-    """Monkeypatch service to force 422 for empty/unreadable PDF."""
+def test_guest_upload_empty_pdf(monkeypatch):
+    """Monkeypatch service to force 422 for empty/unreadable PDF via guest endpoint."""
 
-    async def fake_handle_upload(self, _file):
+    async def fake_handle_upload(self, _file, _user_id=None):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Empty or unreadable document",
         )
 
     monkeypatch.setattr(ResumeService, "handle_upload", fake_handle_upload)
     files = {"file": ("empty.pdf", b"%PDF-1.4\n%%EOF", "application/pdf")}
-    resp = client.post("/resumes/upload", files=files)
+    resp = client.post("/api/v1/resumes/upload/guest", files=files)
     assert resp.status_code == 422
     assert resp.json()["detail"].lower().startswith("empty")
+
+
+def test_authenticated_upload_requires_auth():
+    """Upload to authenticated endpoint without token should return 401."""
+    pdf_bytes = make_pdf_bytes("Sample CV")
+    files = {"file": ("cv.pdf", pdf_bytes, "application/pdf")}
+    resp = client.post("/api/v1/resumes/upload", files=files)
+    assert resp.status_code == 401

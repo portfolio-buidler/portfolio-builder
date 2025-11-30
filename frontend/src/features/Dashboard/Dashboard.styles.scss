@@ -116,7 +116,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-left: 320px; /* Sidebar width (280px) + gap (40px) */
+    margin-left: 300px; /* Sidebar width (260px) + gap (40px) */
     padding: var(--space-6);
     padding-top: 100px; /* Space for logo */
     padding-bottom: var(--space-8);
@@ -144,7 +144,7 @@
     --content-start-top: 158px; // 90px padding + 44px toolbar + 24px margin
     
     &__main {
-      margin-left: 280px;
+      margin-left: 260px; /* Smaller sidebar + gap */
       padding: var(--space-4);
       padding-top: 90px;
     }

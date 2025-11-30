@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing_extensions import Annotated
-from pydantic import EmailStr, Field, SecretStr, StringConstraints, constr
+from pydantic import EmailStr, Field, SecretStr, StringConstraints, constr, field_validator
 from app.shared.schemas import APIModel, IDModel, Timestamped
 
 FullName = Annotated[str, StringConstraints(min_length=1, max_length=30)]
@@ -12,6 +12,21 @@ class RegisterRequest(APIModel):
     email: EmailStr
     password: SecretStr = Field(min_length=8, description="hash server-side")
     full_name: FullName = Field(..., description="User's full name")
+    
+    @field_validator("password")
+    @classmethod
+    def validate_password_complexity(cls, v: SecretStr) -> SecretStr:
+        """Validate password contains both letters and numbers."""
+        password = v.get_secret_value()
+        has_letters = any(c.isalpha() for c in password)
+        has_numbers = any(c.isdigit() for c in password)
+        
+        if not has_letters:
+            raise ValueError("Password must contain at least one letter")
+        if not has_numbers:
+            raise ValueError("Password must contain at least one number")
+        
+        return v
 
 # User login authentication request
 class LoginRequest(APIModel):

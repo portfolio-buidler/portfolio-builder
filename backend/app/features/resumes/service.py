@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import secrets
 from dataclasses import dataclass
 from pathlib import Path
@@ -19,7 +20,19 @@ from app.features.parsing.normalizers import normalize_text, heal_urls
 from app.features.parsing.parser_core import parse_cv_text
 
 from .jsonb_models import ResumeParsed, MAX_DESC_LEN, MAX_SKILL_LEN
-from .security import verify_magic_bytes, SUPPORTED_MIME, verify_extension
+from .security import (
+    verify_magic_bytes,
+    SUPPORTED_MIME,
+    verify_extension,
+    check_docx_for_macros,
+    check_docx_for_encryption,
+)
+
+# Security logger for audit trail
+security_logger = logging.getLogger("security.file_validation")
+
+DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
 
 @dataclass
 class UploadResult:
@@ -28,21 +41,37 @@ class UploadResult:
     raw_text: str
     parsed_json: ResumeParsed
 
+
 class ResumeService:
     async def handle_upload(self, file: UploadFile) -> UploadResult:
-        verify_extension(file.filename or "")
+        filename = file.filename or ""
+        
+        # 1. Extension validation (with double-extension check)
+        verify_extension(filename)
 
+        # 2. MIME type validation
         ct = (file.content_type or "")
         if ct not in SUPPORTED_MIME:
-            raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                                detail=f"Unsupported content type: {ct or '(missing)'}")
+            security_logger.warning(f"REJECTED: Unsupported MIME '{ct}' - {filename}")
+            raise HTTPException(
+                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                detail=f"Unsupported content type: {ct or '(missing)'}",
+            )
 
-        safe_name = safe_filename(file.filename or "upload.bin")
+        safe_name = safe_filename(filename or "upload.bin")
         dst_name = f"{Path(safe_name).stem}_{secrets.token_hex(8)}{Path(safe_name).suffix.lower()}"
         dst = (UPLOAD_DIR / dst_name).absolute()
 
-        header = await self._save_streamed(file, dst, MAX_UPLOAD_SIZE)
-        verify_magic_bytes(header, ct)
+        # 3. Streaming upload with size enforcement
+        header = await self._save_streamed(file, dst, MAX_UPLOAD_SIZE, filename)
+        
+        # 4. Magic bytes validation
+        verify_magic_bytes(header, ct, filename)
+
+        # 5. DOCX-specific: macro and encryption detection
+        if ct == DOCX_MIME:
+            check_docx_for_macros(dst, filename)
+            check_docx_for_encryption(dst, filename)
 
         try:
             raw_text = self._extract_text(dst, ct)
@@ -58,7 +87,7 @@ class ResumeService:
             raise
         except Exception as e:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Failed to parse document: {e!s}",
             )
         finally:
@@ -67,14 +96,22 @@ class ResumeService:
             except Exception:
                 pass
 
+        security_logger.info(f"ACCEPTED: File passed all validation checks - {filename}")
         return UploadResult(
-            original_name=file.filename or "upload.bin",
+            original_name=filename or "upload.bin",
             content_type=ct,
             raw_text=norm_text,
             parsed_json=parsed,
         )
 
-    async def _save_streamed(self, upload: UploadFile, dst: Path, limit: int) -> bytes:
+    async def _save_streamed(
+        self, upload: UploadFile, dst: Path, limit: int, filename: str = "unknown"
+    ) -> bytes:
+        """
+        Stream file to disk with size enforcement.
+        Returns the file header (first 8 bytes) for magic byte validation.
+        Raises HTTP 413 if file exceeds size limit.
+        """
         header = b""
         written = 0
         chunk = await upload.read(8192)
@@ -85,8 +122,13 @@ class ResumeService:
                 written += len(chunk)
                 if written > limit:
                     dst.unlink(missing_ok=True)
-                    raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                                        detail="File too large")
+                    security_logger.warning(
+                        f"REJECTED: File too large ({written} bytes > {limit} limit) - {filename}"
+                    )
+                    raise HTTPException(
+                        status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                        detail=f"File too large (max {limit // (1024 * 1024)}MB)",
+                    )
                 f.write(chunk)
                 chunk = await upload.read(8192)
         return header

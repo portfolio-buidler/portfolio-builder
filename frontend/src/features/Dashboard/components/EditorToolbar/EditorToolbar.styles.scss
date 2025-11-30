@@ -16,10 +16,10 @@
   width: 100%;
   max-width: 685px;
   min-width: 320px;
-  height: 44px;
+  height: 39px;
   
-  padding: 6px 20px;
-  gap: 12px;
+  padding: 7px 20px;
+  gap: 10px;
   
   background: rgba(155, 77, 78, 0.2);
   backdrop-filter: blur(15px);
@@ -87,7 +87,7 @@
   }
 
   &__option {
-    font-family: var(--font-family-base);
+    font-family: 'Poppins', var(--font-family-base);
     font-size: 14px;
     font-weight: 500;
     color: var(--gray-700, #374151);
@@ -122,7 +122,7 @@
   }
 
   &__mode-btn {
-    font-family: var(--font-family-base);
+    font-family: 'Poppins', var(--font-family-base);
     font-size: 13px;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.7);

@@ -9,7 +9,7 @@ Goals:
 """
 
 from typing import Any, Literal
-from pydantic import Field, StrictBool, BaseModel
+from pydantic import Field, StrictBool, BaseModel, ConfigDict
 from app.shared.schemas import APIModel, IDModel, Timestamped
 
 # --- Section names the editor knows about (kept simple & explicit) ---
@@ -110,10 +110,11 @@ class PortfolioDraftUpdate(BaseModel):
     sections_visibility: dict[str, bool] | None = Field(default=None)
     data: dict[str, Any] | None = Field(default=None)
 
-    class Config:
+    model_config = ConfigDict(
         # Rejects unknown fields at model root, preventing accidental payload noise from being persisted.
         # (Unknown fields within nested dicts are intentionally allowed for flexibility.)
-        extra = "ignore"  # דוחה שדות לא מוכרים
+        extra="ignore"  # דוחה שדות לא מוכרים
+    )
 
 
 # --- Outgoing shape ---

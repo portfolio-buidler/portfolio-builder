@@ -9,7 +9,9 @@ This module handles:
 
 from datetime import datetime, timedelta, UTC
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
+from sqlalchemy import select, update, func
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.exc import StaleDataError
 
 from app.db.models_user import User
 from app.db.models_refresh_token import RefreshToken
@@ -29,8 +31,10 @@ from app.features.auth.schemas import RegisterRequest, UpdateProfile
 # ============================================================================
 
 async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
-    """Find a user by email address."""
-    result = await db.execute(select(User).where(User.email == email))
+    """Find a user by email address (case-insensitive)."""
+    # Normalize email to lowercase for comparison
+    email_lower = email.lower()
+    result = await db.execute(select(User).where(func.lower(User.email) == email_lower))
     return result.scalar_one_or_none()
 
 
@@ -58,14 +62,17 @@ async def register_user(db: AsyncSession, data: RegisterRequest) -> User:
     Raises:
         ValueError: If email already exists
     """
-    # Check if email already exists
-    existing_user = await get_user_by_email(db, data.email)
+    # Normalize email to lowercase
+    email_lower = data.email.lower()
+    
+    # Check if email already exists (case-insensitive)
+    existing_user = await get_user_by_email(db, email_lower)
     if existing_user:
         raise ValueError("Email already registered")
     
-    # Create new user with email, password, and full_name
+    # Create new user with normalized email, password, and full_name
     user = User(
-        email=data.email,
+        email=email_lower,
         password_hash=hash_password(data.password.get_secret_value()),
         full_name=data.full_name,
         headline=None,
@@ -78,8 +85,23 @@ async def register_user(db: AsyncSession, data: RegisterRequest) -> User:
     )
     
     db.add(user)
-    await db.commit()
-    await db.refresh(user)
+    try:
+        await db.commit()
+        await db.refresh(user)
+    except IntegrityError as e:
+        await db.rollback()
+        # Check if it's a duplicate email constraint violation
+        error_str = str(e.orig).lower() if hasattr(e, 'orig') else str(e).lower()
+        if "email" in error_str or "unique" in error_str or "duplicate" in error_str:
+            raise ValueError("Email already registered")
+        raise
+    except Exception as e:
+        # Catch any other database errors that might occur during concurrent registration
+        await db.rollback()
+        error_str = str(e).lower()
+        if "email" in error_str or "unique" in error_str or "duplicate" in error_str:
+            raise ValueError("Email already registered")
+        raise
     
     return user
 
@@ -90,17 +112,19 @@ async def register_user(db: AsyncSession, data: RegisterRequest) -> User:
 
 async def authenticate_user(db: AsyncSession, email: str, password: str) -> User | None:
     """
-    Authenticate a user with email and password.
+    Authenticate a user with email and password (case-insensitive email).
     
     Args:
         db: Database session
-        email: User email
+        email: User email (will be normalized to lowercase)
         password: Plain text password
     
     Returns:
         User object if credentials are valid, None otherwise
     """
-    user = await get_user_by_email(db, email)
+    # Normalize email to lowercase for case-insensitive lookup
+    email_lower = email.lower()
+    user = await get_user_by_email(db, email_lower)
     if not user:
         return None
     
@@ -143,7 +167,7 @@ async def create_tokens_for_user(
     token_hash = hash_refresh_token(refresh_token)
     
     # Store refresh token in database
-    expires_at = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    expires_at = datetime.now(UTC) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
     db_token = RefreshToken(
         user_id=user.id,
         token_hash=token_hash,
@@ -192,7 +216,13 @@ async def refresh_access_token(
         return None
     
     # Check if token is expired
-    if db_token.expires_at < datetime.now(UTC):
+    # Ensure both datetimes are timezone-aware for comparison
+    expires_at = db_token.expires_at
+    if expires_at.tzinfo is None:
+        # If expires_at is naive, assume it's UTC
+        from datetime import timezone
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    if expires_at < datetime.now(UTC):
         return None
     
     # Get the user
