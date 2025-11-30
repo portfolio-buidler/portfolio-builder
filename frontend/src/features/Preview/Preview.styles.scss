@@ -54,6 +54,61 @@
     z-index: 2;
   }
 
+  // Auth section - positioned on the right side (matches UploadCV exactly)
+  &__auth-section {
+    position: fixed;
+    top: 2rem;
+    right: 1.5rem;
+    z-index: 1000; // High z-index to ensure it's always visible above other elements
+    display: block !important; // Force display
+    visibility: visible !important; // Force visibility
+  }
+
+  // User info container
+  &__user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 38px;
+  }
+
+  // Username display
+  &__username {
+    font-family: Poppins, var(--font-family-base);
+    font-weight: 500;
+    font-size: 16px;
+    color: #354052;
+    padding: 0 0.75rem;
+    white-space: nowrap;
+    display: inline-block; // Ensure it's visible
+    min-width: 1px; // Prevent collapse if empty
+  }
+
+  // Logout button
+  &__logout-btn {
+    height: 38px;
+    padding: 0 1rem;
+    font-family: Poppins, var(--font-family-base);
+    font-weight: 500;
+    font-size: 14px;
+    color: #6B7280;
+    background: transparent;
+    border: 1px solid rgba(53, 64, 82, 0.3);
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+
+    &:hover {
+      background: rgba(53, 64, 82, 0.05);
+      border-color: rgba(53, 64, 82, 0.5);
+    }
+
+    &:active {
+      background: rgba(53, 64, 82, 0.1);
+    }
+  }
+
   &__container {
     overflow-y: visible;
     overflow-x: hidden;

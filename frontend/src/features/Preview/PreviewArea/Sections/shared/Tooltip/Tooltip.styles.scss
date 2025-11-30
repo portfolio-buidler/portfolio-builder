@@ -1,0 +1,168 @@
+// Tooltip.styles.scss
+
+/* Dark speech bubble tooltip styling - Updated to match Figma Frame 149 specs */
+$tooltip-bg: #354052;
+$tooltip-text: #fff;
+$tooltip-width: 264px;
+$tooltip-min-height: 54px;
+$tooltip-border-radius: 15px;
+$tooltip-padding: 12px;
+$tooltip-gap: 10px;
+$tooltip-font-size: 12px;
+$tooltip-line-height: 1.5;
+$tooltip-z-index: 1000;
+
+/* Arrow dimensions from Figma Polygon 1 */
+$tooltip-arrow-width: 14.72px;
+$tooltip-arrow-height: 11.75px;
+
+.tooltip-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tooltip {
+  position: absolute;
+  z-index: $tooltip-z-index;
+  pointer-events: none;
+  animation: tooltipFadeIn 0.15s ease-out;
+
+  &__content {
+    width: $tooltip-width;
+    min-height: $tooltip-min-height;
+    background: $tooltip-bg;
+    color: $tooltip-text;
+    padding: $tooltip-padding;
+    border-radius: $tooltip-border-radius;
+    font-family: Poppins, sans-serif;
+    font-size: $tooltip-font-size;
+    font-weight: 400;
+    line-height: $tooltip-line-height;
+    white-space: pre-line;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: $tooltip-gap;
+  }
+
+  &__arrow {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+  }
+
+  /* Position: Right (default) - Tooltip appears to the right of trigger, arrow points left */
+  &--right {
+    left: calc(100% + #{$tooltip-arrow-height + 4px});
+    top: 50%;
+    transform: translateY(-50%);
+
+    .tooltip__arrow {
+      left: calc(-#{$tooltip-arrow-height});
+      top: 50%;
+      transform: translateY(-50%);
+      border-width: calc(#{$tooltip-arrow-width} / 2) $tooltip-arrow-height calc(#{$tooltip-arrow-width} / 2) 0;
+      border-color: transparent $tooltip-bg transparent transparent;
+    }
+  }
+
+  /* Position: Left - Tooltip appears to the left of trigger, arrow points right */
+  &--left {
+    right: calc(100% + #{$tooltip-arrow-height + 4px});
+    top: 50%;
+    transform: translateY(-50%);
+
+    .tooltip__arrow {
+      right: calc(-#{$tooltip-arrow-height});
+      top: 50%;
+      transform: translateY(-50%);
+      border-width: calc(#{$tooltip-arrow-width} / 2) 0 calc(#{$tooltip-arrow-width} / 2) $tooltip-arrow-height;
+      border-color: transparent transparent transparent $tooltip-bg;
+    }
+  }
+
+  /* Position: Top - Tooltip appears above trigger, arrow points down */
+  &--top {
+    bottom: calc(100% + #{$tooltip-arrow-height + 4px});
+    left: 50%;
+    transform: translateX(-50%);
+
+    .tooltip__arrow {
+      bottom: calc(-#{$tooltip-arrow-height});
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: $tooltip-arrow-height calc(#{$tooltip-arrow-width} / 2) 0 calc(#{$tooltip-arrow-width} / 2);
+      border-color: $tooltip-bg transparent transparent transparent;
+    }
+  }
+
+  /* Position: Bottom - Tooltip appears below trigger, arrow points up */
+  &--bottom {
+    top: calc(100% + #{$tooltip-arrow-height + 4px});
+    left: 50%;
+    transform: translateX(-50%);
+
+    .tooltip__arrow {
+      top: calc(-#{$tooltip-arrow-height});
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 0 calc(#{$tooltip-arrow-width} / 2) $tooltip-arrow-height calc(#{$tooltip-arrow-width} / 2);
+      border-color: transparent transparent $tooltip-bg transparent;
+    }
+  }
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+/* Fix animation for non-right positions */
+.tooltip--top {
+  @keyframes tooltipFadeIn {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
+  }
+}
+
+.tooltip--bottom {
+  @keyframes tooltipFadeIn {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
+  }
+}
+
+.tooltip--left {
+  @keyframes tooltipFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-50%) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(-50%) scale(1);
+    }
+  }
+}
+

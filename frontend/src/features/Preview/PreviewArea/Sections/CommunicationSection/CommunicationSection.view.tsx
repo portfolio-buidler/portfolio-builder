@@ -3,6 +3,7 @@ import React from 'react'
 import type { CommunicationSectionViewProps } from './CommunicationSection.types'
 import questionMarkIcon from '../../../../../assets/icons/PreviewPage/question-mark.svg'
 import { getLinkLabel } from './utils'
+import { Tooltip } from '../shared/Tooltip'
 import './CommunicationSection.styles.scss'
 
 /**
@@ -44,11 +45,24 @@ export const CommunicationSectionView: React.FC<CommunicationSectionViewProps> =
     >
       <div className="preview-section__title-container">
         <h3 className="preview-section__title">{title}</h3>
-        <img
-          src={questionMarkIcon}
-          alt="Help"
-          className="preview-section__help-icon"
-        />
+        <Tooltip
+          content={
+            <>
+              <strong>Phone:</strong> Enter one phone number only.
+              {'\n'}
+              <strong>Email:</strong> Enter one valid email address.
+              {'\n'}
+              <strong>Links:</strong> Paste the full link (starts with https://).
+            </>
+          }
+          position="right"
+        >
+          <img
+            src={questionMarkIcon}
+            alt="Help"
+            className="preview-section__help-icon"
+          />
+        </Tooltip>
       </div>
 
       <div 

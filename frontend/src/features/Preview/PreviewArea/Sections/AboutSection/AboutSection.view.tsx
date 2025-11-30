@@ -50,7 +50,7 @@ export const AboutSectionView = React.forwardRef<HTMLElement, AboutSectionViewPr
               onClick={(e) => e.stopPropagation()}
               placeholder="Write a short summary about yourself, your background, interests, and what drives you professionally."
             />
-          ) : editableContent.trim() ? (
+          ) : content ? (
             content
           ) : (
             <p className="preview-section__placeholder">

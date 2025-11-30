@@ -6,7 +6,7 @@
    ============================================================================ */
 
 /* Section constants for collapsed state */
-$skills-collapsed-height: 110px;
+$skills-collapsed-height: 140px;
 $toggle-transition: 0.3s;
 
 .preview-section--skills {
@@ -120,7 +120,7 @@ $toggle-transition: 0.3s;
   font-family: Poppins, sans-serif;
   font-weight: 500;
   font-size: 15px;
-  line-height: 1.5;
+  line-height: 1;
   color: var(--title-color);
   text-align: left;
 }
@@ -133,4 +133,13 @@ $toggle-transition: 0.3s;
   gap: 8px;
   flex: 1;
   min-height: 22px; /* Minimum height to accommodate tags */
+  overflow: visible; /* Ensure tags are not cut off */
+  
+  /* Skill tag text overflow handling */
+  .preview-tag {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }

@@ -19,7 +19,6 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
   onContentChange,
 }) => {
   const sectionRef = React.useRef<HTMLElement>(null)
-  const [editableContent, setEditableContent] = React.useState('')
   const previousEditingRef = React.useRef(isEditing)
   const MAX_CHARACTERS = 500
 
@@ -36,7 +35,23 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
     return ''
   }, [])
 
-  // Initialize editable content only when transitioning to edit mode
+  // Initialize editable content from content prop
+  const [editableContent, setEditableContent] = React.useState(() => extractTextContent(content))
+  
+  // Track previous content to detect hydration changes
+  const prevContentRef = React.useRef(content)
+
+  // Update editable content when content prop changes (e.g., hydration)
+  React.useEffect(() => {
+    // Only update if content has actually changed and not currently editing
+    if (prevContentRef.current !== content && !isEditing) {
+      const contentString = extractTextContent(content)
+      setEditableContent(contentString)
+    }
+    prevContentRef.current = content
+  }, [content, extractTextContent, isEditing])
+
+  // Sync editable content when transitioning to edit mode
   React.useEffect(() => {
     const wasNotEditing = !previousEditingRef.current
     const isNowEditing = isEditing

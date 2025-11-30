@@ -221,7 +221,10 @@ const PreviewArea: React.FC = () => {
   const handleToggleSkills = React.useCallback(() => {
     setSkillsExpanded(prev => {
       const next = !prev
-      if (next) setCommunicationExpanded(false)
+      // If expanding skills, collapse communication
+      if (next) {
+        setCommunicationExpanded(false)
+      }
       return next
     })
   }, [])
@@ -233,7 +236,10 @@ const PreviewArea: React.FC = () => {
   const handleToggleCommunication = React.useCallback(() => {
     setCommunicationExpanded(prev => {
       const next = !prev
-      if (next) setSkillsExpanded(false)
+      // If expanding communication, collapse skills
+      if (next) {
+        setSkillsExpanded(false)
+      }
       return next
     })
   }, [])

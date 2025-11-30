@@ -2,6 +2,7 @@
 import React from 'react'
 import type { SkillsSectionViewProps } from './SkillsSection.types'
 import questionMarkIcon from '../../../../../assets/icons/PreviewPage/question-mark.svg'
+import { Tooltip } from '../shared/Tooltip'
 import './SkillsSection.styles.scss'
 
 /**
@@ -41,11 +42,24 @@ export const SkillsSectionView: React.FC<SkillsSectionViewProps> = ({
     >
       <div className="preview-section__title-container">
         <h3 className="preview-section__title">{title}</h3>
-        <img
-          src={questionMarkIcon}
-          alt="Help"
-          className="preview-section__help-icon"
-        />
+        <Tooltip
+          content={
+            <>
+              <strong>Languages:</strong> Add programming or spoken languages.
+              {'\n'}
+              <strong>Technologies:</strong> Add frameworks, tools, and technologies you know.
+              {'\n\n'}
+              Click "+" to add, double-click a tag to remove.
+            </>
+          }
+          position="right"
+        >
+          <img
+            src={questionMarkIcon}
+            alt="Help"
+            className="preview-section__help-icon"
+          />
+        </Tooltip>
       </div>
 
       <div 

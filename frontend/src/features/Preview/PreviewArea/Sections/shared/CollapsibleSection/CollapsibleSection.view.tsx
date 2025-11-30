@@ -2,6 +2,7 @@ import React from 'react'
 import type { CollapsibleSectionViewProps } from './CollapsibleSection.types'
 import './CollapsibleSection.styles.scss'
 import questionMarkIcon from '../../../../../../assets/icons/PreviewPage/question-mark.svg'
+import { Tooltip } from '../Tooltip'
 
 export const CollapsibleSectionView = React.forwardRef<HTMLElement, CollapsibleSectionViewProps>(
   (
@@ -29,19 +30,56 @@ export const CollapsibleSectionView = React.forwardRef<HTMLElement, CollapsibleS
     // Custom default messages for each section
     let placeholderText = '';
     let emptyPlaceholder = '';
+    let tooltipContent: React.ReactNode = null;
     const lowerTitle = title?.toLowerCase() || '';
     if (lowerTitle === 'education') {
       placeholderText = 'Add your degree, university name, and graduation years.';
       emptyPlaceholder = 'Add your degree, university name, and graduation years.';
+      tooltipContent = (
+        <>
+          <strong>Line 1:</strong> Degree – University (Dates)
+          {'\n'}
+          <strong>Line 2:</strong> Bulleted lines using "-" / "*" / "1." for each detail.
+          {'\n\n'}
+          Leave one blank line between different institutions.
+        </>
+      );
     } else if (lowerTitle === 'work experience') {
       placeholderText = 'List your work experience, include your role, company, and main achievements.';
       emptyPlaceholder = 'List your work experience, include your role, company, and main achievements.';
+      tooltipContent = (
+        <>
+          <strong>Line 1:</strong> Degree – University (Dates)
+          {'\n'}
+          <strong>Line 2:</strong> Bulleted lines using "-" / "*" / "1." for each detail.
+          {'\n\n'}
+          Leave one blank line between different institutions.
+        </>
+      );
     } else if (lowerTitle === 'projects') {
       placeholderText = 'Highlight projects that represent your skills and creativity.';
       emptyPlaceholder = 'Highlight projects that represent your skills and creativity.';
+      tooltipContent = (
+        <>
+          <strong>Line 1:</strong> Project Name (Dates)
+          {'\n'}
+          <strong>Line 2:</strong> Bulleted lines using "-" / "*" / "1." for each detail.
+          {'\n\n'}
+          Leave one blank line between different projects.
+        </>
+      );
     } else {
       placeholderText = `Line 1: ${fieldLabels.field1} – ${fieldLabels.field2} – (${fieldLabels.years})\nLines 2+: - • * or 1.\n\nSeparate entries with a blank line.`;
       emptyPlaceholder = `Double-click to add ${title.toLowerCase()}. First line: ${fieldLabels.field1} – ${fieldLabels.field2} – (${fieldLabels.years}). Then bullets. Separate entries with a blank line.`;
+      tooltipContent = (
+        <>
+          <strong>Line 1:</strong> {fieldLabels.field1} – {fieldLabels.field2} ({fieldLabels.years})
+          {'\n'}
+          <strong>Line 2:</strong> Bulleted lines using "-" / "*" / "1." for each detail.
+          {'\n\n'}
+          Leave one blank line between different entries.
+        </>
+      );
     }
 
     return (
@@ -55,11 +93,13 @@ export const CollapsibleSectionView = React.forwardRef<HTMLElement, CollapsibleS
       >
         <div className="preview-section__title-container">
           <h3 className="preview-section__title">{title}</h3>
-          <img
-            src={questionMarkIcon}
-            alt="Help"
-            className="preview-section__help-icon"
-          />
+          <Tooltip content={tooltipContent} position="right">
+            <img
+              src={questionMarkIcon}
+              alt="Help"
+              className="preview-section__help-icon"
+            />
+          </Tooltip>
         </div>
 
         <div

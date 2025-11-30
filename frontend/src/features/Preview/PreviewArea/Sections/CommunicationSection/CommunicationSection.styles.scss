@@ -6,7 +6,7 @@
    ============================================================================ */
 
 /* Section constants for collapsed state */
-$communication-collapsed-height: 110px;
+$communication-collapsed-height: 140px;
 $toggle-transition: 0.3s;
 
 .preview-section--communication {
@@ -103,8 +103,7 @@ $toggle-transition: 0.3s;
 
 .preview-communication__row {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
+  align-items: center; /* Changed from flex-start to center to match Skills section */ 
   margin-bottom: 12px;
 
   &:last-child {
@@ -113,24 +112,28 @@ $toggle-transition: 0.3s;
 }
 
 .preview-communication__label {
-  /* Label positioning and styling */
+  /* Label positioning and styling - matches Skills section spacing and alignment */
   flex-shrink: 0;
-  width: 100px;
-  padding-top: 4px; /* Align with first item baseline */
+  width: 100px; /* Same width as Skills section */
+  padding-top: 0;
   font-family: Poppins, sans-serif;
   font-weight: 500;
   font-size: 15px;
-  line-height: 1.5;
+  line-height: 22px; /* Match tag height exactly for perfect alignment */
+  height: 22px; /* Explicit height to match tag */
+  display: flex;
+  align-items: center; /* Center text vertically within the 22px height */
   color: var(--title-color);
   text-align: left;
 }
 
 .preview-communication__items {
-  /* Items container with flexbox for proper wrapping */
+  /* Items container with flexbox for proper wrapping - matches Skills section */
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 8px; /* Same gap as Skills section */
   flex: 1;
-  min-height: 22px; /* Minimum height to accommodate fields/tags */
+  min-height: 22px; /* Same min-height as Skills section */
+  overflow: visible; /* Ensure items are not cut off */
 }

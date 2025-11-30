@@ -3,9 +3,15 @@ import React, { useEffect, useRef } from 'react'
 import type { PreviewViewProps } from './Preview.types'
 import './Preview.styles.scss'
 
-export const PreviewView: React.FC<PreviewViewProps> = ({ backgroundUrl, previewArea }) => {
+export const PreviewView: React.FC<PreviewViewProps> = ({ backgroundUrl, previewArea, user, onLogout }) => {
   const bodyRef = useRef<HTMLDivElement|null>(null)
   const indicatorRef = useRef<HTMLDivElement|null>(null)
+
+  // Debug: Log user prop
+  React.useEffect(() => {
+    console.log('[PreviewView] Rendered with user:', user)
+    console.log('[PreviewView] Auth section should be visible')
+  }, [user])
 
   useEffect(() => {
     const container = bodyRef.current
@@ -62,19 +68,58 @@ export const PreviewView: React.FC<PreviewViewProps> = ({ backgroundUrl, preview
     }
   }, [])
 
+  // Render auth section - always visible, shows loading state if user not loaded yet
   return (
-    <div className="preview">
-      {backgroundUrl && (
-        <img className="preview__bg-img" src={backgroundUrl} alt="" aria-hidden />
-      )}
-      <div className="preview__container">
+    <>
+      {/* Auth section - fixed position top right (matches UploadCV exactly) */}
+      <div 
+        className="preview__auth-section" 
+        id="preview-auth-section"
+      >
+        {user ? (
+          <div className="preview__user-info">
+            <span className="preview__username">{user.full_name || user.email}</span>
+            <button
+              type="button"
+              className="preview__logout-btn"
+              onClick={onLogout}
+              aria-label="Logout"
+            >
+              Logout
+            </button>
+          </div>
+        ) : (
+          <div className="preview__user-info">
+            <span className="preview__username">Loading...</span>
+            <button
+              type="button"
+              className="preview__logout-btn"
+              onClick={onLogout}
+              aria-label="Logout"
+              disabled
+            >
+              Logout
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="preview">
+        {backgroundUrl && (
+          <img className="preview__bg-img" src={backgroundUrl} alt="" aria-hidden />
+        )}
+        
+        {/* Title - fixed position (matches UploadCV) */}
         <h1 className="preview__title">Portify.</h1>
-        <div className="preview__body" ref={bodyRef}>
-          {/* The moving line */}
-          <div className="preview__scroll-indicator" aria-hidden ref={indicatorRef} />
-          {previewArea}
+
+        <div className="preview__container">
+          <div className="preview__body" ref={bodyRef}>
+            {/* The moving line */}
+            <div className="preview__scroll-indicator" aria-hidden ref={indicatorRef} />
+            {previewArea}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }

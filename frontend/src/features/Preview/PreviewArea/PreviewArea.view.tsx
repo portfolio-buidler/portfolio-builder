@@ -10,6 +10,7 @@ import {
 } from './Sections'
 import { SkillsSection } from './Sections/SkillsSection/SkillsSection.tsx'
 import { CommunicationSection } from './Sections/CommunicationSection/CommunicationSection.tsx'
+import { Tooltip } from './Sections/shared/Tooltip'
 
 /**
  * PreviewArea View Component (Pure Presentation)
@@ -168,7 +169,8 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
           type="button"
           className="preview-area__back"
           onClick={onPageBack}
-          aria-label="Back to previous page"
+          aria-label="Back to upload"
+          title="Back to upload"
         >
           ‹
         </button>
@@ -264,43 +266,52 @@ export const PreviewAreaView: React.FC<PreviewAreaViewProps> = ({
         <div className="preview-area__controls">
           {/* Undo/Redo History Controls */}
           <div className="preview-area__history">
-            <button
-              type="button"
-              className="preview-area__history-btn preview-area__history-btn--undo"
-              onClick={onUndo}
-              disabled={!undoAvailable}
-              aria-label="Undo last change"
-            />
-            <button
-              type="button"
-              className="preview-area__history-btn preview-area__history-btn--redo"
-              onClick={onRedo}
-              disabled={!redoAvailable}
-              aria-label="Redo last change"
-            />
+            <Tooltip content="Undo last change" position="top">
+              <button
+                type="button"
+                className="preview-area__history-btn preview-area__history-btn--undo"
+                onClick={onUndo}
+                disabled={!undoAvailable}
+                aria-label="Undo last change"
+              />
+            </Tooltip>
+            <Tooltip content="Redo last change" position="top">
+              <button
+                type="button"
+                className="preview-area__history-btn preview-area__history-btn--redo"
+                onClick={onRedo}
+                disabled={!redoAvailable}
+                aria-label="Redo last change"
+              />
+            </Tooltip>
           </div>
 
           {/* Next Button */}
-          <button
-            type="button"
-            className="preview-area__next"
-            onClick={isNextEnabled ? onNext : undefined}
-            disabled={!isNextEnabled}
-            aria-label="Proceed to next step"
+          <Tooltip 
+            content={isNextEnabled ? "Continue to dashboard" : "Complete all required fields to continue"} 
+            position="top"
           >
-            <span className="preview-area__next-text">Next</span>
-            <span className="preview-area__next-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M9 6L15 12L9 18"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </span>
-          </button>
+            <button
+              type="button"
+              className="preview-area__next"
+              onClick={isNextEnabled ? onNext : undefined}
+              disabled={!isNextEnabled}
+              aria-label="Proceed to next step"
+            >
+              <span className="preview-area__next-text">Next</span>
+              <span className="preview-area__next-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M9 6L15 12L9 18"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+            </button>
+          </Tooltip>
         </div>
       </footer>
     </div>

@@ -4,7 +4,7 @@ import regex as re
 
 DEGREE_WORDS = r"\b(?:B\.?Sc\.?|BSc|B\.?A\.?|BA|M\.?Sc\.?|MSc|M\.?A\.?|MA|Bachelor|Master|Ph\.?D\.?|Bachelor'?s\s+Degree|Master'?s\s+Degree|Certificate)\b"
 YEAR_RANGE_RE = re.compile(
-    r"(?:(?:20|19)\d{2})(?:\s*[–-]\s*(?:Present|(?:20|19)\d{2}))?|Expected\s+(?:20|19)\d{2}",
+    r"(?:(?:20|19)\d{2})(?:\s*[–-]\s*(?:Present|(?:20|19)\d{2}))?|(?:Expected|graduating)\s+(?:\w+\s+)?(?:20|19)\d{2}",
     re.I,
 )
 

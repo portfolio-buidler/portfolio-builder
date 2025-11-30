@@ -163,7 +163,7 @@ async def test_portfolio_draft(db: AsyncSession, test_user: User) -> PortfolioDr
         user_id=test_user.id,
         about={"text": "Test about section"},
         contact={"email": "testuser@example.com"},
-        data={"projects": [], "skills": []},
+        data={"projects": [], "skills": {"languages": [], "technologies": []}},
         is_active=True,
     )
     db.add(draft)
@@ -179,7 +179,7 @@ async def second_user_draft(db: AsyncSession, second_user: User) -> PortfolioDra
         user_id=second_user.id,
         about={"text": "Second user about"},
         contact={"email": "seconduser@example.com"},
-        data={"projects": [], "skills": []},
+        data={"projects": [], "skills": {"languages": [], "technologies": []}},
         is_active=True,
     )
     db.add(draft)
@@ -308,7 +308,7 @@ class TestChangePasswordEndpoint:
             "/api/v1/auth/change-password",
             headers=auth_headers,
             json={
-                "current_password": "SecurePass123!",
+                "old_password": "SecurePass123!",
                 "new_password": "NewSecurePass456!"
             }
         )
@@ -522,7 +522,7 @@ class TestPortfolioPublishEndpoint:
                 "contact": {"email": "test@example.com"},
                 "data": {
                     "projects": [{"name": "Test Project"}],
-                    "skills": ["Python"]
+                    "skills": {"languages": [], "technologies": ["Python"]}
                 }
             }
         )

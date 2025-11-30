@@ -7,7 +7,7 @@
  * - Displays preview of uploaded CV
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import backgroundImage from '../../assets/aea027abbda7eb6100dda02bdd2e253f3a73b6c8.jpg'
 import { PreviewView } from './Preview.view.tsx'
@@ -17,36 +17,47 @@ import { useAuthStore } from '../../store/authStore'
 
 function Preview() {
   const navigate = useNavigate()
-  const [isChecking, setIsChecking] = useState(true)
-  const { user, fetchUser } = useAuthStore()
+  
+  // Use global auth store (same pattern as UploadCV)
+  const { user, isAuthenticated, isBootstrapped, isLoading, logout } = useAuthStore()
 
   /**
-   * Check authentication on mount
-   * Redirect to login if not authenticated
+   * Redirect to login if not authenticated (after store is bootstrapped and not loading)
+   * Give token refresh a chance to complete before redirecting
    */
   useEffect(() => {
-    const checkAuth = async () => {
-      await fetchUser()
-      setIsChecking(false)
+    // Wait for bootstrap and loading to complete before checking auth
+    if (isBootstrapped && !isLoading && !isAuthenticated) {
+      // Small delay to allow token refresh to complete if it's in progress
+      const timer = setTimeout(() => {
+        console.log('[Preview] User not authenticated after delay, redirecting to login')
+        navigate('/login', { state: { from: '/preview' }, replace: true })
+      }, 500)
+      
+      return () => clearTimeout(timer)
     }
-    checkAuth()
-  }, [fetchUser])
+  }, [isBootstrapped, isLoading, isAuthenticated, navigate])
 
-  useEffect(() => {
-    if (!isChecking && !user) {
-      console.log('[Preview] User not authenticated, redirecting to login')
-      navigate('/login', { state: { from: '/preview' }, replace: true })
-    }
-  }, [isChecking, user, navigate])
+  /**
+   * Handle logout
+   */
+  const handleLogout = useCallback(async () => {
+    await logout()
+    navigate('/login', { replace: true })
+  }, [logout, navigate])
 
-  // Show nothing while checking authentication
-  if (isChecking) {
+  // Show nothing while auth store is bootstrapping
+  if (!isBootstrapped) {
     return null
   }
 
+  // Always render the view - auth section will show even if user is null
+  // This ensures the auth section is always visible while token refresh happens
   const viewProps: PreviewViewProps = {
     backgroundUrl: backgroundImage,
-    previewArea: <PreviewArea />,
+    previewArea: isAuthenticated ? <PreviewArea /> : null, // Only show preview area if authenticated
+    user: user || null, // Pass null if user not loaded yet (token refresh in progress)
+    onLogout: handleLogout,
   }
 
   return <PreviewView {...viewProps} />

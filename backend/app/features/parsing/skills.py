@@ -17,8 +17,9 @@ def _split_parenthetical_items(token: str) -> list[str]:
 def parse_skills(s: str) -> list[str]:
     if not s:
         return []
-    # Break on bullets, pipes, commas, semicolons, slashes, or 2+ spaces
-    parts = re.split(r"[•|,;/:]|\s{2,}", s)
+    # Break on bullets, middle dots, pipes, commas, semicolons, slashes, or 2+ spaces
+    # Also handle " . " (space-dot-space) and "·" (middle dot U+00B7)
+    parts = re.split(r"[•·|,;/:]|\s+\.\s+|\s{2,}", s)
     out: list[str] = []
     for p in parts:
         p = p.strip(" .•-|")

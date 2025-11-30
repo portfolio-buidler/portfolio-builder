@@ -28,16 +28,17 @@ SECTION_ALIASES = {
         "work experience",
         "professional experience",
         "employment",
+        "extras",
     ],
     "projects": ["projects", "portfolio", "selected projects"],
     "military_service": [
         "military",
+        "military service",
         "idf",
-        "service",
-        "naval",
-        "army",
+        "idf service",
+        "naval service",
+        "army service",
         "air force",
-        "unit",
     ],
 }
 

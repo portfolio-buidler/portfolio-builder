@@ -24,6 +24,69 @@ class ExperienceItem:
 
 _HEADER_DELIMS = [" — ", " – ", " | ", " - "]
 
+# Pattern for EXTRAS-style bullets: "- Role - Description..."
+EXTRAS_BULLET_RE = re.compile(r"^[•\-–—]\s*(?P<role>[^-–—]+?)\s*[–—-]\s*(?P<rest>.+)$")
+
+
+def _parse_extras_style_bullet(ln: str) -> Optional[ExperienceItem]:
+    """Parse EXTRAS-style bullet: '- Role - Description...'
+    
+    Handles formats like:
+    - House manager - After military service, directed... at Alut, providing...
+    - PC technician - Participated for 3 years in Neta Youth Tech Program...
+    """
+    m = EXTRAS_BULLET_RE.match(ln)
+    if not m:
+        return None
+    role = m.group("role").strip()
+    rest = m.group("rest").strip()
+    
+    # Try to extract company and dates from rest
+    company: Optional[str] = None
+    dates: Optional[str] = None
+    description = rest
+    
+    # Look for "at <Company>" pattern
+    at_match = re.search(r"\bat\s+([A-Z][^,]+?)(?:,|$)", rest)
+    if at_match:
+        company = at_match.group(1).strip()
+    
+    # Look for "in <Program/Company>" pattern  
+    in_match = re.search(r"\bin\s+([A-Z][^,\-–—]+?)(?:\s*[\-–—(]|,|$)", rest)
+    if in_match and not company:
+        company = in_match.group(1).strip()
+    
+    # Look for time patterns like "After military service" or "for X years"
+    time_patterns = [
+        r"(After\s+military\s+service)",
+        r"(for\s+\d+\s+years?)",
+        r"(\d+\s+years?)",
+    ]
+    for pattern in time_patterns:
+        time_match = re.search(pattern, rest, re.I)
+        if time_match:
+            dates = time_match.group(1).strip()
+            break
+    
+    # Clean up description - get the main descriptive part after the context
+    # Find the first comma and use text after it as the main description
+    comma_idx = rest.find(",")
+    if comma_idx != -1:
+        description = rest[comma_idx + 1:].strip()
+        # If description is short, keep the full rest
+        if len(description) < 20:
+            description = rest
+    
+    return ExperienceItem(role=role, company=company, dates=dates, description=description)
+
+
+def _is_extras_style_section(lines: List[str]) -> bool:
+    """Check if the section appears to be EXTRAS-style (bullet-point entries)."""
+    if not lines:
+        return False
+    bullet_count = sum(1 for ln in lines[:5] if EXTRAS_BULLET_RE.match(ln))
+    return bullet_count >= 1
+
 def _prejoin_broken_headers(lines: List[str]) -> List[str]:
     out: List[str] = []
     i = 0
@@ -53,6 +116,17 @@ def parse_experience(section_text: str, fallback_role: Optional[str] = None) -> 
     raw_lines = [l.rstrip() for l in section_text.splitlines()]
     stitched = _prejoin_broken_headers(raw_lines)
     lines = [l.strip() for l in stitched if l.strip()]
+    
+    # Check if this is an EXTRAS-style section (bullet-point entries)
+    if _is_extras_style_section(lines):
+        extras_items: List[ExperienceItem] = []
+        for ln in lines:
+            item = _parse_extras_style_bullet(ln)
+            if item:
+                extras_items.append(item)
+        if extras_items:
+            return [asdict(item) for item in extras_items if item.role or item.description]
+    
     items: List[ExperienceItem] = []
     current_role: Optional[str] = None
     current_company: Optional[str] = None
