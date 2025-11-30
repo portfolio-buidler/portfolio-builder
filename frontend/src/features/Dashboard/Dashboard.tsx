@@ -65,14 +65,14 @@ export const Dashboard: React.FC<DashboardProps> = () => {
   // Resume data state
   const [resumeData, setResumeData] = useState<ResumeData>(() => {
     // Initialize from stored resume data if available
-    const parsed = storedResumeData?.data?.parsed
+    const extractedData = storedResumeData?.data?.extractedData as Record<string, unknown> | undefined
     
     return {
-      fullName: parsed?.name || 'yoad madmoni',
-      title: parsed?.title || 'full-stack developer',
+      fullName: (extractedData?.name as string) || 'yoad madmoni',
+      title: (extractedData?.title as string) || 'full-stack developer',
       headline: 'I Help Companies Turn Messy CV Data Into Clean, Modern Portfolio Websites.',
       avatarUrl: undefined,
-      about: parsed?.about || "I'm a full-stack developer from Israel, passionate about creating modern, user-friendly applications. I specialize in building scalable systems and enjoy working at the intersection of design and technology. Living in Tel Aviv, I thrive in dynamic startup environments where fast problem-solving and teamwork are essential. In my free time, I like contributing to open-source projects and mentoring junior developers",
+      about: (extractedData?.about as string) || "I'm a full-stack developer from Israel, passionate about creating modern, user-friendly applications. I specialize in building scalable systems and enjoy working at the intersection of design and technology. Living in Tel Aviv, I thrive in dynamic startup environments where fast problem-solving and teamwork are essential. In my free time, I like contributing to open-source projects and mentoring junior developers",
       projects: [
         {
           id: '1',
@@ -263,7 +263,7 @@ export const Dashboard: React.FC<DashboardProps> = () => {
   const viewProps: DashboardViewProps = {
     backgroundUrl: backgroundImage,
     user: {
-      name: user?.fullName || user?.email?.split('@')[0] || 'User',
+      name: user?.full_name || user?.email?.split('@')[0] || 'User',
       plan: 'Basic',
       avatarUrl: undefined,
     },

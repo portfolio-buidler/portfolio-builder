@@ -60,10 +60,10 @@
     // Inner shadow: bottom-right depth
     inset -3px -3px 3px 0 rgba(221, 221, 221, 0.15);
   
-  // Positioning - fixed, aligned with toolbar/content start
+  // Positioning - fixed, aligned with portfolio content start
   position: fixed;
   left: 1.25rem;
-  top: 100px; // Aligned with main content padding-top
+  top: 168px; // Aligned with dashboard__content (100px padding + 44px toolbar + 24px margin)
   z-index: 10;
 
   // ==========================================================================
@@ -344,7 +344,7 @@
     width: 240px;
     padding: 18px 20px;
     left: 0.75rem;
-    top: 90px; // Aligned with main content padding-top at this breakpoint
+    top: 158px; // Aligned with portfolio content (90px padding + 44px toolbar + 24px margin)
   }
 }
 
@@ -372,5 +372,3 @@
     }
   }
 }
-
-

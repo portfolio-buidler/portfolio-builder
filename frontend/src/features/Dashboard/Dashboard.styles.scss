@@ -7,6 +7,9 @@
 @use '../../styles/mixins/mq' as mq;
 
 .dashboard {
+  // Shared alignment variable for sidebar and content
+  --content-start-top: 168px; // 100px padding + 44px toolbar + 24px margin
+  
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
@@ -15,12 +18,13 @@
   overflow-y: auto;
   font-family: var(--font-family-base);
 
-  /* Hide scrollbar but keep scrolling */
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-
+  /* Hide scrollbar but keep scrolling - cross-browser */
+  -ms-overflow-style: none; /* IE/Edge */
   &::-webkit-scrollbar {
-    display: none;
+    display: none; /* Chrome, Safari, Opera */
+  }
+  @supports (scrollbar-width: none) {
+    scrollbar-width: none; /* Firefox 64+ */
   }
 
   /* Background - Light gray for portfolio card to float on */
@@ -54,6 +58,7 @@
     align-items: center;
     justify-content: center;
     background: rgba(255, 255, 255, 0.9);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 12px;
@@ -136,6 +141,8 @@
 /* Responsive Adjustments */
 @media (max-width: 1024px) {
   .dashboard {
+    --content-start-top: 158px; // 90px padding + 44px toolbar + 24px margin
+    
     &__main {
       margin-left: 280px;
       padding: var(--space-4);
@@ -199,8 +206,8 @@
 /* Glass card base style (reusable) */
 .glass-card {
   background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   border-radius: var(--radius-2xl);
   box-shadow: 
     0 4px 30px rgba(0, 0, 0, 0.1),
